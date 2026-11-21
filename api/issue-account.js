@@ -19,7 +19,9 @@ export default async function handler(req, res) {
       guardianName,
       desiredLoginId,
       lineUserId,
+      deviceId,
     } = req.body || {};
+    const cleanDeviceId = deviceId ? String(deviceId).trim() : "";
 
     const cleanRole = String(role || "").trim();
     const cleanName = String(displayName || "").trim();
@@ -76,9 +78,25 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: "このログインIDはすでに使用されています" });
     }
 
+    if (mode === "self_register" && cleanDeviceId) {
+      const existingDeviceSnap = await db
+        .collection("grit_auth_accounts")
+        .where("boundDeviceId", "==", cleanDeviceId)
+        .limit(1)
+        .get();
+      if (!existingDeviceSnap.empty) {
+        return res.status(403).json({
+          error: "この端末にはすでにアカウントが登録されています（1端末1アカウント制限）。",
+        });
+      }
+    }
+
     const initialPassword = generateTempPassword(10);
     const { salt, passwordHash } = hashPassword(initialPassword);
     const docId = `${cleanRole}_${Date.now()}_${crypto.randomBytes(2).toString("hex")}`;
+
+    const isSelfReg = mode === "self_register";
+    const approvalStatus = isSelfReg ? "pending_hq" : "approved";
 
     await db.collection("grit_auth_accounts").doc(docId).set({
       role: cleanRole,
@@ -90,6 +108,10 @@ export default async function handler(req, res) {
       lineUserId: lineUserId ? String(lineUserId).trim() : "",
       salt,
       passwordHash,
+      approvalStatus,
+      ...(mode === "self_register" && cleanDeviceId
+        ? { boundDeviceId: cleanDeviceId, deviceBoundAt: new Date().toISOString() }
+        : {}),
       mustChangeCredentials: true,
       issuedBy,
       createdAt: new Date().toISOString(),
@@ -107,6 +129,8 @@ export default async function handler(req, res) {
         branch: cleanBranch,
         grade: grade ? String(grade).trim() : "",
         guardianName: guardianName ? String(guardianName).trim() : "",
+        approvalStatus,
+        requiresHqApproval: isSelfReg,
       },
     });
   } catch (err) {

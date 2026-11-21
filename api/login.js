@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { role, loginId, password, lineUserId } = req.body || {};
+    const { role, loginId, password, lineUserId, deviceId } = req.body || {};
     if (!process.env.AUTH_TOKEN_SECRET) {
       return res.status(500).json({ error: "サーバー側の AUTH_TOKEN_SECRET が未設定です" });
     }
@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     const cleanRole = String(role).trim();
     const cleanId = String(loginId).trim();
     const cleanLineUserId = lineUserId ? String(lineUserId).trim() : "";
+    const cleanDeviceId = deviceId ? String(deviceId).trim() : "";
 
     // 1. Firestore の個別アカウント（本部発行 / 新規登録 / ID・PW変更済み）を検索
     const accountSnap = await db
@@ -33,6 +34,56 @@ export default async function handler(req, res) {
 
       if (!verifyPasswordHash(password, accountData.salt, accountData.passwordHash)) {
         return res.status(401).json({ error: "IDまたはパスワードが正しくありません" });
+      }
+
+      if (accountData.approvalStatus === "pending_hq") {
+        return res.status(403).json({
+          error: "新規登録は本部許可制です。現在、本部管理者の承認待ちのためログインできません。",
+          pendingApproval: true,
+        });
+      }
+
+      if (accountData.approvalStatus === "rejected") {
+        return res.status(403).json({
+          error: "この新規登録申請は承認されませんでした。本部までお問い合わせください。",
+        });
+      }
+
+      // 1端末1アカウント制御：アカウント側の端末固定チェック＆端末側のアカウント固定チェック
+      if (!cleanDeviceId) {
+        return res.status(400).json({ error: "端末識別情報（deviceId）を取得できませんでした。" });
+      }
+
+      if (accountData.boundDeviceId && accountData.boundDeviceId !== cleanDeviceId) {
+        return res.status(403).json({
+          error: "このアカウントはすでに別の端末に紐づけられています（1端末1アカウント制限）。端末変更は本部へお問い合わせください。",
+          deviceConflict: true,
+        });
+      }
+
+      const sameDeviceSnap = await db
+        .collection("grit_auth_accounts")
+        .where("boundDeviceId", "==", cleanDeviceId)
+        .limit(5)
+        .get();
+
+      const otherBoundDoc = sameDeviceSnap.docs.find((d) => d.id !== docSnap.id);
+      if (otherBoundDoc) {
+        return res.status(403).json({
+          error: "この端末にはすでに別のアカウントが登録されています（1端末1アカウント制限）。",
+          deviceConflict: true,
+        });
+      }
+
+      if (!accountData.boundDeviceId) {
+        await docSnap.ref.set(
+          {
+            boundDeviceId: cleanDeviceId,
+            deviceBoundAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
       }
 
       if (cleanLineUserId && accountData.lineUserId !== cleanLineUserId) {

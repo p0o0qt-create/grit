@@ -161,11 +161,16 @@
                     </div>
                 </div>
 
-                <div id="self-reg-guardian-link-box" class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 space-y-2 hidden">
-                    <span class="font-bold text-emerald-900 block"><i class="fa-solid fa-link mr-1 text-emerald-600"></i>お子様（生徒）との紐づけ設定</span>
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">既存生徒ID（すでに登録済みのお子様がいる場合）</label>
-                        <input type="text" id="self-reg-target-student-id" class="w-full border border-slate-300 rounded-lg p-2 bg-white font-mono" placeholder="例: ST001（未入力の場合は仮生徒台帳を作成）">
+                <div id="self-reg-link-request-box" class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 space-y-2 hidden">
+                    <span class="font-bold text-emerald-900 block"><i class="fa-solid fa-handshake mr-1 text-emerald-600"></i>保護者・生徒 相互承認による紐づけ申請</span>
+                    <p class="text-[11px] text-emerald-800">紐づけは<strong>保護者・生徒の双方の承認</strong>が完了した後に成立します。</p>
+                    <div id="self-reg-target-student-wrap">
+                        <label class="block font-bold text-slate-700 mb-1">紐づけ希望の生徒ID（保護者登録時）</label>
+                        <input type="text" id="self-reg-target-student-id" class="w-full border border-slate-300 rounded-lg p-2 bg-white font-mono" placeholder="例: ST001（後からマイページから紐づけ申請も可能）">
+                    </div>
+                    <div id="self-reg-target-guardian-wrap" class="hidden">
+                        <label class="block font-bold text-slate-700 mb-1">紐づけ希望の保護者ログインID（生徒登録時）</label>
+                        <input type="text" id="self-reg-target-guardian-id" class="w-full border border-slate-300 rounded-lg p-2 bg-white font-mono" placeholder="例: prt_xxxxxx（後からマイページから紐づけ申請も可能）">
                     </div>
                 </div>
                 <div id="self-reg-error" class="text-red-600 font-bold hidden text-center"></div>
@@ -462,6 +467,43 @@
 
         const STORAGE_KEY = 'GRIT_ACADEMY_APP_DATA_ENISHI_SEC_V6';
         const AUTH_STORAGE_KEY = 'GRIT_ACADEMY_AUTH_SESSION_ENISHI_SEC_V6';
+        const DEVICE_ID_KEY = 'GRIT_DEVICE_ID_ENISHI_V1';
+        const DEVICE_BOUND_ACCOUNT_KEY = 'GRIT_BOUND_ACCOUNT_ENISHI_V1';
+
+        function getOrCreateDeviceId() {
+            try {
+                let devId = localStorage.getItem(DEVICE_ID_KEY);
+                if (!devId) {
+                    const rand = (window.crypto && window.crypto.randomUUID)
+                        ? window.crypto.randomUUID()
+                        : ('dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12));
+                    devId = rand;
+                    localStorage.setItem(DEVICE_ID_KEY, devId);
+                }
+                return devId;
+            } catch (e) {
+                return 'dev_fallback_session';
+            }
+        }
+
+        function getBoundAccountForDevice() {
+            try {
+                const raw = localStorage.getItem(DEVICE_BOUND_ACCOUNT_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function bindAccountToDevice(role, loginId) {
+            try {
+                localStorage.setItem(DEVICE_BOUND_ACCOUNT_KEY, JSON.stringify({
+                    role,
+                    loginId,
+                    boundAt: new Date().toISOString()
+                }));
+            } catch (e) {}
+        }
 
         const defaultState = {
             settings: { liffId: '', lineFriendUrl: '', webhookUrl: '/api/line-push' },
@@ -479,6 +521,9 @@
             ],
             issuedInitialAccounts: [],
             pendingAccountApprovals: [],
+            pendingRegistrationRequests: [],
+            guardianStudentLinks: [],
+            hqNotifications: [],
             branches: [
                 { id: 1, name: '渋谷本校', status: '稼働中' },
                 { id: 2, name: '新宿駅前校', status: '稼働中' },
@@ -541,6 +586,9 @@
                     if (!parsed.staffUsers) parsed.staffUsers = defaultState.staffUsers;
                     if (!parsed.issuedInitialAccounts) parsed.issuedInitialAccounts = [];
                     if (!parsed.pendingAccountApprovals) parsed.pendingAccountApprovals = [];
+                    if (!parsed.pendingRegistrationRequests) parsed.pendingRegistrationRequests = [];
+                    if (!parsed.guardianStudentLinks) parsed.guardianStudentLinks = [];
+                    if (!parsed.hqNotifications) parsed.hqNotifications = [];
                     return parsed;
                 }
             } catch (e) { console.error(e); }
@@ -624,6 +672,9 @@
                                 state = JSON.parse(incomingStr);
                                 if (!state.issuedInitialAccounts) state.issuedInitialAccounts = [];
                                 if (!state.pendingAccountApprovals) state.pendingAccountApprovals = [];
+                                if (!state.pendingRegistrationRequests) state.pendingRegistrationRequests = [];
+                                if (!state.guardianStudentLinks) state.guardianStudentLinks = [];
+                                if (!state.hqNotifications) state.hqNotifications = [];
                                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                                 updateHeaderBranchCounts();
                                 renderView();
@@ -707,83 +758,102 @@
         function toggleSelfRegExtraFields() {
             const role = document.getElementById('self-reg-role').value;
             const extraBox = document.getElementById('self-reg-student-extra');
-            const guardianLinkBox = document.getElementById('self-reg-guardian-link-box');
+            const linkBox = document.getElementById('self-reg-link-request-box');
+            const stWrap = document.getElementById('self-reg-target-student-wrap');
+            const gdWrap = document.getElementById('self-reg-target-guardian-wrap');
+
             if (extraBox) {
                 extraBox.classList.toggle('hidden', role !== 'student' && role !== 'guardian');
             }
-            if (guardianLinkBox) {
-                guardianLinkBox.classList.toggle('hidden', role !== 'guardian');
+            if (linkBox) {
+                linkBox.classList.toggle('hidden', role !== 'student' && role !== 'guardian');
+            }
+            if (stWrap) stWrap.classList.toggle('hidden', role !== 'guardian');
+            if (gdWrap) gdWrap.classList.toggle('hidden', role !== 'student');
+        }
+
+        async function pushRegistrationToHQ(payload) {
+            if (!state.pendingRegistrationRequests) state.pendingRegistrationRequests = [];
+            state.pendingRegistrationRequests.unshift(payload);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+            // 未ログイン状態でも Firestore に直接引き渡しできるよう一時接続を試行
+            try {
+                if (isCloudConnected && firestoreDocRef && window.FirebaseModules) {
+                    await window.FirebaseModules.setDoc(firestoreDocRef, {
+                        payload: JSON.stringify(state),
+                        updatedAt: new Date().toISOString()
+                    });
+                    return;
+                }
+                if (window.FirebaseModules && EMBEDDED_FIREBASE_CONFIG) {
+                    const { initializeApp, getFirestore, doc, getDoc, setDoc, getAuth, signInAnonymously } = window.FirebaseModules;
+                    const app = initializeApp(EMBEDDED_FIREBASE_CONFIG, 'enishi-line-reg-push-' + Date.now());
+                    try { await signInAnonymously(getAuth(app)); } catch (e) {}
+                    const dbInstance = getFirestore(app);
+                    const ref = doc(dbInstance, 'grit_academies', EMBEDDED_DOC_ID);
+                    const snap = await getDoc(ref);
+                    if (snap.exists() && snap.data()?.payload) {
+                        const remoteState = JSON.parse(snap.data().payload);
+                        if (!remoteState.pendingRegistrationRequests) remoteState.pendingRegistrationRequests = [];
+                        if (!remoteState.guardianStudentLinks) remoteState.guardianStudentLinks = [];
+                        if (!remoteState.issuedInitialAccounts) remoteState.issuedInitialAccounts = [];
+                        if (!remoteState.hqNotifications) remoteState.hqNotifications = [];
+                        remoteState.pendingRegistrationRequests.unshift(payload);
+                        const latestNotif = (state.hqNotifications || []).find(n => n.regId === payload.regId);
+                        if (latestNotif) {
+                            remoteState.hqNotifications.unshift(latestNotif);
+                        }
+                        if (payload.linkRequest) {
+                            remoteState.guardianStudentLinks.unshift(payload.linkRequest);
+                        }
+                        await setDoc(ref, {
+                            payload: JSON.stringify(remoteState),
+                            updatedAt: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('本部へのFirestore直接送信フォールバック:', err);
             }
         }
 
-        function syncAccountToRoster({ role, loginId, displayName, branch, grade, guardianName, targetStudentId }) {
-            const today = new Date().toISOString().split('T')[0];
-            if (role === 'student') {
-                const existingIdx = state.students.findIndex(
-                    s => s.id.toUpperCase() === String(loginId).toUpperCase() || s.studentLoginId === loginId
-                );
-                if (existingIdx >= 0) {
-                    state.students[existingIdx] = {
-                        ...state.students[existingIdx],
-                        name: displayName || state.students[existingIdx].name,
-                        branch: branch || state.students[existingIdx].branch,
-                        grade: grade || state.students[existingIdx].grade,
-                        guardian: guardianName || state.students[existingIdx].guardian,
-                        studentLoginId: loginId
-                    };
-                    return state.students[existingIdx].id;
-                }
-                const newStudentId = generateNextStudentId();
-                state.students.push({
-                    id: newStudentId,
-                    studentLoginId: loginId,
-                    name: displayName,
-                    kana: '',
-                    branch: branch || '渋谷本校',
-                    grade: grade || '未設定',
-                    guardian: guardianName || '保護者様',
-                    guardianKana: '',
-                    guardianLoginId: '',
-                    guardianLineUserId: '',
-                    studentLineUserId: '',
-                    status: '正常',
-                    registeredAt: today
-                });
-                return newStudentId;
-            }
+        function createMutualLinkRequest({ initiatorRole, loginId, displayName, targetStudentId, targetGuardianId }) {
+            const cleanStId = String(targetStudentId || '').trim().toUpperCase();
+            const cleanGdId = String(targetGuardianId || '').trim();
+            if (!cleanStId && !cleanGdId) return null;
 
-            if (role === 'guardian') {
-                const cleanTargetId = String(targetStudentId || '').trim().toUpperCase();
-                if (cleanTargetId) {
-                    const matchedIdx = state.students.findIndex(s => s.id.toUpperCase() === cleanTargetId);
-                    if (matchedIdx >= 0) {
-                        state.students[matchedIdx].guardianLoginId = loginId;
-                        state.students[matchedIdx].guardian = displayName || state.students[matchedIdx].guardian;
-                        return state.students[matchedIdx].id;
-                    }
-                }
-                // 既存生徒ID指定がない場合、保護者名義で紐づける生徒台帳を1件作成（他生徒とは一切紐づけない）
-                const linkedStudentId = generateNextStudentId();
-                const childDisplayName = guardianName ? `${guardianName}（お子様）` : `${displayName}のお子様`;
-                state.students.push({
-                    id: linkedStudentId,
-                    studentLoginId: '',
-                    name: childDisplayName,
-                    kana: '',
-                    branch: branch || '渋谷本校',
-                    grade: grade || '未設定',
-                    guardian: displayName,
-                    guardianKana: '',
-                    guardianLoginId: loginId,
-                    guardianLineUserId: '',
-                    studentLineUserId: '',
-                    status: '正常',
-                    registeredAt: today
-                });
-                return linkedStudentId;
-            }
+            const studentRecord = cleanStId
+                ? state.students.find(s => String(s.id || '').toUpperCase() === cleanStId || String(s.studentLoginId || '').toUpperCase() === cleanStId)
+                : null;
 
-            return '';
+            const resolvedStudentCode = studentRecord ? studentRecord.id : cleanStId;
+            const resolvedStudentLoginId = studentRecord ? (studentRecord.studentLoginId || studentRecord.id) : cleanStId;
+            const resolvedStudentName = studentRecord ? studentRecord.name : (cleanStId || '未特定生徒');
+
+            const resolvedGuardianLoginId = initiatorRole === 'guardian'
+                ? loginId
+                : (cleanGdId || (studentRecord ? studentRecord.guardianLoginId : ''));
+            const resolvedGuardianName = initiatorRole === 'guardian'
+                ? displayName
+                : (studentRecord ? studentRecord.guardian : '保護者');
+
+            if (!resolvedStudentCode && !resolvedGuardianLoginId) return null;
+
+            return {
+                linkId: 'LINK_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                studentId: resolvedStudentCode,
+                studentLoginId: resolvedStudentLoginId,
+                studentName: resolvedStudentName,
+                guardianLoginId: resolvedGuardianLoginId,
+                guardianName: resolvedGuardianName,
+                initiatorRole,
+                // 双方（保護者・生徒）の承認が揃うまで status は 'pending_both'
+                guardianApproved: initiatorRole === 'guardian',
+                studentApproved: initiatorRole === 'student',
+                status: 'pending_both',
+                createdAt: new Date().toISOString().split('T')[0]
+            };
         }
 
         async function submitSelfRegistration() {
@@ -793,6 +863,7 @@
             const grade = document.getElementById('self-reg-grade').value;
             const guardianName = document.getElementById('self-reg-guardian').value.trim();
             const targetStudentId = document.getElementById('self-reg-target-student-id')?.value.trim() || '';
+            const targetGuardianId = document.getElementById('self-reg-target-guardian-id')?.value.trim() || '';
             const errEl = document.getElementById('self-reg-error');
             const btn = document.getElementById('self-reg-submit-btn');
 
@@ -816,7 +887,8 @@
                         branch,
                         grade,
                         guardianName,
-                        lineUserId: liffLineUserId || ''
+                        lineUserId: liffLineUserId || '',
+                        deviceId: getOrCreateDeviceId()
                     })
                 });
                 const data = await res.json().catch(() => ({}));
@@ -824,15 +896,58 @@
                     throw new Error(data.error || '初期ID・初期パスワードの発行に失敗しました。');
                 }
 
-                const linkedStudentId = syncAccountToRoster({
+                const linkRequest = (role === 'student' || role === 'guardian')
+                    ? createMutualLinkRequest({
+                        initiatorRole: role,
+                        loginId: data.account.loginId,
+                        displayName: data.account.displayName,
+                        targetStudentId,
+                        targetGuardianId
+                    })
+                    : null;
+
+                if (linkRequest) {
+                    if (!state.guardianStudentLinks) state.guardianStudentLinks = [];
+                    state.guardianStudentLinks.unshift(linkRequest);
+                }
+
+                const nowDate = new Date().toISOString().split('T')[0];
+                const regId = 'REG_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                const notifId = 'NOTIF_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+                const regRecord = {
+                    regId,
+                    docId: data.account.docId || '',
                     role: data.account.role,
                     loginId: data.account.loginId,
                     displayName: data.account.displayName,
                     branch: data.account.branch,
-                    grade,
-                    guardianName,
-                    targetStudentId
-                });
+                    grade: role === 'student' || role === 'guardian' ? grade : '',
+                    guardianName: role === 'student' ? guardianName : '',
+                    targetStudentId: role === 'guardian' ? targetStudentId : '',
+                    targetGuardianId: role === 'student' ? targetGuardianId : '',
+                    hqApproved: false,
+                    approvalStatus: 'pending_hq',
+                    status: '本部許可待ち',
+                    registeredAt: nowDate,
+                    linkRequest
+                };
+
+                const hqNotification = {
+                    notifId,
+                    regId,
+                    docId: data.account.docId || '',
+                    targetRole: 'hq',
+                    title: `新規登録の許可申請（${ROLE_LABEL_MAP[data.account.role] || data.account.role}）`,
+                    message: `${data.account.displayName}様（${data.account.branch} / ID: ${data.account.loginId}）から新規登録申請が届きました。本部の許可後にログイン可能になります。`,
+                    applicantRole: data.account.role,
+                    applicantName: data.account.displayName,
+                    applicantBranch: data.account.branch,
+                    loginId: data.account.loginId,
+                    unread: true,
+                    resolved: false,
+                    createdAt: new Date().toISOString()
+                };
 
                 if (!state.issuedInitialAccounts) state.issuedInitialAccounts = [];
                 state.issuedInitialAccounts.unshift({
@@ -840,16 +955,20 @@
                     displayName: data.account.displayName,
                     branch: data.account.branch,
                     loginId: data.account.loginId,
-                    linkedStudentId,
-                    issuedAt: new Date().toISOString().split('T')[0]
+                    approvalStatus: 'pending_hq',
+                    issuedAt: nowDate
                 });
 
-                await saveState();
+                if (!state.hqNotifications) state.hqNotifications = [];
+                state.hqNotifications.unshift(hqNotification);
+
+                await pushRegistrationToHQ(regRecord);
                 updateHeaderBranchCounts();
                 if (currentAuth) renderView();
 
-                lastIssuedSelfAccount = { ...data.account, linkedStudentId };
-                document.getElementById('issued-self-role').innerText = ROLE_LABEL_MAP[data.account.role] || data.account.role;
+                bindAccountToDevice(data.account.role, data.account.loginId);
+                lastIssuedSelfAccount = data.account;
+                document.getElementById('issued-self-role').innerText = `${ROLE_LABEL_MAP[data.account.role] || data.account.role}（本部許可待ち）`;
                 document.getElementById('issued-self-id').innerText = data.account.loginId;
                 document.getElementById('issued-self-pass').innerText = data.account.initialPassword;
                 document.getElementById('self-reg-result-box').classList.remove('hidden');
@@ -957,6 +1076,7 @@
 
                 currentAuth.token = data.token;
                 currentAuth.staffId = data.loginId;
+                bindAccountToDevice(currentAuth.role, data.loginId);
                 currentAuth.userName = data.displayName || data.loginId;
                 currentAuth.roleName = `${ROLE_LABEL_MAP[currentAuth.role] || currentAuth.role} (${data.loginId})`;
                 currentAuth.mustChangeCredentials = false;
@@ -1090,6 +1210,17 @@
                 return;
             }
 
+            const boundDev = getBoundAccountForDevice();
+            if (
+                boundDev &&
+                boundDev.loginId &&
+                (String(boundDev.loginId).trim().toLowerCase() !== inputId.toLowerCase() || String(boundDev.role) !== role)
+            ) {
+                errEl.innerText = `この端末はアカウント「${boundDev.loginId}」専用です（1端末1アカウント制限）。別アカウントでのログインはできません。`;
+                errEl.classList.remove('hidden');
+                return;
+            }
+
             try {
                 const res = await fetch('/api/login', {
                     method: 'POST',
@@ -1098,7 +1229,8 @@
                         role,
                         loginId: inputId,
                         password: inputPass,
-                        lineUserId: liffLineUserId || ''
+                        lineUserId: liffLineUserId || '',
+                        deviceId: getOrCreateDeviceId()
                     })
                 });
                 const data = await res.json().catch(() => ({}));
@@ -1111,6 +1243,7 @@
                 lastActivityTimestamp = Date.now();
                 const displayName = `${ROLE_LABEL_MAP[role] || role} (${data.displayName || inputId})`;
 
+                bindAccountToDevice(role, inputId);
                 currentAuth = {
                     role,
                     roleName: displayName,
@@ -1241,15 +1374,32 @@
             }
         }
 
-        function getLinkedStudentsForGuardian() {
+        function getApprovedLinksForGuardian() {
             if (!currentAuth || currentAuth.role !== 'guardian') return [];
-            const targetIds = [currentAuth.guardianLoginId, currentAuth.staffId]
+            const myIds = [currentAuth.guardianLoginId, currentAuth.staffId]
                 .filter(Boolean)
                 .map(v => String(v).trim().toLowerCase());
-            if (!targetIds.length) return [];
+            if (!myIds.length) return [];
+            return (state.guardianStudentLinks || []).filter(lk =>
+                lk.status === 'approved' &&
+                lk.guardianApproved === true &&
+                lk.studentApproved === true &&
+                myIds.includes(String(lk.guardianLoginId || '').trim().toLowerCase())
+            );
+        }
+
+        function getLinkedStudentsForGuardian() {
+            if (!currentAuth || currentAuth.role !== 'guardian') return [];
+            const approvedLinks = getApprovedLinksForGuardian();
+            if (!approvedLinks.length) return [];
+
             return state.students.filter(s => {
-                const gId = String(s.guardianLoginId || '').trim().toLowerCase();
-                return gId && targetIds.includes(gId);
+                const stCode = String(s.id || '').trim().toUpperCase();
+                const stLogin = String(s.studentLoginId || '').trim().toUpperCase();
+                return approvedLinks.some(lk =>
+                    (lk.studentId && String(lk.studentId).trim().toUpperCase() === stCode) ||
+                    (lk.studentLoginId && String(lk.studentLoginId).trim().toUpperCase() === stLogin)
+                );
             });
         }
 
@@ -1264,6 +1414,32 @@
                 const stLogin = String(s.studentLoginId || '').trim().toUpperCase();
                 return candidates.includes(stCode) || (stLogin && candidates.includes(stLogin));
             }) || null;
+        }
+
+        function getLinksForStudent() {
+            const me = getLinkedStudentForStudent();
+            const myCandidates = [
+                me?.id,
+                me?.studentLoginId,
+                currentAuth?.studentId,
+                currentAuth?.staffId
+            ].filter(Boolean).map(v => String(v).trim().toUpperCase());
+            if (!myCandidates.length) return [];
+            return (state.guardianStudentLinks || []).filter(lk =>
+                myCandidates.includes(String(lk.studentId || '').trim().toUpperCase()) ||
+                (lk.studentLoginId && myCandidates.includes(String(lk.studentLoginId).trim().toUpperCase()))
+            );
+        }
+
+        function getLinksForGuardian() {
+            if (!currentAuth || currentAuth.role !== 'guardian') return [];
+            const myIds = [currentAuth.guardianLoginId, currentAuth.staffId]
+                .filter(Boolean)
+                .map(v => String(v).trim().toLowerCase());
+            if (!myIds.length) return [];
+            return (state.guardianStudentLinks || []).filter(lk =>
+                myIds.includes(String(lk.guardianLoginId || '').trim().toLowerCase())
+            );
         }
 
         function getBranchStudentCount(branchName) {
@@ -1300,8 +1476,10 @@
 
         function renderHQView() {
             const pendingCount = (state.pendingAccountApprovals || []).length;
+            const pendingRegCount = (state.pendingRegistrationRequests || []).filter(r => !r.hqApproved).length;
+            const pendingLinkCount = (state.guardianStudentLinks || []).filter(l => l.status !== 'approved').length;
             const tabs = [
-                { id: 'issueAccounts', label: '全役職 初期ID/PW発行（LINE連携導線）' },
+                { id: 'issueAccounts', label: `新規登録受信・初期ID/PW発行${pendingRegCount ? ` (${pendingRegCount})` : ''}` },
                 { id: 'branches', label: '校舎・生徒・保護者一覧' },
                 { id: 'staffAccounts', label: `受付・本部アカウント承認${pendingCount ? ` (${pendingCount})` : ''}` },
                 { id: 'roles', label: '役職・権限設定' },
@@ -1362,6 +1540,8 @@
 
         function renderHqIssueAccountsContent() {
             const issuedHistory = state.issuedInitialAccounts || [];
+            const regRequests = state.pendingRegistrationRequests || [];
+            const allLinks = state.guardianStudentLinks || [];
             return `
                 <div class="space-y-6 text-xs">
                     <div class="bg-white p-5 rounded-2xl border-2 border-orange-200 shadow-sm space-y-4">
@@ -1430,6 +1610,111 @@
                                 </div>
                             </div>
                         ` : ''}
+                    </div>
+
+                    <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-300 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-amber-950 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-bell text-amber-600"></i> 本部アカウント宛て 新規登録通知（未読: ${(state.hqNotifications || []).filter(n => n.unread).length}件 / 全${(state.hqNotifications || []).length}件）
+                            </h4>
+                            ${(state.hqNotifications || []).some(n => n.unread) ? `<button onclick="markAllHqNotificationsRead()" class="bg-amber-700 text-white px-3 py-1 rounded-lg text-[11px] font-bold">すべて既読にする</button>` : ''}
+                        </div>
+                        <div class="space-y-2 max-h-60 overflow-y-auto">
+                            ${(state.hqNotifications || []).length ? (state.hqNotifications || []).map(n => `
+                                <div class="bg-white p-3 rounded-xl border ${n.unread ? 'border-amber-400 shadow-sm' : 'border-slate-200'} flex flex-col md:flex-row md:items-center justify-between gap-2">
+                                    <div>
+                                        <div class="font-bold text-slate-900 flex items-center gap-2">
+                                            ${n.unread ? '<span class="px-2 py-0.5 text-[10px] rounded-full bg-red-600 text-white">新規通知</span>' : '<span class="px-2 py-0.5 text-[10px] rounded-full bg-slate-200 text-slate-600">確認済</span>'}
+                                            <span>${escapeHtml(n.title)}</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 mt-0.5">${escapeHtml(n.message)}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        ${!n.resolved ? `
+                                            <button onclick="acceptRegistrationToRoster('${escapeHtml(n.regId)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold text-[11px]">許可して台帳反映</button>
+                                            <button onclick="rejectRegistrationRequest('${escapeHtml(n.regId)}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg font-bold text-[11px]">却下</button>
+                                        ` : `<span class="text-[11px] font-bold text-slate-500">処理完了</span>`}
+                                    </div>
+                                </div>
+                            `).join('') : '<p class="text-slate-500 bg-white p-3 rounded-xl text-center">本部宛ての新規登録通知はありません。</p>'}
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border-2 border-indigo-200 space-y-3">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-inbox text-indigo-600"></i> 新規登録 受信一覧・本部許可管理（全${regRequests.length}件）
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border border-slate-200 rounded-xl">
+                                <thead class="bg-slate-100 text-slate-600">
+                                    <tr>
+                                        <th class="p-3">登録日</th>
+                                        <th class="p-3">役職</th>
+                                        <th class="p-3">氏名</th>
+                                        <th class="p-3">校舎 / 学年</th>
+                                        <th class="p-3">発行ID</th>
+                                        <th class="p-3">本部反映状態</th>
+                                        <th class="p-3">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    ${regRequests.length ? regRequests.map(req => `
+                                        <tr>
+                                            <td class="p-3">${escapeHtml(req.registeredAt)}</td>
+                                            <td class="p-3 font-bold">${escapeHtml(ROLE_LABEL_MAP[req.role] || req.role)}</td>
+                                            <td class="p-3 font-bold">${escapeHtml(req.displayName)}</td>
+                                            <td class="p-3">${escapeHtml(req.branch)}${req.grade ? ` / ${escapeHtml(req.grade)}` : ''}</td>
+                                            <td class="p-3 font-mono text-orange-600 font-bold">${escapeHtml(req.loginId)}</td>
+                                            <td class="p-3">${
+                                                req.approvalStatus === 'rejected'
+                                                    ? '<span class="text-red-600 font-bold">却下済</span>'
+                                                    : req.hqApproved
+                                                        ? '<span class="text-emerald-700 font-bold">許可・台帳反映済</span>'
+                                                        : '<span class="text-amber-700 font-bold">本部許可待ち</span>'
+                                            }</td>
+                                            <td class="p-3 space-x-1 whitespace-nowrap">
+                                                ${!req.hqApproved && req.approvalStatus !== 'rejected' ? `
+                                                    <button onclick="acceptRegistrationToRoster('${escapeHtml(req.regId)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg font-bold">許可・反映</button>
+                                                    <button onclick="rejectRegistrationRequest('${escapeHtml(req.regId)}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1.5 rounded-lg font-bold">却下</button>
+                                                ` : '-'}
+                                            </td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">新規登録の受信データはまだありません</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-200 space-y-3">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-handshake text-emerald-600"></i> 保護者・生徒 紐づけ申請一覧（双方承認で成立: ${allLinks.length}件）
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border border-slate-200 rounded-xl">
+                                <thead class="bg-slate-100 text-slate-600">
+                                    <tr>
+                                        <th class="p-3">申請日</th>
+                                        <th class="p-3">保護者ID / 氏名</th>
+                                        <th class="p-3">生徒ID / 氏名</th>
+                                        <th class="p-3">保護者承認</th>
+                                        <th class="p-3">生徒承認</th>
+                                        <th class="p-3">紐づけ状態</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    ${allLinks.length ? allLinks.map(lk => `
+                                        <tr>
+                                            <td class="p-3">${escapeHtml(lk.createdAt)}</td>
+                                            <td class="p-3 font-mono">${escapeHtml(lk.guardianLoginId)} (${escapeHtml(lk.guardianName || '-')})</td>
+                                            <td class="p-3 font-mono">${escapeHtml(lk.studentId)} (${escapeHtml(lk.studentName || '-')})</td>
+                                            <td class="p-3 font-bold">${lk.guardianApproved ? '<span class="text-emerald-700">承認済</span>' : '<span class="text-amber-600">未承認</span>'}</td>
+                                            <td class="p-3 font-bold">${lk.studentApproved ? '<span class="text-emerald-700">承認済</span>' : '<span class="text-amber-600">未承認</span>'}</td>
+                                            <td class="p-3 font-bold">${lk.status === 'approved' ? '<span class="text-emerald-700">成立済</span>' : '<span class="text-amber-700">双方承認待ち</span>'}</td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">紐づけ申請はありません</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
@@ -1522,6 +1807,220 @@
             } finally {
                 btn.disabled = false;
             }
+        }
+
+        async function markAllHqNotificationsRead() {
+            if (!requireRole(['hq'])) return;
+            (state.hqNotifications || []).forEach(n => { n.unread = false; });
+            await saveState();
+            renderView();
+        }
+
+        async function notifyServerApprovalDecision(req, decision) {
+            try {
+                await fetch('/api/approve-registration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentAuth.token}`
+                    },
+                    body: JSON.stringify({
+                        docId: req.docId || '',
+                        loginId: req.loginId,
+                        role: req.role,
+                        decision
+                    })
+                });
+            } catch (err) {
+                console.warn('サーバー側承認ステータス更新エラー:', err);
+            }
+        }
+
+        async function rejectRegistrationRequest(regId) {
+            if (!requireRole(['hq'])) return;
+            const idx = (state.pendingRegistrationRequests || []).findIndex(r => r.regId === regId);
+            if (idx === -1) return;
+            const req = state.pendingRegistrationRequests[idx];
+            req.approvalStatus = 'rejected';
+            req.hqApproved = false;
+            req.status = '却下済';
+            (state.hqNotifications || []).forEach(n => {
+                if (n.regId === regId) {
+                    n.unread = false;
+                    n.resolved = true;
+                }
+            });
+            await notifyServerApprovalDecision(req, 'reject');
+            await saveState();
+            renderView();
+            alert(`${req.displayName}様の新規登録申請を却下しました。`);
+        }
+
+        async function acceptRegistrationToRoster(regId) {
+            if (!requireRole(['hq'])) return;
+            const idx = (state.pendingRegistrationRequests || []).findIndex(r => r.regId === regId);
+            if (idx === -1) return;
+            const req = state.pendingRegistrationRequests[idx];
+            const today = new Date().toISOString().split('T')[0];
+
+            if (req.role === 'student') {
+                const exists = state.students.some(s =>
+                    String(s.studentLoginId || '').toUpperCase() === String(req.loginId).toUpperCase() ||
+                    (s.name === req.displayName && s.branch === req.branch)
+                );
+                if (!exists) {
+                    state.students.push({
+                        id: generateNextStudentId(),
+                        studentLoginId: req.loginId,
+                        name: req.displayName,
+                        kana: '',
+                        branch: req.branch || '渋谷本校',
+                        grade: req.grade || '未設定',
+                        guardian: req.guardianName || '未紐づけ',
+                        guardianKana: '',
+                        guardianLoginId: '',
+                        guardianLineUserId: '',
+                        studentLineUserId: '',
+                        status: '正常',
+                        registeredAt: today
+                    });
+                }
+            } else if (req.role === 'staff' || req.role === 'teacher' || req.role === 'hq') {
+                const staffExists = (state.staffUsers || []).some(u => u.id === req.loginId);
+                if (!staffExists) {
+                    state.staffUsers.push({
+                        id: req.loginId,
+                        role: req.role,
+                        name: req.displayName,
+                        branch: req.branch || '全校舎'
+                    });
+                }
+            }
+
+            req.hqApproved = true;
+            req.approvalStatus = 'approved';
+            req.status = '許可・台帳反映済';
+            (state.hqNotifications || []).forEach(n => {
+                if (n.regId === regId) {
+                    n.unread = false;
+                    n.resolved = true;
+                }
+            });
+            await notifyServerApprovalDecision(req, 'approve');
+            await saveState();
+            renderView();
+            alert(`${req.displayName}様（${ROLE_LABEL_MAP[req.role] || req.role}）の新規登録を許可し、本部台帳へ反映しました。`);
+        }
+
+        async function finalizeLinkIfBothApproved(linkObj) {
+            if (!linkObj.guardianApproved || !linkObj.studentApproved) {
+                linkObj.status = 'pending_both';
+                return false;
+            }
+            linkObj.status = 'approved';
+            linkObj.approvedAt = new Date().toISOString().split('T')[0];
+
+            // 双方承認完了時のみ台帳へ紐づけを反映
+            const stIdx = state.students.findIndex(s =>
+                String(s.id || '').trim().toUpperCase() === String(linkObj.studentId || '').trim().toUpperCase() ||
+                (linkObj.studentLoginId && String(s.studentLoginId || '').trim().toUpperCase() === String(linkObj.studentLoginId).trim().toUpperCase())
+            );
+            if (stIdx >= 0) {
+                state.students[stIdx].guardianLoginId = linkObj.guardianLoginId;
+                if (linkObj.guardianName) state.students[stIdx].guardian = linkObj.guardianName;
+            } else if (linkObj.studentId) {
+                state.students.push({
+                    id: linkObj.studentId,
+                    studentLoginId: linkObj.studentLoginId || linkObj.studentId,
+                    name: linkObj.studentName || '生徒',
+                    kana: '',
+                    branch: '渋谷本校',
+                    grade: '未設定',
+                    guardian: linkObj.guardianName || '保護者',
+                    guardianKana: '',
+                    guardianLoginId: linkObj.guardianLoginId,
+                    guardianLineUserId: '',
+                    studentLineUserId: '',
+                    status: '正常',
+                    registeredAt: new Date().toISOString().split('T')[0]
+                });
+            }
+            return true;
+        }
+
+        async function approveLinkByGuardian(linkId) {
+            if (!requireRole(['guardian'])) return;
+            const lk = (state.guardianStudentLinks || []).find(item => item.linkId === linkId);
+            if (!lk) return;
+            lk.guardianApproved = true;
+            const completed = await finalizeLinkIfBothApproved(lk);
+            await saveState();
+            renderView();
+            alert(completed ? '保護者・生徒の双方承認が完了し、紐づけが成立しました。' : '保護者側の承認を記録しました。生徒側の承認完了後に紐づけが成立します。');
+        }
+
+        async function approveLinkByStudent(linkId) {
+            if (!requireRole(['student'])) return;
+            const lk = (state.guardianStudentLinks || []).find(item => item.linkId === linkId);
+            if (!lk) return;
+            lk.studentApproved = true;
+            const completed = await finalizeLinkIfBothApproved(lk);
+            await saveState();
+            renderView();
+            alert(completed ? '保護者・生徒の双方承認が完了し、紐づけが成立しました。' : '生徒側の承認を記録しました。保護者側の承認完了後に紐づけが成立します。');
+        }
+
+        async function createLinkRequestFromGuardianPortal() {
+            if (!requireRole(['guardian'])) return;
+            const stCode = document.getElementById('guardian-link-student-id')?.value.trim().toUpperCase() || '';
+            if (!stCode) return alert('紐づけを申請する生徒IDを入力してください。');
+            const myGuardianId = currentAuth.guardianLoginId || currentAuth.staffId;
+            const stRecord = state.students.find(s => String(s.id || '').toUpperCase() === stCode || String(s.studentLoginId || '').toUpperCase() === stCode);
+
+            if (!state.guardianStudentLinks) state.guardianStudentLinks = [];
+            state.guardianStudentLinks.unshift({
+                linkId: 'LINK_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                studentId: stRecord ? stRecord.id : stCode,
+                studentLoginId: stRecord ? (stRecord.studentLoginId || stRecord.id) : stCode,
+                studentName: stRecord ? stRecord.name : stCode,
+                guardianLoginId: myGuardianId,
+                guardianName: currentAuth.userName || myGuardianId,
+                initiatorRole: 'guardian',
+                guardianApproved: true,
+                studentApproved: false,
+                status: 'pending_both',
+                createdAt: new Date().toISOString().split('T')[0]
+            });
+            await saveState();
+            renderView();
+            alert('生徒への紐づけ承認リクエストを送信しました。生徒側の承認後に紐づけが成立します。');
+        }
+
+        async function createLinkRequestFromStudentPortal() {
+            if (!requireRole(['student'])) return;
+            const gdLoginId = document.getElementById('student-link-guardian-id')?.value.trim() || '';
+            if (!gdLoginId) return alert('紐づけを申請する保護者のログインIDを入力してください。');
+            const me = getLinkedStudentForStudent();
+            const myStudentCode = me ? me.id : (currentAuth.studentId || currentAuth.staffId);
+            const myStudentName = me ? me.name : (currentAuth.userName || myStudentCode);
+
+            if (!state.guardianStudentLinks) state.guardianStudentLinks = [];
+            state.guardianStudentLinks.unshift({
+                linkId: 'LINK_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                studentId: myStudentCode,
+                studentLoginId: me?.studentLoginId || myStudentCode,
+                studentName: myStudentName,
+                guardianLoginId: gdLoginId,
+                guardianName: gdLoginId,
+                initiatorRole: 'student',
+                guardianApproved: false,
+                studentApproved: true,
+                status: 'pending_both',
+                createdAt: new Date().toISOString().split('T')[0]
+            });
+            await saveState();
+            renderView();
+            alert('保護者への紐づけ承認リクエストを送信しました。保護者側の承認後に紐づけが成立します。');
         }
 
         function copyIssuedCredentialText() {
@@ -2333,15 +2832,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-slate-100 grid grid-cols-3 text-center text-[11px] border-b font-bold">
+                    <div class="bg-slate-100 grid grid-cols-4 text-center text-[11px] border-b font-bold">
                         <button onclick="guardianActiveTab='reports';renderView();" class="py-3 ${guardianActiveTab === 'reports' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">指導報告書</button>
                         <button onclick="guardianActiveTab='absence';renderView();" class="py-3 ${guardianActiveTab === 'absence' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">欠席・リスケ</button>
                         <button onclick="guardianActiveTab='billing';renderView();" class="py-3 ${guardianActiveTab === 'billing' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">お支払い</button>
+                        <button onclick="guardianActiveTab='links';renderView();" class="py-3 ${guardianActiveTab === 'links' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">紐づけ承認</button>
                     </div>
                     <div class="p-4 bg-slate-50 min-h-[380px]">
                         ${guardianActiveTab === 'reports' ? renderGuardianReportsContent(myStudents)
                         : guardianActiveTab === 'absence' ? renderGuardianAbsenceContent(myStudents)
-                        : renderGuardianBillingContent(myStudents)}
+                        : guardianActiveTab === 'billing' ? renderGuardianBillingContent(myStudents)
+                        : renderGuardianLinksContent()}
                     </div>
                 </div>
             `;
@@ -2364,6 +2865,34 @@
                         <select id="abs-schedule" class="w-full border rounded-lg p-2.5 bg-slate-50">${firstSlots.length ? firstSlots.map(s => `<option value="${s.id}">${escapeHtml(s.date)} ${escapeHtml(s.startTime)}〜${escapeHtml(s.endTime)} (${escapeHtml(s.subject)})</option>`).join('') : '<option value="">授業コマがありません</option>'}</select>
                         <input type="text" id="abs-reason" value="体調不良のため" class="w-full border rounded-lg p-2.5 bg-slate-50">
                         <button onclick="submitAbsenceRequest()" class="w-full line-theme text-white py-2.5 rounded-xl font-bold">欠席申請を送信する</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGuardianLinksContent() {
+            const links = getLinksForGuardian();
+            return `
+                <div class="space-y-4 text-xs">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5">
+                        <h4 class="font-bold text-slate-900 text-sm">生徒との紐づけ申請（双方承認制）</h4>
+                        <p class="text-[11px] text-slate-500">保護者・生徒の双方が承認すると紐づけが成立し、お子様の情報が表示されます。</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="guardian-link-student-id" placeholder="例: ST001" class="flex-1 border rounded-lg p-2 bg-slate-50 font-mono">
+                            <button onclick="createLinkRequestFromGuardianPortal()" class="line-theme text-white px-3 py-2 rounded-lg font-bold whitespace-nowrap">紐づけ申請</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${links.length ? links.map(lk => `
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                                <div class="flex justify-between font-bold">
+                                    <span>生徒ID: ${escapeHtml(lk.studentId)} (${escapeHtml(lk.studentName || '-')})</span>
+                                    <span class="${lk.status === 'approved' ? 'text-emerald-700' : 'text-amber-600'}">${lk.status === 'approved' ? '双方承認済（成立）' : '双方承認待ち'}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-600">保護者承認: ${lk.guardianApproved ? '済' : '未'} / 生徒承認: ${lk.studentApproved ? '済' : '未'}</div>
+                                ${!lk.guardianApproved ? `<button onclick="approveLinkByGuardian('${escapeHtml(lk.linkId)}')" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold">保護者として承認する</button>` : ''}
+                            </div>
+                        `).join('') : '<p class="text-slate-500 text-center py-6">紐づけ申請はまだありません。</p>'}
                     </div>
                 </div>
             `;
@@ -2402,14 +2931,45 @@
                         <h3 class="font-bold text-sm">GRIT指導学院 生徒マイページ</h3>
                         <p class="text-[11px] text-emerald-100">${me ? `${escapeHtml(me.name)}（${escapeHtml(me.grade)}）` : ''}</p>
                     </div>
-                    <div class="bg-slate-100 grid grid-cols-2 text-center text-[11px] border-b font-bold">
+                    <div class="bg-slate-100 grid grid-cols-3 text-center text-[11px] border-b font-bold">
                         <button onclick="studentActiveTab='schedules';renderView();" class="py-3 ${studentActiveTab === 'schedules' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">授業予定</button>
                         <button onclick="studentActiveTab='reports';renderView();" class="py-3 ${studentActiveTab === 'reports' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">指導報告書</button>
+                        <button onclick="studentActiveTab='links';renderView();" class="py-3 ${studentActiveTab === 'links' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">保護者紐づけ</button>
                     </div>
                     <div class="p-4 bg-slate-50 min-h-[360px] text-xs space-y-2">
                         ${studentActiveTab === 'schedules'
                             ? (mySchedules.length ? mySchedules.map(sc => `<div class="p-3 bg-white border rounded-xl font-bold">${escapeHtml(sc.date)} ${escapeHtml(sc.startTime)}〜${escapeHtml(sc.endTime)} / ${escapeHtml(sc.subject)}</div>`).join('') : '<p class="text-center py-8 text-slate-500">授業予定はありません。</p>')
-                            : (myReports.length ? myReports.map(r => `<div class="p-3 bg-white border rounded-xl"><strong>${escapeHtml(r.date)} ${escapeHtml(r.subject)}</strong><p class="mt-1">${escapeHtml(r.comment)}</p></div>`).join('') : '<p class="text-center py-8 text-slate-500">指導報告書はありません。</p>')}
+                            : studentActiveTab === 'reports'
+                            ? (myReports.length ? myReports.map(r => `<div class="p-3 bg-white border rounded-xl"><strong>${escapeHtml(r.date)} ${escapeHtml(r.subject)}</strong><p class="mt-1">${escapeHtml(r.comment)}</p></div>`).join('') : '<p class="text-center py-8 text-slate-500">指導報告書はありません。</p>')
+                            : renderStudentLinksContent()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStudentLinksContent() {
+            const links = getLinksForStudent();
+            return `
+                <div class="space-y-4 text-xs">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5">
+                        <h4 class="font-bold text-slate-900 text-sm">保護者との紐づけ申請（双方承認制）</h4>
+                        <p class="text-[11px] text-slate-500">保護者・生徒の双方が承認すると紐づけが成立します。</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="student-link-guardian-id" placeholder="保護者ログインIDを入力" class="flex-1 border rounded-lg p-2 bg-slate-50 font-mono">
+                            <button onclick="createLinkRequestFromStudentPortal()" class="line-theme text-white px-3 py-2 rounded-lg font-bold whitespace-nowrap">紐づけ申請</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${links.length ? links.map(lk => `
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                                <div class="flex justify-between font-bold">
+                                    <span>保護者ID: ${escapeHtml(lk.guardianLoginId)}</span>
+                                    <span class="${lk.status === 'approved' ? 'text-emerald-700' : 'text-amber-600'}">${lk.status === 'approved' ? '双方承認済（成立）' : '双方承認待ち'}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-600">保護者承認: ${lk.guardianApproved ? '済' : '未'} / 生徒承認: ${lk.studentApproved ? '済' : '未'}</div>
+                                ${!lk.studentApproved ? `<button onclick="approveLinkByStudent('${escapeHtml(lk.linkId)}')" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold">生徒として承認する</button>` : ''}
+                            </div>
+                        `).join('') : '<p class="text-slate-500 text-center py-6">紐づけ申請はまだありません。</p>'}
                     </div>
                 </div>
             `;
