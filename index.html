@@ -467,43 +467,6 @@
 
         const STORAGE_KEY = 'GRIT_ACADEMY_APP_DATA_ENISHI_SEC_V6';
         const AUTH_STORAGE_KEY = 'GRIT_ACADEMY_AUTH_SESSION_ENISHI_SEC_V6';
-        const DEVICE_ID_KEY = 'GRIT_DEVICE_ID_ENISHI_V1';
-        const DEVICE_BOUND_ACCOUNT_KEY = 'GRIT_BOUND_ACCOUNT_ENISHI_V1';
-
-        function getOrCreateDeviceId() {
-            try {
-                let devId = localStorage.getItem(DEVICE_ID_KEY);
-                if (!devId) {
-                    const rand = (window.crypto && window.crypto.randomUUID)
-                        ? window.crypto.randomUUID()
-                        : ('dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12));
-                    devId = rand;
-                    localStorage.setItem(DEVICE_ID_KEY, devId);
-                }
-                return devId;
-            } catch (e) {
-                return 'dev_fallback_session';
-            }
-        }
-
-        function getBoundAccountForDevice() {
-            try {
-                const raw = localStorage.getItem(DEVICE_BOUND_ACCOUNT_KEY);
-                return raw ? JSON.parse(raw) : null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function bindAccountToDevice(role, loginId) {
-            try {
-                localStorage.setItem(DEVICE_BOUND_ACCOUNT_KEY, JSON.stringify({
-                    role,
-                    loginId,
-                    boundAt: new Date().toISOString()
-                }));
-            } catch (e) {}
-        }
 
         const defaultState = {
             settings: { liffId: '', lineFriendUrl: '', webhookUrl: '/api/line-push' },
@@ -887,8 +850,7 @@
                         branch,
                         grade,
                         guardianName,
-                        lineUserId: liffLineUserId || '',
-                        deviceId: getOrCreateDeviceId()
+                        lineUserId: liffLineUserId || ''
                     })
                 });
                 const data = await res.json().catch(() => ({}));
@@ -966,7 +928,6 @@
                 updateHeaderBranchCounts();
                 if (currentAuth) renderView();
 
-                bindAccountToDevice(data.account.role, data.account.loginId);
                 lastIssuedSelfAccount = data.account;
                 document.getElementById('issued-self-role').innerText = `${ROLE_LABEL_MAP[data.account.role] || data.account.role}（本部許可待ち）`;
                 document.getElementById('issued-self-id').innerText = data.account.loginId;
@@ -1076,7 +1037,6 @@
 
                 currentAuth.token = data.token;
                 currentAuth.staffId = data.loginId;
-                bindAccountToDevice(currentAuth.role, data.loginId);
                 currentAuth.userName = data.displayName || data.loginId;
                 currentAuth.roleName = `${ROLE_LABEL_MAP[currentAuth.role] || currentAuth.role} (${data.loginId})`;
                 currentAuth.mustChangeCredentials = false;
@@ -1210,17 +1170,6 @@
                 return;
             }
 
-            const boundDev = getBoundAccountForDevice();
-            if (
-                boundDev &&
-                boundDev.loginId &&
-                (String(boundDev.loginId).trim().toLowerCase() !== inputId.toLowerCase() || String(boundDev.role) !== role)
-            ) {
-                errEl.innerText = `この端末はアカウント「${boundDev.loginId}」専用です（1端末1アカウント制限）。別アカウントでのログインはできません。`;
-                errEl.classList.remove('hidden');
-                return;
-            }
-
             try {
                 const res = await fetch('/api/login', {
                     method: 'POST',
@@ -1229,8 +1178,7 @@
                         role,
                         loginId: inputId,
                         password: inputPass,
-                        lineUserId: liffLineUserId || '',
-                        deviceId: getOrCreateDeviceId()
+                        lineUserId: liffLineUserId || ''
                     })
                 });
                 const data = await res.json().catch(() => ({}));
@@ -1243,7 +1191,6 @@
                 lastActivityTimestamp = Date.now();
                 const displayName = `${ROLE_LABEL_MAP[role] || role} (${data.displayName || inputId})`;
 
-                bindAccountToDevice(role, inputId);
                 currentAuth = {
                     role,
                     roleName: displayName,
