@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>GRIT指導学院 - 総合管理・コミュニケーションアプリ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- Tesseract.js (実画像OCR解析用) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Firebase SDK (v10 Modular CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        window.FirebaseModules = { initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, getAuth, signInAnonymously };
+        window.dispatchEvent(new Event('firebase-sdk-ready'));
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', 'Inter', sans-serif; }
+        .line-theme { background-color: #06C755; }
+        .grit-gradient { background: linear-gradient(135deg, #FF6B00 0%, #FFA800 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- ヘッダー -->
+    <header id="app-header" class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm hidden">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 grit-gradient rounded-xl flex items-center justify-center text-white shadow-md">
+                    <img src="GRIT.jpg" alt="GRIT" class="w-8 h-8 object-contain rounded-lg" onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fa-solid fa-graduation-cap text-lg\'></i>';">
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-wide text-slate-900 flex items-center gap-2">
+                        GRIT <span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full font-semibold">指導学院 総合管理</span>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 md:space-x-3">
+                <div class="hidden md:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700">
+                    <i class="fa-solid fa-user-shield text-orange-500"></i>
+                    <span id="header-user-role-label">本部管理者</span>
+                </div>
+                <button id="header-firebase-btn" onclick="openFirebaseModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-fire text-sm"></i> <span class="hidden sm:inline">Firebase設定</span>
+                </button>
+                <button id="header-line-btn" onclick="openLineIntegrationModal()" class="bg-[#06C755] hover:bg-[#05b34c] text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-brands fa-line text-sm"></i> <span class="hidden sm:inline">LINE設定</span>
+                </button>
+                <button onclick="logout()" class="bg-slate-200 hover:bg-red-100 text-slate-700 hover:text-red-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">ログアウト</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+        <!-- ログイン画面 -->
+        <div id="login-view" class="max-w-md w-full mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 grit-gradient rounded-2xl mx-auto flex items-center justify-center text-white text-2xl shadow-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2 class="text-xl font-black text-slate-900">GRIT指導学院 総合管理システム</h2>
+                <p class="text-xs text-slate-500">権限を選択してID・パスワードを入力してください。</p>
+                <div id="login-sync-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">
+                    <i class="fa-solid fa-lock text-slate-500"></i> サーバー認証待機中（ログイン後にDB接続）
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ログインロール</label>
+                    <select id="login-role-select" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-bold">
+                        <option value="hq">本部管理者 (HQ)</option>
+                        <option value="staff">受付スタッフ (Staff)</option>
+                        <option value="teacher">講師 (Teacher)</option>
+                        <option value="guardian">保護者 (LINE Portal)</option>
+                        <option value="student">生徒 (LINE Portal)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ログインID（任意・識別用）</label>
+                    <input type="text" id="login-id" autocomplete="username" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="例: hq_admin / ST001">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">パスワード</label>
+                    <input type="password" id="login-pass" autocomplete="current-password" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="サーバー環境変数で設定されたパスワードを入力">
+                </div>
+                <div id="login-error" class="text-red-600 font-bold hidden text-center">IDまたはパスワードが正しくありません。</div>
+            </div>
+
+            <button id="login-submit-btn" onclick="attemptLogin()" class="w-full grit-gradient text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md hover:opacity-95">
+                ログインする
+            </button>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
+                <span class="font-bold text-slate-700 block"><i class="fa-solid fa-shield-halved mr-1 text-orange-500"></i>セキュリティ仕様</span>
+                <p>パスワードの照合とセッション発行はVercelサーバー（/api/login）で実行されます。初期パスワードはコード内に保持していません。</p>
+            </div>
+        </div>
+
+        <!-- アプリ本体 -->
+        <div id="app-view-container" class="hidden space-y-4">
+            <div id="staff-status-bar" class="flex items-center justify-between flex-wrap gap-2 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="font-bold text-slate-700"><i class="fa-solid fa-school text-orange-500 mr-1"></i>校舎別在籍数:</span>
+                    <span id="header-branch-counts" class="flex flex-wrap gap-1.5"></span>
+                </div>
+                <span id="save-status-badge" class="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-check"></i> クラウド同期準備中
+                </span>
+            </div>
+            <div id="app-view"></div>
+        </div>
+    </main>
+
+    <!-- 振替日時指定・確定モーダル -->
+    <div id="reschedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 text-xs">
+            <button onclick="closeRescheduleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 grit-gradient rounded-xl flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">振替日時の指定・確定処理</h3>
+                    <p id="reschedule-modal-subtitle" class="text-[11px] text-slate-500">生徒名・科目</p>
+                </div>
+            </div>
+            <input type="hidden" id="reschedule-target-id">
+            <div class="space-y-3">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="text-slate-500 block text-[10px]">元の欠席対象日時</span>
+                    <span id="reschedule-modal-orig" class="font-bold text-slate-800"></span>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">新しい振替日 <span class="text-red-500">*</span></label>
+                    <input type="date" id="reschedule-new-date" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">開始時刻 <span class="text-red-500">*</span></label>
+                        <input type="time" id="reschedule-new-start" value="17:00" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">終了時刻 <span class="text-red-500">*</span></label>
+                        <input type="time" id="reschedule-new-end" value="18:00" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">担当講師（変更がある場合）</label>
+                    <input type="text" id="reschedule-new-teacher" placeholder="例: 田中 先生" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                </div>
+                <label class="flex items-center gap-2 pt-1 cursor-pointer">
+                    <input type="checkbox" id="reschedule-update-schedule" checked class="rounded text-orange-500">
+                    <span class="font-bold text-slate-700">生徒の授業予定表（スケジュール）にも振替日時を自動反映する</span>
+                </label>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeRescheduleModal()" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold">キャンセル</button>
+                <button onclick="confirmRescheduleWithDate()" class="grit-gradient text-white px-5 py-2.5 rounded-xl font-bold shadow-sm">振替日時を確定する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase設定確認モーダル -->
+    <div id="firebase-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeFirebaseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white text-xl">
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Firebase Firestore リアルタイム同期設定</h3>
+                    <p class="text-xs text-slate-500">プロジェクト名: enishi-line</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">組み込み済み Firebase Config</label>
+                    <textarea id="firebase-config-input" rows="7" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 font-mono text-[11px]" readonly></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Firestore ドキュメントID</label>
+                    <input type="text" id="firebase-doc-id" value="grit_academy_main" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono" readonly>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeFirebaseModal()" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LINE設定モーダル -->
+    <div id="line-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeLineIntegrationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#06C755] rounded-xl flex items-center justify-center text-white text-xl">
+                    <i class="fa-brands fa-line"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">LINE公式アカウント・通知設定</h3>
+                    <p class="text-xs text-slate-500">LIFF連携・VercelサーバーレスAPI（/api/line-push）連携</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">LIFF ID（LINEミニアプリ連携用）</label>
+                    <input type="text" id="setting-liff-id" placeholder="例: 2006548912-xxxxxxxx" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">通知API エンドポイントURL（Vercelサーバーレス関数）</label>
+                    <input type="text" id="setting-webhook-url" placeholder="/api/line-push" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono">
+                </div>
+                <p class="text-[11px] text-slate-500">※LINEチャネルアクセストークンおよび認証シークレットはVercel側の環境変数で管理します（ブラウザ側には保存しません）。</p>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeLineIntegrationModal()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold">キャンセル</button>
+                <button onclick="saveSystemSettings()" class="bg-[#06C755] text-white px-4 py-2 rounded-xl text-xs font-bold">設定を保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // セキュリティユーティリティ（XSSサニタイズ・CSV対策・サーバーセッション制御）
+        // =========================================================================
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function sanitizeCsvCell(value) {
+            let str = value === null || value === undefined ? '' : String(value);
+            if (/^[=+\-@\t\r\n]/.test(str)) {
+                str = "'" + str;
+            }
+            if (/[",\n\r]/.test(str)) {
+                str = `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        }
+
+        const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+        let lastActivityTimestamp = Date.now();
+        let loginAttempts = 0;
+        let lockoutUntil = 0;
+
+        ['click', 'keydown', 'mousemove', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                lastActivityTimestamp = Date.now();
+            }, { passive: true });
+        });
+
+        setInterval(() => {
+            if (currentAuth && (Date.now() - lastActivityTimestamp > SESSION_TIMEOUT_MS)) {
+                alert('一定時間操作がなかったため、セキュリティ保護のため自動ログアウトしました。');
+                logout();
+            }
+        }, 30000);
+
+        // =========================================================================
+        // Firebase設定 (enishi-line)
+        // =========================================================================
+        const EMBEDDED_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDIaN7TJZ42sWLbVKNeLzWI965UjVLLvX0",
+            authDomain: "enishi-line.firebaseapp.com",
+            projectId: "enishi-line",
+            storageBucket: "enishi-line.firebasestorage.app",
+            messagingSenderId: "655279590839",
+            appId: "1:655279590839:web:e28fdf2d6f1e7bc4f22c32",
+            measurementId: "G-SP6BTLTZD2"
+        };
+        const EMBEDDED_DOC_ID = 'grit_academy_main';
+
+        const STORAGE_KEY = 'GRIT_ACADEMY_APP_DATA_ENISHI_SEC_V5';
+        const AUTH_STORAGE_KEY = 'GRIT_ACADEMY_AUTH_SESSION_ENISHI_SEC_V5';
+
+        const defaultState = {
+            settings: { liffId: '', webhookUrl: '/api/line-push' },
+            rolePermissions: {
+                staffCanRegisterStudent: true,
+                staffCanManageSchedule: true,
+                staffCanViewUnpaid: true,
+                staffCanProcessReschedule: true,
+                teacherCanViewAllStudents: false
+            },
+            staffUsers: [
+                { id: 'hq_admin', role: 'hq', name: '本部管理者', branch: '全校舎' },
+                { id: 'staff_shibuya', role: 'staff', name: '渋谷校 受付担当', branch: '渋谷本校' },
+                { id: 'teacher_tanaka', role: 'teacher', name: '田中 先生', branch: '渋谷本校' }
+            ],
+            pendingAccountApprovals: [],
+            branches: [
+                { id: 1, name: '渋谷本校', status: '稼働中' },
+                { id: 2, name: '新宿駅前校', status: '稼働中' },
+                { id: 3, name: '横浜校', status: '稼働中' }
+            ],
+            students: [
+                {
+                    id: 'ST001', name: '山田 太郎', kana: 'ヤマダ タロウ', branch: '渋谷本校', grade: '高校2年',
+                    guardian: '山田 一郎', guardianKana: 'ヤマダ イチロウ', guardianLoginId: 'guardian_yamada',
+                    guardianLineUserId: '', studentLineUserId: '',
+                    status: '正常', registeredAt: '2026-04-01'
+                },
+                {
+                    id: 'ST002', name: '佐藤 花子', kana: 'サトウ ハナコ', branch: '新宿駅前校', grade: '中学3年',
+                    guardian: '佐藤 美香', guardianKana: 'サトウ ミカ', guardianLoginId: 'guardian_sato',
+                    guardianLineUserId: '', studentLineUserId: '',
+                    status: '未入金あり', registeredAt: '2026-04-15'
+                }
+            ],
+            schedules: [
+                { id: 1, studentId: 'ST001', date: '2026-11-18', startTime: '17:00', endTime: '18:00', subject: '数学', teacher: '田中 先生' },
+                { id: 2, studentId: 'ST002', date: '2026-11-19', startTime: '18:00', endTime: '19:00', subject: '英語', teacher: '高橋 先生' }
+            ],
+            reports: [
+                { id: 1, studentId: 'ST001', studentName: '山田 太郎', teacherName: '田中 先生', date: '2026-11-14', subject: '数学II・B', evaluation: 'A', homework: '完了', comment: '三角関数の加法定理を完璧に理解しました。' }
+            ],
+            unpaidList: [
+                { id: 1, studentId: 'ST002', studentName: '佐藤 花子', branch: '新宿駅前校', amount: '38,500円', month: '2026年11月分', status: '未入金', date: '2026-11-12' }
+            ],
+            rescheduleList: [
+                { id: 1, scheduleId: 1, studentId: 'ST001', studentName: '山田 太郎', branch: '渋谷本校', originalDate: '2026-11-16 17:00〜18:00', confirmedDate: '', subject: '数学', reason: '体調不良のため', applicantRole: 'guardian', status: 'リスケ待ち' }
+            ],
+            lineTemplates: {
+                reportNotice: "【GRIT指導学院よりお知らせ】保護者様：指導報告書が更新されました。"
+            }
+        };
+
+        let state = loadLocalState();
+        let currentAuth = null;
+        let firestoreDb = null;
+        let firestoreDocRef = null;
+        let unsubscribeSnapshot = null;
+        let isCloudConnected = false;
+        let isApplyingRemoteUpdate = false;
+        let liffLineUserId = null;
+
+        let ocrPreviewUrl = null;
+        let ocrRawText = '';
+        let ocrUnpaidCandidates = [];
+        let isOcrRunning = false;
+
+        function loadLocalState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (!parsed.settings) parsed.settings = defaultState.settings;
+                    if (!parsed.rolePermissions) parsed.rolePermissions = defaultState.rolePermissions;
+                    if (!parsed.staffUsers) parsed.staffUsers = defaultState.staffUsers;
+                    if (!parsed.pendingAccountApprovals) parsed.pendingAccountApprovals = [];
+                    return parsed;
+                }
+            } catch (e) { console.error(e); }
+            return JSON.parse(JSON.stringify(defaultState));
+        }
+
+        async function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateHeaderBranchCounts();
+
+            if (currentAuth && isCloudConnected && firestoreDocRef && !isApplyingRemoteUpdate) {
+                try {
+                    updateSyncBadge('syncing');
+                    await window.FirebaseModules.setDoc(firestoreDocRef, {
+                        payload: JSON.stringify(state),
+                        updatedAt: new Date().toISOString()
+                    });
+                    updateSyncBadge('connected');
+                } catch (err) {
+                    console.error('Firestore保存エラー:', err);
+                    updateSyncBadge('error');
+                }
+            }
+        }
+
+        function updateSyncBadge(status) {
+            const badge = document.getElementById('save-status-badge');
+            const loginInd = document.getElementById('login-sync-indicator');
+            if (status === 'connected') {
+                if (badge) {
+                    badge.className = 'text-[11px] text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5';
+                    badge.innerHTML = '<i class="fa-solid fa-fire text-amber-500"></i> Firebase リアルタイム同期中';
+                }
+                if (loginInd) {
+                    loginInd.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200';
+                    loginInd.innerHTML = '<i class="fa-solid fa-fire text-amber-500"></i> Firebase 接続完了 (enishi-line)';
+                }
+            } else if (status === 'syncing') {
+                if (badge) badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-500"></i> クラウド保存中...';
+            } else if (status === 'error') {
+                if (badge) {
+                    badge.className = 'text-[11px] text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5';
+                    badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> 同期エラー（Firestoreルール確認）';
+                }
+            } else {
+                if (badge) {
+                    badge.className = 'text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5';
+                    badge.innerHTML = '<i class="fa-solid fa-shield-check"></i> ローカル保存中';
+                }
+            }
+        }
+
+        async function initFirebaseConnection() {
+            if (!currentAuth) return false;
+            if (!EMBEDDED_FIREBASE_CONFIG || !window.FirebaseModules) return false;
+            try {
+                const { initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot, getAuth, signInAnonymously } = window.FirebaseModules;
+                const app = initializeApp(EMBEDDED_FIREBASE_CONFIG, 'enishi-line-app-sec-v5');
+                const auth = getAuth(app);
+                try { await signInAnonymously(auth); } catch (authErr) { console.warn('匿名認証スキップ:', authErr); }
+
+                firestoreDb = getFirestore(app);
+                firestoreDocRef = doc(firestoreDb, 'grit_academies', EMBEDDED_DOC_ID);
+
+                const snap = await getDoc(firestoreDocRef);
+                if (!snap.exists()) {
+                    await setDoc(firestoreDocRef, { payload: JSON.stringify(state), updatedAt: new Date().toISOString() });
+                } else {
+                    const data = snap.data();
+                    if (data && data.payload) {
+                        const parsed = JSON.parse(data.payload);
+                        if (!parsed.rolePermissions) parsed.rolePermissions = defaultState.rolePermissions;
+                        if (!parsed.staffUsers) parsed.staffUsers = defaultState.staffUsers;
+                        if (!parsed.pendingAccountApprovals) parsed.pendingAccountApprovals = [];
+                        state = parsed;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    }
+                }
+
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                unsubscribeSnapshot = onSnapshot(firestoreDocRef, (docSnap) => {
+                    if (!currentAuth) return;
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data && data.payload) {
+                            const incomingStr = data.payload;
+                            const currentStr = JSON.stringify(state);
+                            if (incomingStr !== currentStr) {
+                                isApplyingRemoteUpdate = true;
+                                state = JSON.parse(incomingStr);
+                                if (!state.pendingAccountApprovals) state.pendingAccountApprovals = [];
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                                updateHeaderBranchCounts();
+                                renderView();
+                                isApplyingRemoteUpdate = false;
+                            }
+                        }
+                    }
+                });
+
+                isCloudConnected = true;
+                updateSyncBadge('connected');
+                renderView();
+                return true;
+            } catch (err) {
+                console.error('Firebase接続失敗:', err);
+                isCloudConnected = false;
+                updateSyncBadge('error');
+                return false;
+            }
+        }
+
+        async function sendSecureLineNotification(requestData, applicantRole) {
+            const endpoint = (state.settings && state.settings.webhookUrl) || '/api/line-push';
+            if (!endpoint || !currentAuth || !currentAuth.token) return;
+
+            const studentRecord = state.students.find(s => s.id === requestData.studentId);
+            const targetUserId = applicantRole === 'student'
+                ? (studentRecord?.guardianLineUserId || studentRecord?.studentLineUserId || '')
+                : (studentRecord?.studentLineUserId || studentRecord?.guardianLineUserId || '');
+
+            const messageText = `【GRIT指導学院】欠席・振替申請のお知らせ\n生徒: ${requestData.studentName}\n元日時: ${requestData.originalDate}\n科目: ${requestData.subject || '-'}\n理由: ${requestData.reason}`;
+
+            try {
+                await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentAuth.token}`
+                    },
+                    body: JSON.stringify({
+                        to: targetUserId || undefined,
+                        message: messageText,
+                        requestData,
+                        applicantRole
+                    })
+                });
+            } catch (err) {
+                console.warn('LINE通知リクエストエラー:', err);
+            }
+        }
+
+        function openFirebaseModal() {
+            document.getElementById('firebase-config-input').value = JSON.stringify(EMBEDDED_FIREBASE_CONFIG, null, 2);
+            document.getElementById('firebase-doc-id').value = EMBEDDED_DOC_ID;
+            document.getElementById('firebase-modal').classList.remove('hidden');
+        }
+        function closeFirebaseModal() { document.getElementById('firebase-modal').classList.add('hidden'); }
+
+        async function bootstrapApp() {
+            const savedSession = sessionStorage.getItem(AUTH_STORAGE_KEY);
+            if (savedSession) {
+                try { currentAuth = JSON.parse(savedSession); } catch (e) { currentAuth = null; }
+            }
+
+            if (currentAuth && currentAuth.token) {
+                await initFirebaseConnection();
+                if (state.settings && state.settings.liffId && typeof liff !== 'undefined') {
+                    try {
+                        await liff.init({ liffId: state.settings.liffId });
+                        if (liff.isLoggedIn()) {
+                            const profile = await liff.getProfile();
+                            liffLineUserId = profile.userId;
+                        }
+                    } catch (err) { console.warn('LIFF初期化スキップ:', err); }
+                }
+            }
+            checkSession();
+        }
+
+        if (window.FirebaseModules) {
+            window.addEventListener('DOMContentLoaded', bootstrapApp);
+        } else {
+            window.addEventListener('firebase-sdk-ready', bootstrapApp);
+        }
+
+        async function attemptLogin() {
+            const errEl = document.getElementById('login-error');
+            if (Date.now() < lockoutUntil) {
+                const remainSec = Math.ceil((lockoutUntil - Date.now()) / 1000);
+                errEl.innerText = `ログイン試行回数が上限を超えました。${remainSec}秒後に再試行してください。`;
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            const role = document.getElementById('login-role-select').value;
+            const inputId = document.getElementById('login-id').value.trim();
+            const inputPass = document.getElementById('login-pass').value.trim();
+
+            if (!inputPass) {
+                errEl.innerText = 'パスワードを入力してください。';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role, loginId: inputId, password: inputPass })
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || !data.token) {
+                    throw new Error(data.error || 'IDまたはパスワードが正しくありません。');
+                }
+
+                loginAttempts = 0;
+                lastActivityTimestamp = Date.now();
+                const roleLabelMap = {
+                    hq: '本部管理者',
+                    staff: '受付スタッフ',
+                    teacher: '講師',
+                    guardian: '保護者',
+                    student: '生徒'
+                };
+                const displayName = inputId ? `${roleLabelMap[role] || role} (${inputId})` : (roleLabelMap[role] || role);
+
+                currentAuth = {
+                    role,
+                    roleName: displayName,
+                    token: data.token,
+                    staffId: inputId || `${role}_user`,
+                    userName: inputId || roleLabelMap[role],
+                    guardianLoginId: role === 'guardian' ? inputId : undefined,
+                    studentId: role === 'student' ? inputId : undefined
+                };
+
+                document.getElementById('login-pass').value = '';
+                sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentAuth));
+                errEl.classList.add('hidden');
+
+                await initFirebaseConnection();
+
+                if (role === 'guardian' && liffLineUserId && inputId) {
+                    state.students.forEach(s => { if (s.guardianLoginId === inputId) s.guardianLineUserId = liffLineUserId; });
+                    await saveState();
+                } else if (role === 'student' && liffLineUserId && inputId) {
+                    const candidate = state.students.find(s => s.id.toUpperCase() === inputId.toUpperCase());
+                    if (candidate) {
+                        candidate.studentLineUserId = liffLineUserId;
+                        await saveState();
+                    }
+                }
+
+                checkSession();
+            } catch (err) {
+                loginAttempts += 1;
+                if (loginAttempts >= 5) {
+                    lockoutUntil = Date.now() + 60 * 1000;
+                    loginAttempts = 0;
+                    errEl.innerText = '認証に5回連続で失敗したため、60秒間ロックしました。';
+                } else {
+                    errEl.innerText = `${err.message || 'IDまたはパスワードが正しくありません。'}（残り試行回数: ${5 - loginAttempts}回）`;
+                }
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function checkSession() {
+            if (!currentAuth) {
+                const savedSession = sessionStorage.getItem(AUTH_STORAGE_KEY);
+                if (savedSession) {
+                    try { currentAuth = JSON.parse(savedSession); } catch (e) { currentAuth = null; }
+                }
+            }
+
+            if (currentAuth && currentAuth.token) {
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('app-header').classList.remove('hidden');
+                document.getElementById('app-view-container').classList.remove('hidden');
+                document.getElementById('header-user-role-label').innerText = currentAuth.roleName;
+
+                const isHq = currentAuth.role === 'hq';
+                const isPortalUser = currentAuth.role === 'guardian' || currentAuth.role === 'student';
+
+                document.getElementById('staff-status-bar').classList.toggle('hidden', isPortalUser);
+                document.getElementById('header-line-btn').classList.toggle('hidden', !isHq);
+                document.getElementById('header-firebase-btn').classList.toggle('hidden', !isHq);
+
+                if (!isPortalUser) updateHeaderBranchCounts();
+                renderView();
+            } else {
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('app-header').classList.add('hidden');
+                document.getElementById('app-view-container').classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            if (unsubscribeSnapshot) {
+                try { unsubscribeSnapshot(); } catch (e) {}
+                unsubscribeSnapshot = null;
+            }
+            isCloudConnected = false;
+            sessionStorage.removeItem(AUTH_STORAGE_KEY);
+            currentAuth = null;
+            const passEl = document.getElementById('login-pass');
+            if (passEl) passEl.value = '';
+            checkSession();
+        }
+
+        function requireRole(allowedRoles) {
+            if (!currentAuth || !allowedRoles.includes(currentAuth.role)) {
+                alert('この操作を実行する権限がありません。');
+                return false;
+            }
+            return true;
+        }
+
+        function getLinkedStudentsForGuardian() {
+            if (!currentAuth || currentAuth.role !== 'guardian') return [];
+            const matched = state.students.filter(s => s.guardianLoginId === currentAuth.guardianLoginId);
+            return matched.length ? matched : state.students.slice(0, 1);
+        }
+
+        function getLinkedStudentForStudent() {
+            if (!currentAuth || currentAuth.role !== 'student') return null;
+            const matched = state.students.find(s => s.id.toUpperCase() === String(currentAuth.studentId || '').toUpperCase());
+            return matched || state.students[0] || null;
+        }
+
+        function getBranchStudentCount(branchName) {
+            return state.students.filter(s => s.branch === branchName).length;
+        }
+
+        function updateHeaderBranchCounts() {
+            const container = document.getElementById('header-branch-counts');
+            if (!container) return;
+            container.innerHTML = state.branches.map(b => `
+                <span class="bg-white border border-slate-200 px-2 py-0.5 rounded-md text-[11px] font-semibold text-slate-700">
+                    ${escapeHtml(b.name)}: <strong class="text-orange-600">${getBranchStudentCount(b.name)}</strong>名
+                </span>
+            `).join('');
+        }
+
+        function renderView() {
+            const container = document.getElementById('app-view');
+            if (!currentAuth) return;
+            switch (currentAuth.role) {
+                case 'hq': container.innerHTML = renderHQView(); break;
+                case 'staff': container.innerHTML = renderStaffView(); break;
+                case 'teacher': container.innerHTML = renderTeacherView(); break;
+                case 'guardian': container.innerHTML = renderGuardianView(); break;
+                case 'student': container.innerHTML = renderStudentView(); break;
+            }
+        }
+
+        // =========================================================================
+        // 共通コンポーネント：新規生徒・保護者アカウント登録フォーム（HQ / Staff共通）
+        // =========================================================================
+        function renderStudentRegistrationCard(prefix) {
+            const nextId = generateNextStudentId();
+
+            return `
+                <div class="bg-white p-5 rounded-2xl border-2 border-orange-200 shadow-sm space-y-4 text-xs">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg grit-gradient text-white flex items-center justify-center"><i class="fa-solid fa-user-plus"></i></span>
+                            新規生徒・保護者アカウント登録
+                        </h4>
+                        <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-full font-mono font-bold">自動採番ID: ${escapeHtml(nextId)}</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">生徒氏名 <span class="text-red-500">*</span></label>
+                            <input type="text" id="${prefix}-student-name" placeholder="例: 高橋 翔太" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">生徒フリガナ（通帳照合用）</label>
+                            <input type="text" id="${prefix}-student-kana" placeholder="例: タカハシ ショウタ" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">学年</label>
+                            <select id="${prefix}-student-grade" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                                <option>小学生</option><option>中学1年</option><option>中学2年</option><option>中学3年</option>
+                                <option>高校1年</option><option>高校2年</option><option>高校3年</option><option>既卒</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">所属校舎</label>
+                            <select id="${prefix}-student-branch" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                                ${state.branches.map(b => `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">保護者氏名 <span class="text-red-500">*</span></label>
+                            <input type="text" id="${prefix}-guardian-name" placeholder="例: 高橋 美穂" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">保護者フリガナ（振込名義照合用）</label>
+                            <input type="text" id="${prefix}-guardian-kana" placeholder="例: タカハシ ミホ" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 space-y-2.5">
+                        <span class="font-bold text-amber-900 block"><i class="fa-solid fa-key mr-1 text-amber-600"></i>マイページログインID設定</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold mb-1 text-[11px]">保護者ログインID <span class="text-red-500">*</span></label>
+                                <input type="text" id="${prefix}-guardian-id" value="parent_${escapeHtml(nextId.toLowerCase())}" class="w-full border border-slate-300 rounded-lg p-2 bg-white font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-[11px]">生徒ログインID（自動採番）</label>
+                                <input type="text" value="${escapeHtml(nextId)}" class="w-full border border-slate-200 rounded-lg p-2 bg-slate-100 font-mono" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="registerNewStudent('${prefix}')" class="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold shadow-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> 生徒・保護者アカウントを新規登録する
+                    </button>
+                </div>
+            `;
+        }
+
+        function generateNextStudentId() {
+            if (!state.students.length) return 'ST001';
+            let maxNum = 0;
+            state.students.forEach(s => {
+                const m = String(s.id).match(/^ST(\d+)$/i);
+                if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+            });
+            return 'ST' + String(maxNum + 1).padStart(3, '0');
+        }
+
+        async function registerNewStudent(prefix) {
+            if (!requireRole(['hq', 'staff'])) return;
+            if (currentAuth.role === 'staff' && !state.rolePermissions.staffCanRegisterStudent) {
+                return alert('生徒登録権限がありません。');
+            }
+
+            const name = document.getElementById(`${prefix}-student-name`).value.trim();
+            const kana = document.getElementById(`${prefix}-student-kana`).value.trim();
+            const grade = document.getElementById(`${prefix}-student-grade`).value;
+            const branch = document.getElementById(`${prefix}-student-branch`).value;
+            const guardian = document.getElementById(`${prefix}-guardian-name`).value.trim();
+            const guardianKana = document.getElementById(`${prefix}-guardian-kana`).value.trim();
+            const guardianLoginId = document.getElementById(`${prefix}-guardian-id`).value.trim();
+
+            if (!name || !guardian || !guardianLoginId) {
+                return alert('必須項目（生徒氏名・保護者氏名・保護者ログインID）を入力してください。');
+            }
+
+            const newId = generateNextStudentId();
+            state.students.push({
+                id: newId, name, kana, branch, grade, guardian, guardianKana,
+                guardianLoginId,
+                guardianLineUserId: '', studentLineUserId: '',
+                status: '正常', registeredAt: new Date().toISOString().split('T')[0]
+            });
+            await saveState();
+            renderView();
+            alert(`${name}様 (${newId}) を登録しました。\n保護者ログインID: ${guardianLoginId}\n生徒ログインID: ${newId}`);
+        }
+
+        // =========================================================================
+        // 共通コンポーネント：通帳画像OCR読み込み＆未入金自動リスト作成
+        // =========================================================================
+        function renderBankbookOcrSection() {
+            return `
+                <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-5 space-y-4 text-xs">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div>
+                            <h4 class="font-bold text-indigo-950 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-camera-retro text-indigo-600"></i> 通帳画像スキャン・入金照合（OCR未入金自動抽出）
+                            </h4>
+                            <p class="text-[11px] text-indigo-800 mt-0.5">通帳画像はブラウザ内のメモリ上のみでOCR解析され、外部サーバーには送信されません。</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] font-bold text-indigo-900">対象月:</label>
+                            <input type="text" id="ocr-target-month" value="2026年11月分" class="border border-indigo-300 rounded-lg px-2.5 py-1.5 bg-white font-bold w-32">
+                            <label class="text-[11px] font-bold text-indigo-900">標準月謝:</label>
+                            <input type="text" id="ocr-default-amount" value="35,000円" class="border border-indigo-300 rounded-lg px-2.5 py-1.5 bg-white font-bold w-28">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input type="file" id="bankbook-image-input" accept="image/*" onchange="handleBankbookImageSelect(event)" class="text-xs bg-white border border-indigo-200 rounded-xl p-2 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white file:font-bold">
+                        <button onclick="runBankbookOcr()" ${isOcrRunning ? 'disabled' : ''} class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition flex items-center gap-2">
+                            ${isOcrRunning ? '<i class="fa-solid fa-spinner fa-spin"></i> OCR文字解析中...' : '<i class="fa-solid fa-wand-magic-sparkles"></i> 通帳画像を読み込んで照合する'}
+                        </button>
+                    </div>
+
+                    ${ocrPreviewUrl ? `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-indigo-100">
+                            <div>
+                                <span class="font-bold text-slate-600 block mb-1.5">アップロード画像プレビュー（ローカル処理）</span>
+                                <img src="${ocrPreviewUrl}" alt="通帳プレビュー" class="max-h-48 rounded-lg border border-slate-200 object-contain">
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-600 block mb-1.5">抽出テキスト（手動追記・補正も可能）</span>
+                                <textarea id="ocr-extracted-text" rows="6" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-[11px] bg-slate-50" placeholder="ここに通帳から読み取った文字列が表示されます">${escapeHtml(ocrRawText)}</textarea>
+                                <button onclick="reEvaluateOcrText()" class="mt-2 bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                                    テキスト内容で再照合する
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${ocrUnpaidCandidates.length > 0 ? `
+                        <div class="bg-white p-4 rounded-xl border-2 border-red-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-red-700 text-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> 入金が確認できなかった生徒（未入金リスト候補: ${ocrUnpaidCandidates.length}名）
+                                </span>
+                                <button onclick="bulkAddOcrUnpaidList()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm">
+                                    全員を未入金リストへ一括登録する
+                                </button>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                ${ocrUnpaidCandidates.map((cand, idx) => `
+                                    <div class="py-2 flex items-center justify-between">
+                                        <div>
+                                            <span class="font-bold text-slate-800">${escapeHtml(cand.studentName)}</span>
+                                            <span class="text-slate-500 ml-2">(${escapeHtml(cand.branch)} / 保護者: ${escapeHtml(cand.guardian)})</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-red-600">${escapeHtml(cand.month)} / ${escapeHtml(cand.amount)}</span>
+                                            <button onclick="addSingleOcrUnpaid(${idx})" class="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">個別登録</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function handleBankbookImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                ocrPreviewUrl = e.target.result;
+                ocrRawText = '';
+                ocrUnpaidCandidates = [];
+                renderView();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function runBankbookOcr() {
+            if (!ocrPreviewUrl) return alert('先に通帳画像を選択してください。');
+            isOcrRunning = true;
+            renderView();
+
+            try {
+                if (typeof Tesseract !== 'undefined') {
+                    const result = await Tesseract.recognize(ocrPreviewUrl, 'jpn');
+                    ocrRawText = result.data.text || '';
+                } else {
+                    ocrRawText = 'OCRライブラリの読み込み待機中です。下の欄に明細テキストを貼り付けて再照合できます。';
+                }
+            } catch (err) {
+                console.error('OCRエラー:', err);
+                ocrRawText = '画像の自動読取に失敗しました。テキスト欄に直接入力して照合してください。';
+            }
+
+            isOcrRunning = false;
+            evaluateTextAgainstStudents(ocrRawText);
+            renderView();
+        }
+
+        function reEvaluateOcrText() {
+            const textEl = document.getElementById('ocr-extracted-text');
+            if (textEl) {
+                ocrRawText = textEl.value;
+                evaluateTextAgainstStudents(ocrRawText);
+                renderView();
+            }
+        }
+
+        function evaluateTextAgainstStudents(text) {
+            const normalizedText = String(text || '').replace(/\s+/g, '');
+            const month = document.getElementById('ocr-target-month')?.value || '2026年11月分';
+            const amount = document.getElementById('ocr-default-amount')?.value || '35,000円';
+
+            ocrUnpaidCandidates = state.students.filter(st => {
+                const keys = [st.name, st.kana, st.guardian, st.guardianKana]
+                    .filter(Boolean)
+                    .map(k => k.replace(/\s+/g, ''));
+                const isPaidInText = keys.some(k => k.length >= 2 && normalizedText.includes(k));
+                return !isPaidInText;
+            }).map(st => ({
+                studentId: st.id,
+                studentName: st.name,
+                branch: st.branch,
+                guardian: st.guardian,
+                month,
+                amount
+            }));
+        }
+
+        async function addSingleOcrUnpaid(idx) {
+            const cand = ocrUnpaidCandidates[idx];
+            if (!cand) return;
+            const nextId = state.unpaidList.reduce((max, u) => Math.max(max, Number(u.id) || 0), 0) + 1;
+            state.unpaidList.unshift({
+                id: nextId,
+                studentId: cand.studentId,
+                studentName: cand.studentName,
+                branch: cand.branch,
+                month: cand.month,
+                amount: cand.amount,
+                status: '未入金',
+                date: new Date().toISOString().split('T')[0]
+            });
+            ocrUnpaidCandidates.splice(idx, 1);
+            await saveState();
+            renderView();
+        }
+
+        async function bulkAddOcrUnpaidList() {
+            if (!ocrUnpaidCandidates.length) return;
+            let nextId = state.unpaidList.reduce((max, u) => Math.max(max, Number(u.id) || 0), 0) + 1;
+            ocrUnpaidCandidates.forEach(cand => {
+                state.unpaidList.unshift({
+                    id: nextId++,
+                    studentId: cand.studentId,
+                    studentName: cand.studentName,
+                    branch: cand.branch,
+                    month: cand.month,
+                    amount: cand.amount,
+                    status: '未入金',
+                    date: new Date().toISOString().split('T')[0]
+                });
+            });
+            const count = ocrUnpaidCandidates.length;
+            ocrUnpaidCandidates = [];
+            await saveState();
+            renderView();
+            alert(`${count}件の未入金データをリストに一括登録しました。`);
+        }
+
+        // =========================================================================
+        // 出席リスケ：日付入力＆確定モーダル制御
+        // =========================================================================
+        function openRescheduleModal(id) {
+            if (!requireRole(['hq', 'staff'])) return;
+            if (currentAuth.role === 'staff' && !state.rolePermissions.staffCanProcessReschedule) {
+                return alert('振替確定処理の権限がありません。');
+            }
+            const target = state.rescheduleList.find(r => String(r.id) === String(id));
+            if (!target) return;
+
+            document.getElementById('reschedule-target-id').value = target.id;
+            document.getElementById('reschedule-modal-subtitle').innerText = `${target.studentName}（${target.subject || '科目未指定'}）`;
+            document.getElementById('reschedule-modal-orig').innerText = target.originalDate;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('reschedule-new-date').value = todayStr;
+
+            const linkedSched = state.schedules.find(sc => String(sc.id) === String(target.scheduleId));
+            document.getElementById('reschedule-new-start').value = linkedSched ? linkedSched.startTime : '17:00';
+            document.getElementById('reschedule-new-end').value = linkedSched ? linkedSched.endTime : '18:00';
+            document.getElementById('reschedule-new-teacher').value = linkedSched ? (linkedSched.teacher || '') : '';
+
+            document.getElementById('reschedule-modal').classList.remove('hidden');
+        }
+
+        function closeRescheduleModal() {
+            document.getElementById('reschedule-modal').classList.add('hidden');
+        }
+
+        async function confirmRescheduleWithDate() {
+            if (!requireRole(['hq', 'staff'])) return;
+            const id = document.getElementById('reschedule-target-id').value;
+            const newDate = document.getElementById('reschedule-new-date').value;
+            const newStart = document.getElementById('reschedule-new-start').value;
+            const newEnd = document.getElementById('reschedule-new-end').value;
+            const newTeacher = document.getElementById('reschedule-new-teacher').value.trim();
+            const updateSchedule = document.getElementById('reschedule-update-schedule').checked;
+
+            if (!newDate || !newStart || !newEnd) {
+                return alert('振替日・開始時刻・終了時刻をすべて入力してください。');
+            }
+            if (newEnd <= newStart) {
+                return alert('終了時刻は開始時刻より後に設定してください。');
+            }
+
+            const target = state.rescheduleList.find(r => String(r.id) === String(id));
+            if (!target) return;
+
+            const confirmedDateLabel = `${newDate} ${newStart}〜${newEnd}`;
+            target.status = '振替確定';
+            target.confirmedDate = confirmedDateLabel;
+            if (newTeacher) target.confirmedTeacher = newTeacher;
+
+            if (updateSchedule) {
+                let linkedSched = target.scheduleId
+                    ? state.schedules.find(sc => String(sc.id) === String(target.scheduleId))
+                    : null;
+
+                if (linkedSched) {
+                    linkedSched.date = newDate;
+                    linkedSched.startTime = newStart;
+                    linkedSched.endTime = newEnd;
+                    if (newTeacher) linkedSched.teacher = newTeacher;
+                } else {
+                    const nextSchedId = state.schedules.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0) + 1;
+                    state.schedules.push({
+                        id: nextSchedId,
+                        studentId: target.studentId,
+                        date: newDate,
+                        startTime: newStart,
+                        endTime: newEnd,
+                        subject: target.subject || '振替授業',
+                        teacher: newTeacher || '担当講師'
+                    });
+                }
+            }
+
+            await saveState();
+            closeRescheduleModal();
+            renderView();
+            alert(`${target.studentName}様の振替日時を「${confirmedDateLabel}」で確定しました。`);
+        }
+
+        // =========================================================================
+        // HQ（本部管理者画面）
+        // =========================================================================
+        let hqActiveTab = 'branches';
+        function renderHQView() {
+            const pendingCount = (state.pendingAccountApprovals || []).length;
+            const tabs = [
+                { id: 'branches', label: '校舎・生徒・保護者アカウント' },
+                { id: 'staffAccounts', label: `受付・本部アカウント新規登録・承認${pendingCount ? ` (${pendingCount})` : ''}` },
+                { id: 'roles', label: '役職・権限設定' },
+                { id: 'schedules', label: '授業コマ管理' },
+                { id: 'reports', label: '指導報告書' },
+                { id: 'reschedule', label: '欠席リスケ' },
+                { id: 'finance', label: '未入金管理・通帳OCR' },
+                { id: 'lineTemplates', label: 'LINE通知文' },
+                { id: 'backup', label: '本番初期化・バックアップ' }
+            ];
+
+            let tabHtml = '';
+            if (hqActiveTab === 'branches') tabHtml = renderHqBranchesContent();
+            if (hqActiveTab === 'staffAccounts') tabHtml = renderHqStaffAccountsContent();
+            if (hqActiveTab === 'roles') tabHtml = renderHqRolesContent();
+            if (hqActiveTab === 'schedules') tabHtml = renderHqScheduleContent();
+            if (hqActiveTab === 'reports') tabHtml = renderHqReportsContent();
+            if (hqActiveTab === 'reschedule') tabHtml = renderHqRescheduleContent();
+            if (hqActiveTab === 'finance') tabHtml = renderHqFinanceContent();
+            if (hqActiveTab === 'lineTemplates') tabHtml = renderHqLineTemplatesContent();
+            if (hqActiveTab === 'backup') tabHtml = renderHqBackupContent();
+
+            return `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-400">登録生徒数</span>
+                            <div class="text-2xl font-black text-slate-900 mt-1">${state.students.length} <span class="text-xs font-normal text-slate-500">名</span></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-400">登録授業コマ</span>
+                            <div class="text-2xl font-black text-slate-900 mt-1">${state.schedules.length} <span class="text-xs font-normal text-slate-500">コマ</span></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-400">未入金件数</span>
+                            <div class="text-2xl font-black text-red-600 mt-1">${state.unpaidList.filter(u => u.status !== '入金済').length} <span class="text-xs font-normal text-slate-500">件</span></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-bold text-slate-400">未対応リスケ / 承認待ち</span>
+                            <div class="text-2xl font-black text-amber-600 mt-1">${state.rescheduleList.filter(r => r.status !== '振替確定').length} <span class="text-xs font-normal text-slate-500">件</span> / <span class="text-indigo-600">${pendingCount}</span> <span class="text-xs font-normal text-slate-500">件</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="flex border-b border-slate-200 bg-slate-50/50 px-4 pt-3 gap-2 overflow-x-auto">
+                            ${tabs.map(t => `
+                                <button onclick="setHqTab('${t.id}')" class="px-4 py-2 text-xs md:text-sm font-bold whitespace-nowrap ${hqActiveTab === t.id ? 'border-b-2 border-orange-500 text-orange-600' : 'text-slate-500 hover:text-slate-800'}">${t.label}</button>
+                            `).join('')}
+                        </div>
+                        <div class="p-6">${tabHtml}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setHqTab(tab) { hqActiveTab = tab; renderView(); }
+
+        function renderHqStaffAccountsContent() {
+            const allHqUsers = (state.staffUsers || []).filter(u => u.role === 'hq');
+            const otherHqUsers = allHqUsers.filter(u => u.id !== currentAuth.staffId);
+            const pendingList = state.pendingAccountApprovals || [];
+
+            return `
+                <div class="space-y-6 text-xs">
+                    <div class="bg-white p-5 rounded-2xl border-2 border-indigo-200 shadow-sm space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center"><i class="fa-solid fa-user-shield"></i></span>
+                                    受付者・本部アカウント 新規登録申請（別枠管理）
+                                </h3>
+                                <p class="text-[11px] text-slate-600 mt-1">
+                                    ※受付スタッフ（Staff）および本部管理者（HQ）を増やす場合は、申請者以外の<strong>他の本部アカウント全員（現在: ${otherHqUsers.length}名）の許可</strong>が完了した時点で正式に有効化されます。
+                                </p>
+                            </div>
+                            <span class="bg-indigo-50 text-indigo-800 border border-indigo-200 px-3 py-1 rounded-full font-bold whitespace-nowrap">
+                                本部管理者総数: ${allHqUsers.length}名
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">アカウント種別 <span class="text-red-500">*</span></label>
+                                <select id="new-staff-role" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-bold">
+                                    <option value="staff">受付スタッフ (要・全本部許可)</option>
+                                    <option value="hq">本部管理者 (要・全本部許可)</option>
+                                    <option value="teacher">講師 (即時発行)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">氏名 <span class="text-red-500">*</span></label>
+                                <input type="text" id="new-staff-name" placeholder="例: 鈴木 受付" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">担当校舎</label>
+                                <select id="new-staff-branch" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                                    <option value="全校舎">全校舎</option>
+                                    ${state.branches.map(b => `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">ログインID <span class="text-red-500">*</span></label>
+                                <input type="text" id="new-staff-id" placeholder="例: staff_02" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-mono">
+                            </div>
+                        </div>
+
+                        <button onclick="requestAddStaffOrHqAccount()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> アカウント新規登録を申請する
+                        </button>
+                    </div>
+
+                    <div class="bg-amber-50/70 p-5 rounded-2xl border border-amber-200 space-y-3">
+                        <h4 class="font-bold text-amber-950 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-stamp text-amber-600"></i> 他の本部アカウント全員の許可待ち一覧 (${pendingList.length}件)
+                        </h4>
+                        ${pendingList.length ? `
+                            <div class="space-y-3">
+                                ${pendingList.map(req => {
+                                    const requiredIds = req.requiredApproverIds || [];
+                                    const approvedIds = req.approvedByIds || [];
+                                    const remainingIds = requiredIds.filter(id => !approvedIds.includes(id));
+                                    const canIApprove = remainingIds.includes(currentAuth.staffId);
+                                    const isApplicant = req.requestedBy === currentAuth.staffId;
+
+                                    return `
+                                        <div class="bg-white p-4 rounded-xl border border-amber-300 shadow-sm space-y-2.5">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2.5 py-0.5 rounded font-bold ${req.role === 'hq' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}">
+                                                        ${req.role === 'hq' ? '本部管理者 (HQ)' : '受付スタッフ (Staff)'}
+                                                    </span>
+                                                    <span class="font-bold text-slate-900 text-sm">${escapeHtml(req.name)}</span>
+                                                    <span class="font-mono text-slate-500">(ID: ${escapeHtml(req.id)} / 校舎: ${escapeHtml(req.branch)})</span>
+                                                </div>
+                                                <span class="text-[11px] text-slate-500">申請者: <strong>${escapeHtml(req.requestedByName)}</strong> (${escapeHtml(req.createdAt)})</span>
+                                            </div>
+
+                                            <div class="flex flex-wrap items-center gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                                <span class="font-bold text-slate-700">許可状況 (${approvedIds.length} / ${requiredIds.length}名完了):</span>
+                                                ${requiredIds.map(hqId => {
+                                                    const hqUser = allHqUsers.find(u => u.id === hqId);
+                                                    const label = hqUser ? hqUser.name : hqId;
+                                                    const done = approvedIds.includes(hqId);
+                                                    return `<span class="px-2 py-0.5 rounded-full font-bold ${done ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(label)}: ${done ? '許可済 ✓' : '未許可'}</span>`;
+                                                }).join('')}
+                                            </div>
+
+                                            <div class="flex justify-end gap-2">
+                                                ${canIApprove ? `
+                                                    <button onclick="approvePendingAccount('${escapeHtml(req.requestId)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm">
+                                                        <i class="fa-solid fa-check mr-1"></i> このアカウント追加を許可する
+                                                    </button>
+                                                ` : isApplicant ? `
+                                                    <span class="text-[11px] text-amber-800 font-bold py-1.5 px-3 bg-amber-100 rounded-lg">他の本部管理者全員の許可待ちです</span>
+                                                ` : `
+                                                    <span class="text-[11px] text-emerald-700 font-bold py-1.5 px-3 bg-emerald-50 rounded-lg">あなたは許可済みです</span>
+                                                `}
+                                                <button onclick="rejectPendingAccount('${escapeHtml(req.requestId)}')" class="bg-slate-200 hover:bg-red-100 text-slate-700 hover:text-red-600 px-3 py-2 rounded-lg font-bold">
+                                                    却下・取り消し
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : '<p class="text-slate-500 bg-white p-4 rounded-xl border border-amber-100 text-center">現在、他の本部アカウントの許可待ち申請はありません。</p>'}
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-slate-900 text-sm">現在有効な本部管理者・受付スタッフ・講師アカウント一覧</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border border-slate-200 rounded-xl">
+                                <thead class="bg-slate-100 text-slate-600">
+                                    <tr>
+                                        <th class="p-3">役職</th>
+                                        <th class="p-3">氏名</th>
+                                        <th class="p-3">担当校舎</th>
+                                        <th class="p-3">ログインID</th>
+                                        <th class="p-3">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    ${(state.staffUsers || []).map((u, idx) => `
+                                        <tr>
+                                            <td class="p-3 font-bold">
+                                                <span class="px-2 py-0.5 rounded ${u.role === 'hq' ? 'bg-orange-100 text-orange-800' : u.role === 'staff' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}">
+                                                    ${u.role === 'hq' ? '本部管理者' : u.role === 'staff' ? '受付スタッフ' : '講師'}
+                                                </span>
+                                            </td>
+                                            <td class="p-3 font-bold">${escapeHtml(u.name)}</td>
+                                            <td class="p-3">${escapeHtml(u.branch || '全校舎')}</td>
+                                            <td class="p-3 font-mono">${escapeHtml(u.id)}</td>
+                                            <td class="p-3">
+                                                ${u.id === 'hq_admin' ? '<span class="text-slate-400">主管理者</span>' : `<button onclick="deleteStaffUser(${idx})" class="text-red-600 font-bold hover:underline">削除</button>`}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function requestAddStaffOrHqAccount() {
+            if (!requireRole(['hq'])) return;
+            const role = document.getElementById('new-staff-role').value;
+            const name = document.getElementById('new-staff-name').value.trim();
+            const branch = document.getElementById('new-staff-branch').value;
+            const id = document.getElementById('new-staff-id').value.trim();
+
+            if (!name || !id) return alert('氏名・ログインIDをすべて入力してください。');
+            if (state.staffUsers.some(u => u.id === id) || (state.pendingAccountApprovals || []).some(p => p.id === id)) {
+                return alert('すでに同じログインIDが存在するか、承認申請中です。');
+            }
+
+            if (role === 'teacher') {
+                state.staffUsers.push({ id, role, name, branch });
+                await saveState();
+                renderView();
+                alert(`講師アカウント「${name} (${id})」を即時発行しました。`);
+                return;
+            }
+
+            const allHqUsers = (state.staffUsers || []).filter(u => u.role === 'hq');
+            const otherHqIds = allHqUsers.filter(u => u.id !== currentAuth.staffId).map(u => u.id);
+
+            if (otherHqIds.length === 0) {
+                state.staffUsers.push({ id, role, name, branch });
+                await saveState();
+                renderView();
+                alert(`他に本部アカウントが存在しないため、${role === 'hq' ? '本部管理者' : '受付スタッフ'}アカウント「${name} (${id})」を即時発行しました。`);
+                return;
+            }
+
+            state.pendingAccountApprovals.push({
+                requestId: 'REQ_' + Date.now(),
+                role,
+                name,
+                branch,
+                id,
+                requestedBy: currentAuth.staffId,
+                requestedByName: currentAuth.userName || currentAuth.staffId,
+                requiredApproverIds: otherHqIds,
+                approvedByIds: [],
+                createdAt: new Date().toISOString().split('T')[0]
+            });
+
+            await saveState();
+            renderView();
+            alert(`${role === 'hq' ? '本部管理者' : '受付スタッフ'}アカウント「${name} (${id})」の新規登録を申請しました。\n他の本部アカウント全員（${otherHqIds.length}名）が許可するとアカウントが有効化されます。`);
+        }
+
+        async function approvePendingAccount(requestId) {
+            if (!requireRole(['hq'])) return;
+            const idx = (state.pendingAccountApprovals || []).findIndex(r => r.requestId === requestId);
+            if (idx === -1) return;
+
+            const req = state.pendingAccountApprovals[idx];
+            if (!req.requiredApproverIds.includes(currentAuth.staffId)) {
+                return alert('あなたはこの申請の承認対象者ではありません。');
+            }
+            if (!req.approvedByIds.includes(currentAuth.staffId)) {
+                req.approvedByIds.push(currentAuth.staffId);
+            }
+
+            const allApproved = req.requiredApproverIds.every(hqId => req.approvedByIds.includes(hqId));
+            if (allApproved) {
+                state.staffUsers.push({
+                    id: req.id,
+                    role: req.role,
+                    name: req.name,
+                    branch: req.branch
+                });
+                state.pendingAccountApprovals.splice(idx, 1);
+                await saveState();
+                renderView();
+                alert(`他の本部アカウント全員の許可が完了したため、${req.role === 'hq' ? '本部管理者' : '受付スタッフ'}アカウント「${req.name} (${req.id})」が正式に有効化されました！`);
+            } else {
+                await saveState();
+                renderView();
+                alert('許可を記録しました。残りの本部アカウントの許可が完了すると有効化されます。');
+            }
+        }
+
+        async function rejectPendingAccount(requestId) {
+            if (!requireRole(['hq'])) return;
+            if (!confirm('この新規アカウント登録申請を却下・取り消ししますか？')) return;
+            state.pendingAccountApprovals = (state.pendingAccountApprovals || []).filter(r => r.requestId !== requestId);
+            await saveState();
+            renderView();
+        }
+
+        function renderHqBranchesContent() {
+            return `
+                <div class="space-y-6">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-xs text-slate-700">校舎の追加・管理</h4>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-branch-name" placeholder="例: 梅田校" class="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white flex-1">
+                            <button onclick="addBranch()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold">校舎追加</button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            ${state.branches.map(b => `
+                                <span class="bg-white border border-slate-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2">
+                                    ${escapeHtml(b.name)} (${getBranchStudentCount(b.name)}名)
+                                    <button onclick="deleteBranch(${b.id})" class="text-red-500 hover:text-red-700">×</button>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${renderStudentRegistrationCard('hq')}
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-base">登録生徒・保護者ログインアカウント一覧 (${state.students.length}名)</h3>
+                            <button onclick="exportStudentsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-file-csv"></i> CSVダウンロード
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100 text-slate-600">
+                                    <tr>
+                                        <th class="p-3">生徒ID (ログインID)</th>
+                                        <th class="p-3">生徒名</th>
+                                        <th class="p-3">学年 / 校舎</th>
+                                        <th class="p-3">保護者名</th>
+                                        <th class="p-3">保護者ログインID</th>
+                                        <th class="p-3">LINE連携</th>
+                                        <th class="p-3">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    ${state.students.length ? state.students.map(s => `
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="p-3 font-mono font-bold text-orange-600">${escapeHtml(s.id)}</td>
+                                            <td class="p-3 font-bold">${escapeHtml(s.name)}</td>
+                                            <td class="p-3">${escapeHtml(s.grade)} / ${escapeHtml(s.branch)}</td>
+                                            <td class="p-3">${escapeHtml(s.guardian)}</td>
+                                            <td class="p-3 font-mono text-slate-700">${escapeHtml(s.guardianLoginId)}</td>
+                                            <td class="p-3 text-[11px]">
+                                                <span class="${s.guardianLineUserId ? 'text-emerald-600 font-bold' : 'text-slate-400'}">保護者:${s.guardianLineUserId ? '済' : '未'}</span> /
+                                                <span class="${s.studentLineUserId ? 'text-emerald-600 font-bold' : 'text-slate-400'}">生徒:${s.studentLineUserId ? '済' : '未'}</span>
+                                            </td>
+                                            <td class="p-3">
+                                                <button onclick="deleteStudent('${escapeHtml(s.id)}')" class="text-red-600 hover:underline font-bold">削除</button>
+                                            </td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">登録生徒がいません</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHqRolesContent() {
+            const perms = state.rolePermissions || defaultState.rolePermissions;
+            return `
+                <div class="space-y-6 text-xs">
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-orange-500"></i> 役職別の機能アクセス権限設定（リアルタイム反映）
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                            <label class="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" ${perms.staffCanRegisterStudent ? 'checked' : ''} onchange="togglePermission('staffCanRegisterStudent', this.checked)">
+                                <span class="font-bold text-slate-700">受付スタッフ：新規生徒・保護者アカウント登録を許可</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" ${perms.staffCanManageSchedule ? 'checked' : ''} onchange="togglePermission('staffCanManageSchedule', this.checked)">
+                                <span class="font-bold text-slate-700">受付スタッフ：授業コマ登録・削除を許可</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" ${perms.staffCanViewUnpaid ? 'checked' : ''} onchange="togglePermission('staffCanViewUnpaid', this.checked)">
+                                <span class="font-bold text-slate-700">受付スタッフ：未入金管理・通帳OCR解析を許可</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" ${perms.staffCanProcessReschedule ? 'checked' : ''} onchange="togglePermission('staffCanProcessReschedule', this.checked)">
+                                <span class="font-bold text-slate-700">受付スタッフ：欠席リスケの「振替確定」処理を許可</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function togglePermission(key, value) {
+            if (!requireRole(['hq'])) return;
+            state.rolePermissions[key] = value;
+            await saveState();
+            renderView();
+        }
+
+        async function deleteStaffUser(idx) {
+            if (!requireRole(['hq'])) return;
+            if (!confirm('このスタッフアカウントを削除しますか？')) return;
+            state.staffUsers.splice(idx, 1);
+            await saveState();
+            renderView();
+        }
+
+        async function addBranch() {
+            if (!requireRole(['hq'])) return;
+            const name = document.getElementById('new-branch-name').value.trim();
+            if (!name) return;
+            if (state.branches.some(b => b.name === name)) return alert('すでに同じ校舎名があります。');
+            const nextId = state.branches.reduce((max, b) => Math.max(max, b.id), 0) + 1;
+            state.branches.push({ id: nextId, name, status: '稼働中' });
+            await saveState();
+            renderView();
+        }
+
+        async function deleteBranch(id) {
+            if (!requireRole(['hq'])) return;
+            const target = state.branches.find(b => b.id === id);
+            if (!target) return;
+            if (getBranchStudentCount(target.name) > 0) return alert('生徒が所属している校舎は削除できません。');
+            state.branches = state.branches.filter(b => b.id !== id);
+            await saveState();
+            renderView();
+        }
+
+        async function deleteStudent(studentId) {
+            if (!requireRole(['hq'])) return;
+            if (!confirm('この生徒データと関連する授業コマを削除しますか？')) return;
+            state.students = state.students.filter(s => s.id !== studentId);
+            state.schedules = state.schedules.filter(sc => sc.studentId !== studentId);
+            await saveState();
+            renderView();
+        }
+
+        function renderHqScheduleContent() {
+            const schedules = (state.schedules || []).slice().sort((a, b) =>
+                `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`)
+            );
+            return `
+                <div class="space-y-5">
+                    <h3 class="font-bold text-slate-800 text-base">生徒ごとの授業コマ登録</h3>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block font-bold mb-1">生徒</label>
+                                <select id="schedule-student" class="w-full border rounded-lg p-2.5 bg-white">
+                                    ${state.students.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.name)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">授業日</label>
+                                <input type="date" id="schedule-date" class="w-full border rounded-lg p-2.5 bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">科目</label>
+                                <input type="text" id="schedule-subject" placeholder="例: 数学" class="w-full border rounded-lg p-2.5 bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">開始時刻</label>
+                                <input type="time" id="schedule-start" value="17:00" class="w-full border rounded-lg p-2.5 bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">終了時刻</label>
+                                <input type="time" id="schedule-end" value="18:00" class="w-full border rounded-lg p-2.5 bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">担当講師</label>
+                                <input type="text" id="schedule-teacher" placeholder="例: 田中 先生" class="w-full border rounded-lg p-2.5 bg-white">
+                            </div>
+                        </div>
+                        <button onclick="addSchedule()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg font-bold">授業コマを登録</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${schedules.length ? schedules.map(slot => {
+                            const student = state.students.find(s => s.id === slot.studentId);
+                            return `
+                                <div class="bg-white border border-slate-200 rounded-xl p-3 flex justify-between items-center text-xs">
+                                    <div>
+                                        <span class="font-bold text-slate-800">${escapeHtml(student ? student.name : '不明')} (${escapeHtml(slot.studentId)})</span>
+                                        <div class="text-slate-600 mt-0.5">${escapeHtml(slot.date)} ${escapeHtml(slot.startTime)}〜${escapeHtml(slot.endTime)} / ${escapeHtml(slot.subject)} (${escapeHtml(slot.teacher || '未定')})</div>
+                                    </div>
+                                    <button onclick="deleteSchedule(${slot.id})" class="text-red-600 border border-red-200 rounded-lg px-3 py-1.5 font-bold">削除</button>
+                                </div>
+                            `;
+                        }).join('') : '<p class="text-xs text-slate-500">授業コマはまだ登録されていません。</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addSchedule() {
+            if (!requireRole(['hq', 'staff'])) return;
+            const studentId = document.getElementById('schedule-student')?.value;
+            const date = document.getElementById('schedule-date').value;
+            const startTime = document.getElementById('schedule-start').value;
+            const endTime = document.getElementById('schedule-end').value;
+            const subject = document.getElementById('schedule-subject').value.trim();
+            const teacher = document.getElementById('schedule-teacher').value.trim();
+
+            if (!studentId || !date || !startTime || !endTime || !subject) return alert('必須項目を入力してください。');
+            if (endTime <= startTime) return alert('終了時刻は開始時刻より後にしてください。');
+
+            const nextId = state.schedules.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0) + 1;
+            state.schedules.push({ id: nextId, studentId, date, startTime, endTime, subject, teacher });
+            await saveState();
+            renderView();
+        }
+
+        async function deleteSchedule(id) {
+            if (!requireRole(['hq', 'staff'])) return;
+            state.schedules = state.schedules.filter(s => s.id !== id);
+            await saveState();
+            renderView();
+        }
+
+        function renderHqReportsContent() {
+            return `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-base">指導報告書一覧</h3>
+                        <button onclick="exportReportsCSV()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">CSVダウンロード</button>
+                    </div>
+                    ${state.reports.map(r => `
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1">
+                            <div class="flex justify-between font-bold">
+                                <span>${escapeHtml(r.studentName)} (${escapeHtml(r.subject)}) - 担当: ${escapeHtml(r.teacherName)}</span>
+                                <span class="text-orange-600">${escapeHtml(r.date)} / 評価: ${escapeHtml(r.evaluation)}</span>
+                            </div>
+                            <p class="text-slate-700">${escapeHtml(r.comment)}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderHqRescheduleContent() {
+            return `
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base">欠席・リスケジュール管理（振替日時指定・確定）</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-600">
+                                <tr>
+                                    <th class="p-3">生徒名</th>
+                                    <th class="p-3">申請者</th>
+                                    <th class="p-3">元の欠席日時</th>
+                                    <th class="p-3">確定した振替日時</th>
+                                    <th class="p-3">科目 / 理由</th>
+                                    <th class="p-3">ステータス</th>
+                                    <th class="p-3">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${state.rescheduleList.map(r => `
+                                    <tr>
+                                        <td class="p-3 font-bold">${escapeHtml(r.studentName)}</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 font-bold text-[10px]">${r.applicantRole === 'student' ? '生徒本人' : '保護者'}</span></td>
+                                        <td class="p-3 font-mono">${escapeHtml(r.originalDate)}</td>
+                                        <td class="p-3 font-mono font-bold text-emerald-700">${r.confirmedDate ? escapeHtml(r.confirmedDate) : '<span class="text-slate-400 font-normal">未指定</span>'}</td>
+                                        <td class="p-3">${escapeHtml(r.subject || '-')} / ${escapeHtml(r.reason)}</td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full font-bold ${r.status === '振替確定' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(r.status)}</span></td>
+                                        <td class="p-3">
+                                            ${r.status !== '振替確定'
+                                                ? `<button onclick="openRescheduleModal(${r.id})" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-bold shadow-sm">振替日入力・確定</button>`
+                                                : `<button onclick="openRescheduleModal(${r.id})" class="text-slate-600 underline text-[11px]">日時変更</button>`}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHqFinanceContent() {
+            return `
+                <div class="space-y-6">
+                    ${renderBankbookOcrSection()}
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-base">未入金管理一覧</h3>
+                            <button onclick="exportUnpaidCSV()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">CSVダウンロード</button>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-wrap gap-2 text-xs">
+                            <select id="unpaid-student" class="border rounded-lg p-2 bg-white">
+                                ${state.students.map(s => `<option value="${escapeHtml(s.id)}|${escapeHtml(s.name)}|${escapeHtml(s.branch)}">${escapeHtml(s.name)}</option>`).join('')}
+                            </select>
+                            <input type="text" id="unpaid-month" placeholder="例: 2026年12月分" class="border rounded-lg p-2 bg-white">
+                            <input type="text" id="unpaid-amount" placeholder="例: 35,000円" class="border rounded-lg p-2 bg-white">
+                            <button onclick="addUnpaidRecord()" class="bg-orange-500 text-white px-3 py-2 rounded-lg font-bold">手動で未入金を追加</button>
+                        </div>
+                        <table class="w-full text-left text-xs border border-slate-200 rounded-xl">
+                            <thead class="bg-slate-100 text-slate-600">
+                                <tr><th class="p-3">生徒名</th><th class="p-3">校舎</th><th class="p-3">対象月</th><th class="p-3">金額</th><th class="p-3">状態</th><th class="p-3">操作</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${state.unpaidList.map(u => `
+                                    <tr>
+                                        <td class="p-3 font-bold">${escapeHtml(u.studentName)}</td>
+                                        <td class="p-3">${escapeHtml(u.branch || '-')}</td>
+                                        <td class="p-3">${escapeHtml(u.month)}</td>
+                                        <td class="p-3 font-bold text-orange-600">${escapeHtml(u.amount)}</td>
+                                        <td class="p-3"><span class="px-2 py-1 rounded-full font-bold ${u.status === '入金済' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${escapeHtml(u.status)}</span></td>
+                                        <td class="p-3">
+                                            ${u.status !== '入金済' ? `<button onclick="markAsPaid(${u.id})" class="bg-emerald-600 text-white px-2.5 py-1 rounded font-bold">入金済にする</button>` : '-'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addUnpaidRecord() {
+            if (!requireRole(['hq', 'staff'])) return;
+            const val = document.getElementById('unpaid-student')?.value;
+            const month = document.getElementById('unpaid-month').value.trim();
+            const amount = document.getElementById('unpaid-amount').value.trim();
+            if (!val || !month || !amount) return alert('すべて入力してください。');
+            const [studentId, studentName, branch] = val.split('|');
+            const nextId = state.unpaidList.reduce((max, u) => Math.max(max, u.id), 0) + 1;
+            state.unpaidList.unshift({ id: nextId, studentId, studentName, branch, month, amount, status: '未入金' });
+            await saveState();
+            renderView();
+        }
+
+        async function markAsPaid(id) {
+            if (!requireRole(['hq', 'staff'])) return;
+            const target = state.unpaidList.find(u => u.id === id);
+            if (target) target.status = '入金済';
+            await saveState();
+            renderView();
+        }
+
+        function renderHqLineTemplatesContent() {
+            return `
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base">LINE通知テンプレート</h3>
+                    <textarea id="tmpl-report" rows="5" class="w-full border border-slate-300 rounded-lg p-3 text-xs font-mono">${escapeHtml(state.lineTemplates.reportNotice)}</textarea>
+                    <button onclick="saveLineTemplates()" class="bg-[#06C755] text-white px-4 py-2 rounded-xl text-xs font-bold">テンプレート保存</button>
+                </div>
+            `;
+        }
+
+        async function saveLineTemplates() {
+            if (!requireRole(['hq'])) return;
+            state.lineTemplates.reportNotice = document.getElementById('tmpl-report').value;
+            await saveState();
+            alert('保存しました。');
+        }
+
+        function renderHqBackupContent() {
+            return `
+                <div class="space-y-6 max-w-2xl">
+                    <div class="bg-red-50 p-6 rounded-2xl border border-red-200 space-y-3">
+                        <h4 class="font-bold text-red-800 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i>本番運用開始用：デモデータの全消去</h4>
+                        <p class="text-xs text-red-700">サンプルの生徒・授業コマ・報告書・未入金・リスケデータをすべて空にし、実際の生徒登録から始められる状態にします。</p>
+                        <button onclick="clearDemoDataForProduction()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold">
+                            デモデータを消去して本番スタートする
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-slate-800 text-sm">バックアップ (.json) の保存と復元</h4>
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <button onclick="exportJsonBackup()" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold">バックアップをダウンロード</button>
+                            <input type="file" accept=".json" onchange="importJsonBackup(event)" class="text-xs">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function clearDemoDataForProduction() {
+            if (!requireRole(['hq'])) return;
+            if (!confirm('現在の生徒・授業コマ・報告書・未入金・リスケデータをすべて削除します。よろしいですか？')) return;
+            state.students = [];
+            state.schedules = [];
+            state.reports = [];
+            state.unpaidList = [];
+            state.rescheduleList = [];
+            await saveState();
+            renderView();
+            alert('データを空にしました。「校舎・生徒・保護者アカウント」または受付画面から実際の生徒を登録してください。');
+        }
+
+        // =========================================================================
+        // Staff（受付スタッフ画面）
+        // =========================================================================
+        let staffActiveTab = 'register';
+        function renderStaffView() {
+            const perms = state.rolePermissions || defaultState.rolePermissions;
+            return `
+                <div class="space-y-4">
+                    <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto text-xs font-bold">
+                        <button onclick="staffActiveTab='register';renderView();" class="px-4 py-2 rounded-xl ${staffActiveTab === 'register' ? 'bg-orange-500 text-white' : 'bg-white text-slate-600 border'}">新規アカウント登録・リスケ対応</button>
+                        ${perms.staffCanManageSchedule ? `<button onclick="staffActiveTab='schedules';renderView();" class="px-4 py-2 rounded-xl ${staffActiveTab === 'schedules' ? 'bg-orange-500 text-white' : 'bg-white text-slate-600 border'}">授業コマ管理</button>` : ''}
+                        ${perms.staffCanViewUnpaid ? `<button onclick="staffActiveTab='unpaid';renderView();" class="px-4 py-2 rounded-xl ${staffActiveTab === 'unpaid' ? 'bg-orange-500 text-white' : 'bg-white text-slate-600 border'}">未入金・通帳OCR解析</button>` : ''}
+                    </div>
+
+                    ${staffActiveTab === 'schedules' && perms.staffCanManageSchedule ? `<div class="bg-white p-6 rounded-2xl border border-slate-200">${renderHqScheduleContent()}</div>`
+                    : staffActiveTab === 'unpaid' && perms.staffCanViewUnpaid ? `<div class="bg-white p-6 rounded-2xl border border-slate-200">${renderHqFinanceContent()}</div>`
+                    : `
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2">
+                                ${perms.staffCanRegisterStudent
+                                    ? renderStudentRegistrationCard('staff')
+                                    : '<div class="bg-white p-6 rounded-2xl border text-xs text-slate-500">本部管理者により新規生徒登録権限が制限されています。</div>'}
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
+                                <h3 class="font-bold text-slate-800 text-sm">最新の欠席リスケ申請 (${state.rescheduleList.length}件)</h3>
+                                <div class="space-y-2 max-h-[480px] overflow-y-auto">
+                                    ${state.rescheduleList.map(r => `
+                                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-bold">${escapeHtml(r.studentName)}</span>
+                                                <span class="px-2 py-0.5 rounded font-bold text-[10px] ${r.status === '振替確定' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(r.status)}</span>
+                                            </div>
+                                            <div class="text-slate-600">元日時: ${escapeHtml(r.originalDate)} (${escapeHtml(r.subject || '-')})</div>
+                                            ${r.confirmedDate ? `<div class="text-emerald-700 font-bold">確定振替日: ${escapeHtml(r.confirmedDate)}</div>` : ''}
+                                            <p class="text-slate-500">${escapeHtml(r.reason)}</p>
+                                            ${r.status !== '振替確定' && perms.staffCanProcessReschedule ? `
+                                                <button onclick="openRescheduleModal(${r.id})" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold text-[11px]">振替日入力・確定する</button>
+                                            ` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        // =========================================================================
+        // Teacher（講師画面）
+        // =========================================================================
+        function renderTeacherView() {
+            return `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs max-w-2xl mx-auto">
+                    <h2 class="text-base font-bold text-slate-900">個別指導報告書作成</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold mb-1">対象生徒</label>
+                            <select id="rep-student" class="w-full border rounded-lg p-2.5 bg-slate-50 font-bold">
+                                ${state.students.map(s => `<option value="${escapeHtml(s.id)}|${escapeHtml(s.name)}">[${escapeHtml(s.id)}] ${escapeHtml(s.name)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">担当講師名</label>
+                            <input type="text" id="rep-teacher" value="${escapeHtml(currentAuth.userName || '田中 先生')}" class="w-full border rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">科目</label>
+                            <input type="text" id="rep-subject" placeholder="例: 英語" class="w-full border rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">理解度評価</label>
+                            <select id="rep-eval" class="w-full border rounded-lg p-2.5 bg-slate-50 font-bold text-orange-600">
+                                <option value="A">A (非常に理解)</option><option value="B">B (概ね理解)</option><option value="C">C (要復習)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">指導内容・保護者へのコメント</label>
+                        <textarea id="rep-comment" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50" placeholder="本日の学習単元や次回の課題を記入"></textarea>
+                    </div>
+                    <button onclick="submitTeacherReport()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">報告書を保存・送信する</button>
+                </div>
+            `;
+        }
+
+        async function submitTeacherReport() {
+            if (!requireRole(['hq', 'teacher'])) return;
+            const val = document.getElementById('rep-student')?.value;
+            if (!val) return alert('生徒が登録されていません。');
+            const [studentId, studentName] = val.split('|');
+            const subject = document.getElementById('rep-subject').value.trim();
+            const comment = document.getElementById('rep-comment').value.trim();
+            if (!subject || !comment) return alert('科目とコメントを入力してください。');
+
+            state.reports.unshift({
+                id: Date.now(), studentId, studentName,
+                teacherName: document.getElementById('rep-teacher').value.trim() || '担当講師',
+                date: new Date().toISOString().split('T')[0],
+                subject, evaluation: document.getElementById('rep-eval').value, comment
+            });
+            await saveState();
+            renderView();
+            alert(`${studentName}様の指導報告書を保存しました。`);
+        }
+
+        // =========================================================================
+        // Guardian（保護者ポータル）
+        // =========================================================================
+        let guardianActiveTab = 'reports';
+        function renderGuardianView() {
+            const myStudents = getLinkedStudentsForGuardian();
+            const studentNamesLabel = myStudents.map(s => `${s.name}（${s.grade}）`).join(' / ');
+
+            return `
+                <div class="max-w-md mx-auto bg-white rounded-3xl border border-slate-300 shadow-xl overflow-hidden my-2">
+                    <div class="line-theme text-white p-4 space-y-1">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-brands fa-line text-2xl"></i>
+                            <div>
+                                <h3 class="font-bold text-sm">GRIT指導学院 保護者マイページ</h3>
+                                <p class="text-[11px] text-emerald-100">対象お子様: ${escapeHtml(studentNamesLabel || '未登録')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 grid grid-cols-3 text-center text-[11px] border-b font-bold">
+                        <button onclick="guardianActiveTab='reports';renderView();" class="py-3 ${guardianActiveTab === 'reports' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">指導報告書</button>
+                        <button onclick="guardianActiveTab='absence';renderView();" class="py-3 ${guardianActiveTab === 'absence' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">欠席・リスケ</button>
+                        <button onclick="guardianActiveTab='billing';renderView();" class="py-3 ${guardianActiveTab === 'billing' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">お支払い</button>
+                    </div>
+                    <div class="p-4 bg-slate-50 min-h-[380px]">
+                        ${guardianActiveTab === 'reports' ? renderGuardianReportsContent(myStudents)
+                        : guardianActiveTab === 'absence' ? renderGuardianAbsenceContent(myStudents)
+                        : renderGuardianBillingContent(myStudents)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGuardianReportsContent(myStudents) {
+            const myStudentIds = myStudents.map(s => s.id);
+            const myReports = state.reports.filter(r => myStudentIds.includes(r.studentId));
+            return `
+                <div class="space-y-3 text-xs">
+                    ${myReports.length ? myReports.map(r => `
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5 shadow-sm">
+                            <div class="font-bold flex justify-between text-slate-800">
+                                <span>${escapeHtml(r.studentName)} / ${escapeHtml(r.subject)}</span>
+                                <span class="text-emerald-600">${escapeHtml(r.date)}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500">担当: ${escapeHtml(r.teacherName)} / 評価: <strong>${escapeHtml(r.evaluation)}</strong></div>
+                            <p class="text-slate-700 leading-relaxed pt-1 border-t border-slate-100">${escapeHtml(r.comment)}</p>
+                        </div>
+                    `).join('') : '<p class="text-slate-500 text-center py-8">お子様の指導報告書はまだありません。</p>'}
+                </div>
+            `;
+        }
+
+        function renderGuardianAbsenceContent(myStudents) {
+            const firstStudentId = myStudents[0] ? myStudents[0].id : '';
+            const firstSlots = (state.schedules || []).filter(s => s.studentId === firstStudentId);
+            const myStudentIds = myStudents.map(s => s.id);
+            const myRequests = state.rescheduleList.filter(r => myStudentIds.includes(r.studentId));
+
+            return `
+                <div class="space-y-4 text-xs">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-slate-900 text-sm">欠席・振替授業申請</h4>
+                        <div>
+                            <label class="block font-bold mb-1">対象のお子様</label>
+                            <select id="abs-student" onchange="updateAbsenceScheduleOptions()" class="w-full border rounded-lg p-2.5 bg-slate-50">
+                                ${myStudents.map(s => `<option value="${escapeHtml(s.id)}|${escapeHtml(s.name)}|${escapeHtml(s.branch)}">[${escapeHtml(s.id)}] ${escapeHtml(s.name)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">欠席する授業コマ</label>
+                            <select id="abs-schedule" class="w-full border rounded-lg p-2.5 bg-slate-50" ${firstSlots.length ? '' : 'disabled'}>
+                                ${firstSlots.length ? firstSlots.map(s => `<option value="${s.id}">${escapeHtml(s.date)} ${escapeHtml(s.startTime)}〜${escapeHtml(s.endTime)} (${escapeHtml(s.subject)})</option>`).join('')
+                                : '<option value="">登録済みの授業コマがありません</option>'}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">欠席理由</label>
+                            <select id="abs-reason-select" onchange="document.getElementById('abs-reason').value = this.value" class="w-full border rounded-lg p-2 bg-slate-50 mb-1.5 font-medium">
+                                <option value="体調不良のため">体調不良のため</option>
+                                <option value="学校行事（部活・テスト等）のため">学校行事（部活・テスト等）のため</option>
+                                <option value="家庭の都合のため">家庭の都合のため</option>
+                                <option value="その他">その他（下に直接入力）</option>
+                            </select>
+                            <input type="text" id="abs-reason" value="体調不良のため" class="w-full border rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <button id="abs-submit-button" onclick="submitAbsenceRequest()" ${firstSlots.length ? '' : 'disabled'} class="w-full line-theme text-white py-2.5 rounded-xl font-bold disabled:opacity-40 shadow-sm">
+                            欠席申請を送信する
+                        </button>
+                    </div>
+                    ${myRequests.length ? `
+                        <div class="space-y-2">
+                            <h5 class="font-bold text-slate-700">申請履歴</h5>
+                            ${myRequests.map(req => `
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1 shadow-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold text-slate-800">${escapeHtml(req.studentName)} (${escapeHtml(req.subject)})</span>
+                                        <span class="px-2.5 py-1 rounded-full font-bold text-[10px] ${req.status === '振替確定' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(req.status)}</span>
+                                    </div>
+                                    <div class="text-slate-500 text-[11px]">元日時: ${escapeHtml(req.originalDate)} / 理由: ${escapeHtml(req.reason)}</div>
+                                    ${req.confirmedDate ? `<div class="text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2 py-1 rounded">確定振替日時: ${escapeHtml(req.confirmedDate)}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderGuardianBillingContent(myStudents) {
+            const myStudentIds = myStudents.map(s => s.id);
+            const myBilling = state.unpaidList.filter(u => myStudentIds.includes(u.studentId));
+            return `
+                <div class="space-y-3 text-xs">
+                    <h4 class="font-bold text-slate-800">月謝・お支払い確認</h4>
+                    ${myBilling.length ? myBilling.map(b => `
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-slate-800">${escapeHtml(b.studentName)} - ${escapeHtml(b.month)}</div>
+                                <div class="text-orange-600 font-bold mt-0.5">${escapeHtml(b.amount)}</div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full font-bold ${b.status === '入金済' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${escapeHtml(b.status)}</span>
+                        </div>
+                    `).join('') : '<p class="text-slate-500 bg-white p-4 rounded-xl border text-center">現在未入金の項目はありません。</p>'}
+                </div>
+            `;
+        }
+
+        function updateAbsenceScheduleOptions() {
+            const studentId = document.getElementById('abs-student').value.split('|')[0];
+            const slots = (state.schedules || []).filter(s => s.studentId === studentId);
+            const scheduleSelect = document.getElementById('abs-schedule');
+            const btn = document.getElementById('abs-submit-button');
+            scheduleSelect.innerHTML = slots.length
+                ? slots.map(s => `<option value="${s.id}">${escapeHtml(s.date)} ${escapeHtml(s.startTime)}〜${escapeHtml(s.endTime)} (${escapeHtml(s.subject)})</option>`).join('')
+                : '<option value="">登録済みの授業コマがありません</option>';
+            scheduleSelect.disabled = slots.length === 0;
+            btn.disabled = slots.length === 0;
+        }
+
+        async function submitAbsenceRequest() {
+            const val = document.getElementById('abs-student')?.value;
+            if (!val) return;
+            const [studentId, studentName, branch] = val.split('|');
+            const scheduleId = document.getElementById('abs-schedule').value;
+            const schedule = state.schedules.find(s => String(s.id) === String(scheduleId) && s.studentId === studentId);
+            if (!schedule) return alert('授業コマを選択してください。');
+            const reason = document.getElementById('abs-reason').value.trim();
+            if (!reason) return alert('欠席理由を入力してください。');
+
+            const requestRecord = {
+                id: Date.now(), scheduleId: schedule.id, studentId, studentName, branch,
+                originalDate: `${schedule.date} ${schedule.startTime}〜${schedule.endTime}`,
+                confirmedDate: '',
+                subject: schedule.subject, reason, applicantRole: 'guardian', status: 'リスケ待ち'
+            };
+
+            state.rescheduleList.unshift(requestRecord);
+            await saveState();
+            await sendSecureLineNotification(requestRecord, 'guardian');
+            renderView();
+            alert('欠席申請を送信しました。');
+        }
+
+        // =========================================================================
+        // Student（生徒ポータル）
+        // =========================================================================
+        let studentActiveTab = 'schedules';
+        function renderStudentView() {
+            const me = getLinkedStudentForStudent();
+            const myReports = me ? state.reports.filter(r => r.studentId === me.id) : [];
+            const mySchedules = me ? state.schedules.filter(s => s.studentId === me.id) : [];
+            const myRequests = me ? state.rescheduleList.filter(r => r.studentId === me.id) : [];
+
+            return `
+                <div class="max-w-md mx-auto bg-white rounded-3xl border border-slate-300 shadow-xl overflow-hidden my-2">
+                    <div class="line-theme text-white p-4 space-y-1">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-brands fa-line text-2xl"></i>
+                            <div>
+                                <h3 class="font-bold text-sm">GRIT指導学院 生徒マイページ</h3>
+                                <p class="text-[11px] text-emerald-100">${me ? `${escapeHtml(me.name)}（${escapeHtml(me.grade)} / ${escapeHtml(me.branch)}）` : ''}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 grid grid-cols-3 text-center text-[11px] border-b font-bold">
+                        <button onclick="studentActiveTab='schedules';renderView();" class="py-3 ${studentActiveTab === 'schedules' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">授業予定</button>
+                        <button onclick="studentActiveTab='absence';renderView();" class="py-3 ${studentActiveTab === 'absence' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">欠席・リスケ</button>
+                        <button onclick="studentActiveTab='reports';renderView();" class="py-3 ${studentActiveTab === 'reports' ? 'text-emerald-700 bg-white border-b-2 border-emerald-600' : 'text-slate-600'}">指導報告書</button>
+                    </div>
+                    <div class="p-4 bg-slate-50 min-h-[380px]">
+                        ${studentActiveTab === 'schedules' ? renderStudentSchedulesContent(mySchedules)
+                        : studentActiveTab === 'absence' ? renderStudentAbsenceContent(me, mySchedules, myRequests)
+                        : renderStudentReportsContent(myReports)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStudentSchedulesContent(mySchedules) {
+            return `
+                <div class="space-y-3 text-xs">
+                    <h4 class="font-bold text-slate-800">今後の授業予定</h4>
+                    ${mySchedules.length ? mySchedules.map(sc => `
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-1 shadow-sm">
+                            <div class="font-bold text-slate-800 flex justify-between">
+                                <span>${escapeHtml(sc.subject)} (${escapeHtml(sc.teacher || '担当未定')})</span>
+                                <span class="text-emerald-600">${escapeHtml(sc.date)}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500">時間: ${escapeHtml(sc.startTime)} 〜 ${escapeHtml(sc.endTime)}</div>
+                        </div>
+                    `).join('') : '<p class="text-slate-500 bg-white p-4 rounded-xl border text-center">登録された授業予定はありません。</p>'}
+                </div>
+            `;
+        }
+
+        function renderStudentAbsenceContent(me, mySchedules, myRequests) {
+            return `
+                <div class="space-y-4 text-xs">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm">欠席・振替授業申請</h4>
+                        <div>
+                            <label class="block font-bold mb-1">対象生徒</label>
+                            <input type="text" value="${escapeHtml(me ? me.name : '')}" class="w-full border rounded-lg p-2.5 bg-slate-100 font-bold text-slate-700" disabled>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">欠席する授業コマ</label>
+                            <select id="student-abs-schedule" class="w-full border rounded-lg p-2.5 bg-slate-50 font-medium" ${mySchedules.length ? '' : 'disabled'}>
+                                ${mySchedules.length ? mySchedules.map(s => `<option value="${s.id}">${escapeHtml(s.date)} ${escapeHtml(s.startTime)}〜${escapeHtml(s.endTime)} (${escapeHtml(s.subject)})</option>`).join('')
+                                : '<option value="">登録済みの授業コマがありません</option>'}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">欠席理由</label>
+                            <select id="student-abs-reason-select" onchange="document.getElementById('student-abs-reason').value = this.value" class="w-full border rounded-lg p-2 bg-slate-50 mb-1.5 font-medium">
+                                <option value="体調不良のため">体調不良のため</option>
+                                <option value="学校行事（部活・テスト等）のため">学校行事（部活・テスト等）のため</option>
+                                <option value="家庭の都合のため">家庭の都合のため</option>
+                                <option value="その他">その他（下に直接入力）</option>
+                            </select>
+                            <input type="text" id="student-abs-reason" value="体調不良のため" class="w-full border rounded-lg p-2.5 bg-slate-50">
+                        </div>
+                        <button id="student-abs-submit-button" onclick="submitStudentAbsenceRequest()" ${mySchedules.length ? '' : 'disabled'} class="w-full line-theme text-white py-2.5 rounded-xl font-bold disabled:opacity-40 shadow-sm">
+                            欠席申請を送信する
+                        </button>
+                    </div>
+                    ${myRequests.length ? `
+                        <div class="space-y-2">
+                            <h5 class="font-bold text-slate-700">申請履歴</h5>
+                            ${myRequests.map(req => `
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1 shadow-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold text-slate-800">${escapeHtml(req.subject)}</span>
+                                        <span class="px-2.5 py-1 rounded-full font-bold text-[10px] ${req.status === '振替確定' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(req.status)}</span>
+                                    </div>
+                                    <div class="text-slate-500 text-[11px]">元日時: ${escapeHtml(req.originalDate)} / 理由: ${escapeHtml(req.reason)}</div>
+                                    ${req.confirmedDate ? `<div class="text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2 py-1 rounded">確定振替日時: ${escapeHtml(req.confirmedDate)}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function submitStudentAbsenceRequest() {
+            const me = getLinkedStudentForStudent();
+            if (!me) return;
+            const scheduleId = document.getElementById('student-abs-schedule').value;
+            const schedule = state.schedules.find(s => String(s.id) === String(scheduleId) && s.studentId === me.id);
+            if (!schedule) return alert('授業コマを選択してください。');
+            const reason = document.getElementById('student-abs-reason').value.trim();
+            if (!reason) return alert('欠席理由を入力してください。');
+
+            const requestRecord = {
+                id: Date.now(), scheduleId: schedule.id, studentId: me.id, studentName: me.name, branch: me.branch,
+                originalDate: `${schedule.date} ${schedule.startTime}〜${schedule.endTime}`,
+                confirmedDate: '',
+                subject: schedule.subject, reason, applicantRole: 'student', status: 'リスケ待ち'
+            };
+
+            state.rescheduleList.unshift(requestRecord);
+            await saveState();
+            await sendSecureLineNotification(requestRecord, 'student');
+            renderView();
+            alert('欠席申請を送信しました。');
+        }
+
+        function renderStudentReportsContent(myReports) {
+            return `
+                <div class="space-y-3 text-xs">
+                    <h4 class="font-bold text-slate-800">指導報告書</h4>
+                    ${myReports.length ? myReports.map(r => `
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5 shadow-sm">
+                            <div class="font-bold flex justify-between text-slate-800">
+                                <span>${escapeHtml(r.subject)}</span>
+                                <span class="text-emerald-600">${escapeHtml(r.date)}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500">担当: ${escapeHtml(r.teacherName)} / 評価: <strong>${escapeHtml(r.evaluation)}</strong></div>
+                            <p class="text-slate-700 leading-relaxed pt-1 border-t border-slate-100">${escapeHtml(r.comment)}</p>
+                        </div>
+                    `).join('') : '<p class="text-slate-500 bg-white p-4 rounded-xl border text-center">指導報告書はまだありません。</p>'}
+                </div>
+            `;
+        }
+
+        // =========================================================================
+        // 設定・エクスポート（CSVインジェクション対策適用）
+        // =========================================================================
+        function openLineIntegrationModal() {
+            document.getElementById('setting-liff-id').value = state.settings.liffId || '';
+            document.getElementById('setting-webhook-url').value = state.settings.webhookUrl || '/api/line-push';
+            document.getElementById('line-modal').classList.remove('hidden');
+        }
+        function closeLineIntegrationModal() { document.getElementById('line-modal').classList.add('hidden'); }
+
+        async function saveSystemSettings() {
+            if (!requireRole(['hq'])) return;
+            state.settings.liffId = document.getElementById('setting-liff-id').value.trim();
+            state.settings.webhookUrl = document.getElementById('setting-webhook-url').value.trim() || '/api/line-push';
+            await saveState();
+            closeLineIntegrationModal();
+            alert('設定を保存しました。');
+        }
+
+        function exportJsonBackup() {
+            if (!requireRole(['hq'])) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `GRIT_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importJsonBackup(event) {
+            if (!requireRole(['hq'])) return;
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    state = JSON.parse(e.target.result);
+                    await saveState();
+                    renderView();
+                    alert('復元しました。');
+                } catch (err) { alert('読み込みに失敗しました。'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportStudentsCSV() {
+            if (!requireRole(['hq'])) return;
+            const rows = [['生徒ID', '生徒氏名', 'フリガナ', '学年', '校舎', '保護者氏名', '保護者フリガナ', '保護者ログインID']];
+            state.students.forEach(s => rows.push([s.id, s.name, s.kana || '', s.grade, s.branch, s.guardian, s.guardianKana || '', s.guardianLoginId]));
+            exportToCSV(`GRIT_生徒一覧_${new Date().toISOString().split('T')[0]}.csv`, rows);
+        }
+
+        function exportReportsCSV() {
+            if (!requireRole(['hq'])) return;
+            const rows = [['生徒ID', '生徒名', '講師', '日付', '科目', '評価', 'コメント']];
+            state.reports.forEach(r => rows.push([r.studentId, r.studentName, r.teacherName, r.date, r.subject, r.evaluation, r.comment]));
+            exportToCSV(`GRIT_報告書_${new Date().toISOString().split('T')[0]}.csv`, rows);
+        }
+
+        function exportUnpaidCSV() {
+            if (!requireRole(['hq', 'staff'])) return;
+            const rows = [['生徒ID', '生徒名', '校舎', '対象月', '金額', 'ステータス']];
+            state.unpaidList.forEach(u => rows.push([u.studentId, u.studentName, u.branch, u.month, u.amount, u.status]));
+            exportToCSV(`GRIT_未入金_${new Date().toISOString().split('T')[0]}.csv`, rows);
+        }
+
+        function exportToCSV(filename, rows) {
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const csvContent = rows.map(e => e.map(sanitizeCsvCell).join(',')).join('\r\n');
+            const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+    </script>
+</body>
+</html>
