@@ -1,35 +1,5 @@
 // api/login.js
-import crypto from "crypto";
-import admin from "firebase-admin";
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
-    }),
-  });
-}
-const db = admin.firestore();
-
-function timingSafeEqualStr(a, b) {
-  const bufA = Buffer.from(String(a || ""), "utf8");
-  const bufB = Buffer.from(String(b || ""), "utf8");
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
-}
-
-function verifyPasswordHash(password, salt, expectedHash) {
-  const derived = crypto.pbkdf2Sync(String(password), salt, 100000, 64, "sha512").toString("hex");
-  return timingSafeEqualStr(derived, expectedHash);
-}
-
-function signToken(payloadObj, secret) {
-  const payload = Buffer.from(JSON.stringify(payloadObj)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
-  return `${payload}.${sig}`;
-}
+import { db, timingSafeEqualStr, verifyPasswordHash, signToken } from "./_auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -37,9 +7,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { role, loginId, password } = req.body || {};
-    const authSecret = process.env.AUTH_TOKEN_SECRET;
-    if (!authSecret) {
+    const { role, loginId, password, lineUserId } = req.body || {};
+    if (!process.env.AUTH_TOKEN_SECRET) {
       return res.status(500).json({ error: "サーバー側の AUTH_TOKEN_SECRET が未設定です" });
     }
     if (!role || !loginId || !password) {
@@ -48,8 +17,9 @@ export default async function handler(req, res) {
 
     const cleanRole = String(role).trim();
     const cleanId = String(loginId).trim();
+    const cleanLineUserId = lineUserId ? String(lineUserId).trim() : "";
 
-    // 1. Firestore に保存された変更済みアカウントを検索
+    // 1. Firestore の個別アカウント（本部発行 / 新規登録 / ID・PW変更済み）を検索
     const accountSnap = await db
       .collection("grit_auth_accounts")
       .where("role", "==", cleanRole)
@@ -58,31 +28,47 @@ export default async function handler(req, res) {
       .get();
 
     if (!accountSnap.empty) {
-      const accountData = accountSnap.docs[0].data();
+      const docSnap = accountSnap.docs[0];
+      const accountData = docSnap.data();
+
       if (!verifyPasswordHash(password, accountData.salt, accountData.passwordHash)) {
         return res.status(401).json({ error: "IDまたはパスワードが正しくありません" });
       }
 
-      const token = signToken(
-        {
-          role: cleanRole,
-          loginId: cleanId,
-          isInitial: false,
-          exp: Date.now() + 1000 * 60 * 60 * 12,
-        },
-        authSecret
-      );
+      if (cleanLineUserId && accountData.lineUserId !== cleanLineUserId) {
+        await docSnap.ref.set(
+          { lineUserId: cleanLineUserId, updatedAt: new Date().toISOString() },
+          { merge: true }
+        );
+      }
+
+      const mustChange = Boolean(accountData.mustChangeCredentials);
+      const effectiveLineUserId = cleanLineUserId || accountData.lineUserId || "";
+
+      const token = signToken({
+        docId: docSnap.id,
+        role: cleanRole,
+        loginId: cleanId,
+        displayName: accountData.displayName || cleanId,
+        branch: accountData.branch || "",
+        isInitial: mustChange,
+        isEnvInitial: false,
+        exp: Date.now() + 1000 * 60 * 60 * (mustChange ? 1 : 12),
+      });
 
       return res.status(200).json({
         ok: true,
         role: cleanRole,
         loginId: cleanId,
-        mustChangeCredentials: false,
+        displayName: accountData.displayName || cleanId,
+        branch: accountData.branch || "",
+        lineUserId: effectiveLineUserId,
+        mustChangeCredentials: mustChange,
         token,
       });
     }
 
-    // 2. 変更済みアカウントが見つからない場合、初期ID・初期パスワードがまだ有効か確認
+    // 2. 環境変数ベースの初期ID・初期パスワード（初回セットアップ用）を確認
     const roleStatusDoc = await db.collection("grit_auth_role_status").doc(cleanRole).get();
     if (roleStatusDoc.exists && roleStatusDoc.data().initialDisabled === true) {
       return res.status(401).json({ error: "IDまたはパスワードが正しくありません" });
@@ -105,20 +91,24 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "IDまたはパスワードが正しくありません" });
     }
 
-    const token = signToken(
-      {
-        role: cleanRole,
-        loginId: cleanId,
-        isInitial: true,
-        exp: Date.now() + 1000 * 60 * 30,
-      },
-      authSecret
-    );
+    const token = signToken({
+      docId: null,
+      role: cleanRole,
+      loginId: cleanId,
+      displayName: cleanId,
+      branch: "全校舎",
+      isInitial: true,
+      isEnvInitial: true,
+      exp: Date.now() + 1000 * 60 * 60,
+    });
 
     return res.status(200).json({
       ok: true,
       role: cleanRole,
       loginId: cleanId,
+      displayName: cleanId,
+      branch: "全校舎",
+      lineUserId: cleanLineUserId,
       mustChangeCredentials: true,
       token,
     });

@@ -1,6 +1,6 @@
 {
   "name": "grit-academy-system",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "dependencies": {
     "firebase-admin": "^12.7.0"
