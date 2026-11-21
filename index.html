@@ -161,6 +161,13 @@
                     </div>
                 </div>
 
+                <div id="self-reg-guardian-link-box" class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 space-y-2 hidden">
+                    <span class="font-bold text-emerald-900 block"><i class="fa-solid fa-link mr-1 text-emerald-600"></i>お子様（生徒）との紐づけ設定</span>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">既存生徒ID（すでに登録済みのお子様がいる場合）</label>
+                        <input type="text" id="self-reg-target-student-id" class="w-full border border-slate-300 rounded-lg p-2 bg-white font-mono" placeholder="例: ST001（未入力の場合は仮生徒台帳を作成）">
+                    </div>
+                </div>
                 <div id="self-reg-error" class="text-red-600 font-bold hidden text-center"></div>
 
                 <button id="self-reg-submit-btn" onclick="submitSelfRegistration()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md">
@@ -700,9 +707,83 @@
         function toggleSelfRegExtraFields() {
             const role = document.getElementById('self-reg-role').value;
             const extraBox = document.getElementById('self-reg-student-extra');
+            const guardianLinkBox = document.getElementById('self-reg-guardian-link-box');
             if (extraBox) {
                 extraBox.classList.toggle('hidden', role !== 'student' && role !== 'guardian');
             }
+            if (guardianLinkBox) {
+                guardianLinkBox.classList.toggle('hidden', role !== 'guardian');
+            }
+        }
+
+        function syncAccountToRoster({ role, loginId, displayName, branch, grade, guardianName, targetStudentId }) {
+            const today = new Date().toISOString().split('T')[0];
+            if (role === 'student') {
+                const existingIdx = state.students.findIndex(
+                    s => s.id.toUpperCase() === String(loginId).toUpperCase() || s.studentLoginId === loginId
+                );
+                if (existingIdx >= 0) {
+                    state.students[existingIdx] = {
+                        ...state.students[existingIdx],
+                        name: displayName || state.students[existingIdx].name,
+                        branch: branch || state.students[existingIdx].branch,
+                        grade: grade || state.students[existingIdx].grade,
+                        guardian: guardianName || state.students[existingIdx].guardian,
+                        studentLoginId: loginId
+                    };
+                    return state.students[existingIdx].id;
+                }
+                const newStudentId = generateNextStudentId();
+                state.students.push({
+                    id: newStudentId,
+                    studentLoginId: loginId,
+                    name: displayName,
+                    kana: '',
+                    branch: branch || '渋谷本校',
+                    grade: grade || '未設定',
+                    guardian: guardianName || '保護者様',
+                    guardianKana: '',
+                    guardianLoginId: '',
+                    guardianLineUserId: '',
+                    studentLineUserId: '',
+                    status: '正常',
+                    registeredAt: today
+                });
+                return newStudentId;
+            }
+
+            if (role === 'guardian') {
+                const cleanTargetId = String(targetStudentId || '').trim().toUpperCase();
+                if (cleanTargetId) {
+                    const matchedIdx = state.students.findIndex(s => s.id.toUpperCase() === cleanTargetId);
+                    if (matchedIdx >= 0) {
+                        state.students[matchedIdx].guardianLoginId = loginId;
+                        state.students[matchedIdx].guardian = displayName || state.students[matchedIdx].guardian;
+                        return state.students[matchedIdx].id;
+                    }
+                }
+                // 既存生徒ID指定がない場合、保護者名義で紐づける生徒台帳を1件作成（他生徒とは一切紐づけない）
+                const linkedStudentId = generateNextStudentId();
+                const childDisplayName = guardianName ? `${guardianName}（お子様）` : `${displayName}のお子様`;
+                state.students.push({
+                    id: linkedStudentId,
+                    studentLoginId: '',
+                    name: childDisplayName,
+                    kana: '',
+                    branch: branch || '渋谷本校',
+                    grade: grade || '未設定',
+                    guardian: displayName,
+                    guardianKana: '',
+                    guardianLoginId: loginId,
+                    guardianLineUserId: '',
+                    studentLineUserId: '',
+                    status: '正常',
+                    registeredAt: today
+                });
+                return linkedStudentId;
+            }
+
+            return '';
         }
 
         async function submitSelfRegistration() {
@@ -711,6 +792,7 @@
             const branch = document.getElementById('self-reg-branch').value;
             const grade = document.getElementById('self-reg-grade').value;
             const guardianName = document.getElementById('self-reg-guardian').value.trim();
+            const targetStudentId = document.getElementById('self-reg-target-student-id')?.value.trim() || '';
             const errEl = document.getElementById('self-reg-error');
             const btn = document.getElementById('self-reg-submit-btn');
 
@@ -742,7 +824,31 @@
                     throw new Error(data.error || '初期ID・初期パスワードの発行に失敗しました。');
                 }
 
-                lastIssuedSelfAccount = data.account;
+                const linkedStudentId = syncAccountToRoster({
+                    role: data.account.role,
+                    loginId: data.account.loginId,
+                    displayName: data.account.displayName,
+                    branch: data.account.branch,
+                    grade,
+                    guardianName,
+                    targetStudentId
+                });
+
+                if (!state.issuedInitialAccounts) state.issuedInitialAccounts = [];
+                state.issuedInitialAccounts.unshift({
+                    role: data.account.role,
+                    displayName: data.account.displayName,
+                    branch: data.account.branch,
+                    loginId: data.account.loginId,
+                    linkedStudentId,
+                    issuedAt: new Date().toISOString().split('T')[0]
+                });
+
+                await saveState();
+                updateHeaderBranchCounts();
+                if (currentAuth) renderView();
+
+                lastIssuedSelfAccount = { ...data.account, linkedStudentId };
                 document.getElementById('issued-self-role').innerText = ROLE_LABEL_MAP[data.account.role] || data.account.role;
                 document.getElementById('issued-self-id').innerText = data.account.loginId;
                 document.getElementById('issued-self-pass').innerText = data.account.initialPassword;
@@ -855,8 +961,29 @@
                 currentAuth.roleName = `${ROLE_LABEL_MAP[currentAuth.role] || currentAuth.role} (${data.loginId})`;
                 currentAuth.mustChangeCredentials = false;
                 currentAuth.lineUserId = data.lineUserId || liffLineUserId || currentAuth.lineUserId || '';
-                if (currentAuth.role === 'guardian') currentAuth.guardianLoginId = data.loginId;
-                if (currentAuth.role === 'student') currentAuth.studentId = data.loginId;
+                if (currentAuth.role === 'guardian') {
+                    const prevGuardianId = currentAuth.guardianLoginId || currentAuth.staffId;
+                    state.students.forEach(s => {
+                        if (s.guardianLoginId === prevGuardianId || s.guardianLoginId === data.loginId) {
+                            s.guardianLoginId = data.loginId;
+                        }
+                    });
+                    currentAuth.guardianLoginId = data.loginId;
+                    await saveState();
+                }
+                if (currentAuth.role === 'student') {
+                    const prevStudentId = currentAuth.studentId || currentAuth.staffId;
+                    state.students.forEach(s => {
+                        if (
+                            String(s.studentLoginId || '').toUpperCase() === String(prevStudentId || '').toUpperCase() ||
+                            String(s.id || '').toUpperCase() === String(prevStudentId || '').toUpperCase()
+                        ) {
+                            s.studentLoginId = data.loginId;
+                        }
+                    });
+                    currentAuth.studentId = data.loginId;
+                    await saveState();
+                }
 
                 sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentAuth));
                 document.getElementById('change-credentials-modal').classList.add('hidden');
@@ -1116,14 +1243,27 @@
 
         function getLinkedStudentsForGuardian() {
             if (!currentAuth || currentAuth.role !== 'guardian') return [];
-            const matched = state.students.filter(s => s.guardianLoginId === currentAuth.guardianLoginId);
-            return matched.length ? matched : state.students.slice(0, 1);
+            const targetIds = [currentAuth.guardianLoginId, currentAuth.staffId]
+                .filter(Boolean)
+                .map(v => String(v).trim().toLowerCase());
+            if (!targetIds.length) return [];
+            return state.students.filter(s => {
+                const gId = String(s.guardianLoginId || '').trim().toLowerCase();
+                return gId && targetIds.includes(gId);
+            });
         }
 
         function getLinkedStudentForStudent() {
             if (!currentAuth || currentAuth.role !== 'student') return null;
-            const matched = state.students.find(s => s.id.toUpperCase() === String(currentAuth.studentId || '').toUpperCase());
-            return matched || state.students[0] || null;
+            const candidates = [currentAuth.studentId, currentAuth.staffId]
+                .filter(Boolean)
+                .map(v => String(v).trim().toUpperCase());
+            if (!candidates.length) return null;
+            return state.students.find(s => {
+                const stCode = String(s.id || '').trim().toUpperCase();
+                const stLogin = String(s.studentLoginId || '').trim().toUpperCase();
+                return candidates.includes(stCode) || (stLogin && candidates.includes(stLogin));
+            }) || null;
         }
 
         function getBranchStudentCount(branchName) {
@@ -1237,7 +1377,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">対象役職 <span class="text-red-500">*</span></label>
                                 <select id="hq-issue-role" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-bold">
@@ -1260,8 +1400,15 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">初期ログインID（空欄で自動採番）</label>
+                                <label class="block font-bold text-slate-700 mb-1">初期ログインID（空欄可）</label>
                                 <input type="text" id="hq-issue-login-id" placeholder="空欄で自動生成" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">紐づけ生徒ID（保護者時）</label>
+                                <select id="hq-issue-target-student" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                                    <option value="">新規生徒台帳を作成</option>
+                                    ${state.students.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.name)}</option>`).join('')}
+                                </select>
                             </div>
                         </div>
 
@@ -1357,23 +1504,16 @@
                     issuedAt: new Date().toISOString().split('T')[0]
                 });
 
-                if (role === 'student') {
-                    const nextId = generateNextStudentId();
-                    state.students.push({
-                        id: nextId,
-                        name: displayName,
-                        kana: '',
-                        branch,
-                        grade: '未設定',
-                        guardian: '保護者様',
-                        guardianKana: '',
-                        guardianLoginId: data.account.loginId,
-                        guardianLineUserId: '',
-                        studentLineUserId: '',
-                        status: '正常',
-                        registeredAt: new Date().toISOString().split('T')[0]
-                    });
-                }
+                const targetStudentId = document.getElementById('hq-issue-target-student')?.value || '';
+                syncAccountToRoster({
+                    role: data.account.role,
+                    loginId: data.account.loginId,
+                    displayName: data.account.displayName,
+                    branch: data.account.branch,
+                    grade: '未設定',
+                    guardianName: '',
+                    targetStudentId
+                });
 
                 await saveState();
                 renderView();

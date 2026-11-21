@@ -105,6 +105,8 @@ export default async function handler(req, res) {
         initialPassword,
         displayName: cleanName,
         branch: cleanBranch,
+        grade: grade ? String(grade).trim() : "",
+        guardianName: guardianName ? String(guardianName).trim() : "",
       },
     });
   } catch (err) {
