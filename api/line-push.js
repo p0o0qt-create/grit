@@ -1,107 +1,67 @@
-import crypto from 'crypto';
+// api/line-push.js
+import crypto from "crypto";
 
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 20;
+function verifyToken(token, secret) {
+  if (!token || !secret) return null;
+  const parts = token.split(".");
+  if (parts.length !== 2) return null;
+  const [payload, sig] = parts;
+  const expectedSig = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
 
-function timingSafeCompare(a, b) {
-  if (!a || !b) return false;
-  const bufA = Buffer.from(String(a));
-  const bufB = Buffer.from(String(b));
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
-}
+  const a = Buffer.from(sig, "utf8");
+  const b = Buffer.from(expectedSig, "utf8");
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
 
-function sanitizeInput(val, maxLen = 200) {
-  if (val === null || val === undefined) return '';
-  return String(val).replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLen);
+  const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  if (!data.exp || Date.now() > data.exp) return null;
+  return data;
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
-  const now = Date.now();
-  const record = rateLimitMap.get(clientIp) || { count: 0, startTime: now };
-  if (now - record.startTime > RATE_LIMIT_WINDOW_MS) {
-    record.count = 1;
-    record.startTime = now;
-  } else {
-    record.count += 1;
-  }
-  rateLimitMap.set(clientIp, record);
-  if (record.count > RATE_LIMIT_MAX_REQUESTS) {
-    return res.status(429).json({ error: 'Too Many Requests' });
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const session = verifyToken(token, process.env.AUTH_TOKEN_SECRET);
+
+  if (!session) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const expectedSecret = process.env.INTERNAL_API_SECRET;
-  const incomingSecret = req.headers['x-api-secret'];
-  if (!expectedSecret || !timingSafeCompare(incomingSecret, expectedSecret)) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Secret' });
+  const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  if (!channelAccessToken) {
+    return res.status(500).json({ error: "LINE_CHANNEL_ACCESS_TOKEN not configured" });
   }
 
-  const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  const adminUserId = process.env.LINE_ADMIN_USER_ID;
+  const { to, message } = req.body || {};
+  const destinationId = to || process.env.LINE_DEFAULT_TO_USER_ID;
 
-  if (!accessToken) {
-    return res.status(500).json({ error: 'LINE_CHANNEL_ACCESS_TOKEN is not configured' });
-  }
-
-  const body = req.body || {};
-  const studentId = sanitizeInput(body.studentId, 32);
-  const studentName = sanitizeInput(body.studentName, 60);
-  const branch = sanitizeInput(body.branch, 60);
-  const originalDate = sanitizeInput(body.originalDate, 60);
-  const subject = sanitizeInput(body.subject, 60);
-  const reason = sanitizeInput(body.reason, 300);
-  const applicantRole = body.applicantRole === 'student' ? 'student' : 'guardian';
-  const guardianLineUserId = sanitizeInput(body.guardianLineUserId, 64);
-  const studentLineUserId = sanitizeInput(body.studentLineUserId, 64);
-
-  const applicantLabel = applicantRole === 'student' ? '生徒本人' : '保護者様';
-  const messageText = [
-    '【GRIT指導学院 欠席・振替申請通知】',
-    `校舎: ${branch || '未指定'}`,
-    `生徒: ${studentName} (${studentId})`,
-    `申請者: ${applicantLabel}`,
-    `対象日時: ${originalDate}`,
-    `科目: ${subject}`,
-    `理由: ${reason}`
-  ].join('\n');
-
-  const lineIdPattern = /^U[0-9a-f]{32}$/i;
-  const targets = new Set();
-  if (adminUserId && lineIdPattern.test(adminUserId)) targets.add(adminUserId);
-  if (guardianLineUserId && lineIdPattern.test(guardianLineUserId)) targets.add(guardianLineUserId);
-  if (studentLineUserId && lineIdPattern.test(studentLineUserId)) targets.add(studentLineUserId);
-
-  if (targets.size === 0) {
-    return res.status(200).json({ status: 'skipped', reason: 'No valid LINE user IDs' });
+  if (!destinationId || !message || typeof message !== "string") {
+    return res.status(400).json({ error: "送信先IDまたはメッセージが不足しています" });
   }
 
   try {
-    const results = await Promise.all(
-      Array.from(targets).map(async (toUserId) => {
-        const response = await fetch('https://api.line.me/v2/bot/message/push', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            to: toUserId,
-            messages: [{ type: 'text', text: messageText }]
-          })
-        });
-        return { to: toUserId, ok: response.ok, status: response.status };
-      })
-    );
+    const lineRes = await fetch("https://api.line.me/v2/bot/message/push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${channelAccessToken}`,
+      },
+      body: JSON.stringify({
+        to: destinationId,
+        messages: [{ type: "text", text: message.slice(0, 2000) }],
+      }),
+    });
 
-    return res.status(200).json({ status: 'sent', results });
-  } catch (error) {
-    console.error('LINE Push API Error:', error);
-    return res.status(500).json({ error: 'Failed to send LINE message' });
+    const data = await lineRes.json().catch(() => ({}));
+    if (!lineRes.ok) {
+      return res.status(lineRes.status).json({ error: "LINE Push failed", detail: data });
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: "LINE API通信エラー" });
   }
 }

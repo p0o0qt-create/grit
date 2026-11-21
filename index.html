@@ -49,6 +49,9 @@
                     <i class="fa-solid fa-user-shield text-orange-500"></i>
                     <span id="header-user-role-label">本部管理者</span>
                 </div>
+                <button onclick="openChangeCredentialsModal(false)" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-key text-xs"></i> <span class="hidden sm:inline">ID/PW変更</span>
+                </button>
                 <button id="header-firebase-btn" onclick="openFirebaseModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
                     <i class="fa-solid fa-fire text-sm"></i> <span class="hidden sm:inline">Firebase設定</span>
                 </button>
@@ -73,7 +76,7 @@
                 <h2 class="text-xl font-black text-slate-900">GRIT指導学院 総合管理システム</h2>
                 <p class="text-xs text-slate-500">権限を選択してID・パスワードを入力してください。</p>
                 <div id="login-sync-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">
-                    <i class="fa-solid fa-lock text-slate-500"></i> サーバー認証待機中（ログイン後にDB接続）
+                    <i class="fa-solid fa-lock text-slate-500"></i> サーバー認証待機中（初回ログイン後にID/PW変更）
                 </div>
             </div>
 
@@ -89,12 +92,12 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">ログインID（任意・識別用）</label>
-                    <input type="text" id="login-id" autocomplete="username" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="例: hq_admin / ST001">
+                    <label class="block font-bold text-slate-700 mb-1">ログインID <span class="text-red-500">*</span></label>
+                    <input type="text" id="login-id" autocomplete="username" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="初期ID または 変更後のログインID">
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">パスワード</label>
-                    <input type="password" id="login-pass" autocomplete="current-password" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="サーバー環境変数で設定されたパスワードを入力">
+                    <label class="block font-bold text-slate-700 mb-1">パスワード <span class="text-red-500">*</span></label>
+                    <input type="password" id="login-pass" autocomplete="current-password" class="w-full border border-slate-300 rounded-xl p-3 bg-slate-50 font-mono" placeholder="初期パスワード または 変更後のパスワード">
                 </div>
                 <div id="login-error" class="text-red-600 font-bold hidden text-center">IDまたはパスワードが正しくありません。</div>
             </div>
@@ -105,7 +108,7 @@
 
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
                 <span class="font-bold text-slate-700 block"><i class="fa-solid fa-shield-halved mr-1 text-orange-500"></i>セキュリティ仕様</span>
-                <p>パスワードの照合とセッション発行はVercelサーバー（/api/login）で実行されます。初期パスワードはコード内に保持していません。</p>
+                <p>初回ログイン後に新しいID・パスワードへ変更すると、初期ID・パスワードはサーバー上で完全に削除（無効化）されます。</p>
             </div>
         </div>
 
@@ -123,6 +126,46 @@
             <div id="app-view"></div>
         </div>
     </main>
+
+    <!-- 初期ID・パスワード変更モーダル -->
+    <div id="change-credentials-modal" class="fixed inset-0 bg-black/75 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 text-xs">
+            <button id="change-cred-close-btn" onclick="closeChangeCredentialsModal()" class="hidden absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 grit-gradient rounded-xl flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                    <h3 id="change-cred-title" class="text-base font-bold text-slate-900">初期ID・パスワードの変更（必須）</h3>
+                    <p id="change-cred-desc" class="text-[11px] text-slate-500">新しいIDとパスワードを設定してください。変更後、初期ID・パスワードは完全に削除されます。</p>
+                </div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900">
+                現在のログインID: <strong id="current-cred-id-display" class="font-mono"></strong>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">新しいログインID（4文字以上・英数字推奨） <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-cred-id" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-mono" placeholder="例: grit_hq_2026">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">新しいパスワード（8文字以上） <span class="text-red-500">*</span></label>
+                    <input type="password" id="new-cred-pass" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-mono" placeholder="8文字以上の強力なパスワード">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">新しいパスワード（確認用） <span class="text-red-500">*</span></label>
+                    <input type="password" id="new-cred-pass-confirm" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 font-mono" placeholder="もう一度同じパスワードを入力">
+                </div>
+                <div id="change-cred-error" class="text-red-600 font-bold hidden text-center"></div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="change-cred-cancel-btn" onclick="logout()" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold">ログアウト</button>
+                <button id="change-cred-submit-btn" onclick="submitChangeCredentials()" class="grit-gradient text-white px-5 py-2.5 rounded-xl font-bold shadow-sm">変更して初期認証を削除する</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 振替日時指定・確定モーダル -->
     <div id="reschedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
@@ -523,6 +566,114 @@
         }
         function closeFirebaseModal() { document.getElementById('firebase-modal').classList.add('hidden'); }
 
+        // =========================================================================
+        // 初期ID・パスワード変更モーダル制御
+        // =========================================================================
+        function openChangeCredentialsModal(isMandatory) {
+            const modal = document.getElementById('change-credentials-modal');
+            const closeBtn = document.getElementById('change-cred-close-btn');
+            const cancelBtn = document.getElementById('change-cred-cancel-btn');
+            const titleEl = document.getElementById('change-cred-title');
+            const descEl = document.getElementById('change-cred-desc');
+            const submitBtn = document.getElementById('change-cred-submit-btn');
+
+            document.getElementById('current-cred-id-display').innerText = currentAuth ? currentAuth.staffId : '';
+            document.getElementById('new-cred-id').value = '';
+            document.getElementById('new-cred-pass').value = '';
+            document.getElementById('new-cred-pass-confirm').value = '';
+            document.getElementById('change-cred-error').classList.add('hidden');
+
+            if (isMandatory) {
+                closeBtn.classList.add('hidden');
+                cancelBtn.innerText = 'ログアウト';
+                cancelBtn.onclick = logout;
+                titleEl.innerText = '初期ID・パスワードの変更（必須）';
+                descEl.innerText = 'セキュリティ保護のため、新しいIDとパスワードを設定してください。変更後、初期ID・パスワードは完全に削除されます。';
+                submitBtn.innerText = '変更して初期認証を削除する';
+            } else {
+                closeBtn.classList.remove('hidden');
+                cancelBtn.innerText = 'キャンセル';
+                cancelBtn.onclick = closeChangeCredentialsModal;
+                titleEl.innerText = 'ログインID・パスワードの変更';
+                descEl.innerText = '新しいログインID（4文字以上）とパスワード（8文字以上）を設定します。';
+                submitBtn.innerText = 'ID・パスワードを変更する';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeChangeCredentialsModal() {
+            if (currentAuth && currentAuth.mustChangeCredentials) return;
+            document.getElementById('change-credentials-modal').classList.add('hidden');
+        }
+
+        async function submitChangeCredentials() {
+            const newId = document.getElementById('new-cred-id').value.trim();
+            const newPass = document.getElementById('new-cred-pass').value.trim();
+            const confirmPass = document.getElementById('new-cred-pass-confirm').value.trim();
+            const errEl = document.getElementById('change-cred-error');
+            const submitBtn = document.getElementById('change-cred-submit-btn');
+
+            if (newId.length < 4) {
+                errEl.innerText = '新しいログインIDは4文字以上で入力してください。';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            if (newPass.length < 8) {
+                errEl.innerText = '新しいパスワードは8文字以上で入力してください。';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                errEl.innerText = '確認用パスワードが一致しません。';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            try {
+                const res = await fetch('/api/change-credentials', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentAuth.token}`
+                    },
+                    body: JSON.stringify({ newLoginId: newId, newPassword: newPass })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.token) {
+                    throw new Error(data.error || 'ID・パスワードの変更に失敗しました。');
+                }
+
+                const roleLabelMap = {
+                    hq: '本部管理者',
+                    staff: '受付スタッフ',
+                    teacher: '講師',
+                    guardian: '保護者',
+                    student: '生徒'
+                };
+                currentAuth.token = data.token;
+                currentAuth.staffId = data.loginId;
+                currentAuth.userName = data.loginId;
+                currentAuth.roleName = `${roleLabelMap[currentAuth.role] || currentAuth.role} (${data.loginId})`;
+                currentAuth.mustChangeCredentials = false;
+                if (currentAuth.role === 'guardian') currentAuth.guardianLoginId = data.loginId;
+                if (currentAuth.role === 'student') currentAuth.studentId = data.loginId;
+
+                sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentAuth));
+                document.getElementById('change-credentials-modal').classList.add('hidden');
+                errEl.classList.add('hidden');
+
+                alert(`ログインIDを「${data.loginId}」に変更し、初期ID・パスワードをサーバーから完全に削除（無効化）しました。`);
+                checkSession();
+            } catch (err) {
+                errEl.innerText = err.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
         async function bootstrapApp() {
             const savedSession = sessionStorage.getItem(AUTH_STORAGE_KEY);
             if (savedSession) {
@@ -542,6 +693,9 @@
                 }
             }
             checkSession();
+            if (currentAuth && currentAuth.mustChangeCredentials) {
+                openChangeCredentialsModal(true);
+            }
         }
 
         if (window.FirebaseModules) {
@@ -563,8 +717,8 @@
             const inputId = document.getElementById('login-id').value.trim();
             const inputPass = document.getElementById('login-pass').value.trim();
 
-            if (!inputPass) {
-                errEl.innerText = 'パスワードを入力してください。';
+            if (!inputId || !inputPass) {
+                errEl.innerText = 'ログインIDとパスワードの両方を入力してください。';
                 errEl.classList.remove('hidden');
                 return;
             }
@@ -590,14 +744,15 @@
                     guardian: '保護者',
                     student: '生徒'
                 };
-                const displayName = inputId ? `${roleLabelMap[role] || role} (${inputId})` : (roleLabelMap[role] || role);
+                const displayName = `${roleLabelMap[role] || role} (${inputId})`;
 
                 currentAuth = {
                     role,
                     roleName: displayName,
                     token: data.token,
-                    staffId: inputId || `${role}_user`,
-                    userName: inputId || roleLabelMap[role],
+                    staffId: inputId,
+                    userName: inputId,
+                    mustChangeCredentials: Boolean(data.mustChangeCredentials),
                     guardianLoginId: role === 'guardian' ? inputId : undefined,
                     studentId: role === 'student' ? inputId : undefined
                 };
@@ -620,6 +775,9 @@
                 }
 
                 checkSession();
+                if (data.mustChangeCredentials) {
+                    openChangeCredentialsModal(true);
+                }
             } catch (err) {
                 loginAttempts += 1;
                 if (loginAttempts >= 5) {
@@ -660,6 +818,7 @@
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('app-header').classList.add('hidden');
                 document.getElementById('app-view-container').classList.add('hidden');
+                document.getElementById('change-credentials-modal').classList.add('hidden');
             }
         }
 
