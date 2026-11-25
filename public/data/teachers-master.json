@@ -1,0 +1,198 @@
+[
+  {
+    "teacherId": "tch_001",
+    "status": "在職中",
+    "name": "イノウエ　カナコ",
+    "branches": []
+  },
+  {
+    "teacherId": "tch_002",
+    "status": "在職中",
+    "name": "イワナガ　ケイ",
+    "branches": [
+      "向日",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_003",
+    "status": "在職中",
+    "name": "オオムラ　サオリ",
+    "branches": [
+      "亀岡",
+      "家庭教師",
+      "長岡京",
+      "高槻"
+    ]
+  },
+  {
+    "teacherId": "tch_004",
+    "status": "在職中",
+    "name": "オオヤギ　ノゾミ",
+    "branches": [
+      "桂",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_005",
+    "status": "在職中",
+    "name": "オカノ　リュウト",
+    "branches": [
+      "亀岡",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_006",
+    "status": "在職中",
+    "name": "カワイ　ココア",
+    "branches": []
+  },
+  {
+    "teacherId": "tch_007",
+    "status": "在職中",
+    "name": "キシカワ　カエデ",
+    "branches": []
+  },
+  {
+    "teacherId": "tch_008",
+    "status": "在職中",
+    "name": "キシモト　カエデ",
+    "branches": [
+      "太秦",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_009",
+    "status": "在職中",
+    "name": "キタイ　ミチオ",
+    "branches": [
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_010",
+    "status": "在職中",
+    "name": "クマノ　イチロウ",
+    "branches": [
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_011",
+    "status": "在職中",
+    "name": "クリモト　チカ",
+    "branches": [
+      "伏見",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_012",
+    "status": "在職中",
+    "name": "クロキ　ユウダイ",
+    "branches": [
+      "太秦"
+    ]
+  },
+  {
+    "teacherId": "tch_013",
+    "status": "在職中",
+    "name": "コニシ　アツヤ",
+    "branches": []
+  },
+  {
+    "teacherId": "tch_014",
+    "status": "在職中",
+    "name": "コバヤシ　ミク",
+    "branches": [
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_015",
+    "status": "在職中",
+    "name": "タバナ　ヨシカズ",
+    "branches": [
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_016",
+    "status": "在職中",
+    "name": "ツガ　ナルキ",
+    "branches": [
+      "亀岡"
+    ]
+  },
+  {
+    "teacherId": "tch_017",
+    "status": "在職中",
+    "name": "トクラ　マホ",
+    "branches": []
+  },
+  {
+    "teacherId": "tch_018",
+    "status": "在職中",
+    "name": "ナガヤ　ユウタ",
+    "branches": [
+      "向日",
+      "太秦"
+    ]
+  },
+  {
+    "teacherId": "tch_019",
+    "status": "在職中",
+    "name": "ナカヤマ　ショウタ",
+    "branches": [
+      "亀岡",
+      "長岡京"
+    ]
+  },
+  {
+    "teacherId": "tch_020",
+    "status": "在職中",
+    "name": "ハシヅメ　ミサオ",
+    "branches": [
+      "太秦",
+      "長岡京",
+      "高槻"
+    ]
+  },
+  {
+    "teacherId": "tch_021",
+    "status": "在職中",
+    "name": "ヒノキオ　リリ",
+    "branches": [
+      "桂"
+    ]
+  },
+  {
+    "teacherId": "tch_022",
+    "status": "在職中",
+    "name": "ホンダ　ユウト",
+    "branches": [
+      "伏見"
+    ]
+  },
+  {
+    "teacherId": "tch_023",
+    "status": "在職中",
+    "name": "ミヨシ　トモユキ",
+    "branches": [
+      "伏見",
+      "桂"
+    ]
+  },
+  {
+    "teacherId": "tch_024",
+    "status": "在職中",
+    "name": "モトイエ　アヤ",
+    "branches": [
+      "伏見",
+      "向日"
+    ]
+  }
+]

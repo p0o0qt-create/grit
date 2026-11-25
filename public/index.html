@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRIT指導学院 統合管理システム</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --primary: #1e3a5f;
+      --accent: #2b6cb0;
+      --danger: #c53030;
+      --success: #2f855a;
+      --border: #dce1e8;
+      --text: #1a202c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 { margin: 0; font-size: 1.15rem; }
+    .badge {
+      background: rgba(255,255,255,0.18);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+    }
+    main { max-width: 1280px; margin: 20px auto; padding: 0 16px 48px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn {
+      padding: 9px 16px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    label { display: flex; flex-direction: column; gap: 5px; font-size: 0.88rem; font-weight: 600; }
+    input, select, button {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.92rem;
+    }
+    button.primary { background: var(--accent); color: #fff; border: none; cursor: pointer; font-weight: 600; }
+    button.success { background: var(--success); color: #fff; border: none; cursor: pointer; font-weight: 600; }
+    button.danger { background: var(--danger); color: #fff; border: none; cursor: pointer; font-weight: 600; }
+    button.secondary { background: #edf2f7; color: var(--text); border: 1px solid var(--border); cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 7px 8px; text-align: left; }
+    th { background: #edf2f7; position: sticky; top: 0; }
+    .table-wrap { max-height: 460px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+    .status-pill { padding: 2px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+    .st-scheduled { background: #e6fffa; color: #234e52; }
+    .st-absent { background: #fed7d7; color: #822727; }
+    .st-rescheduled { background: #fefcbf; color: #744210; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GRIT指導学院 業務管理システム（Firestore永続化・LINE連携）</h1>
+    <div>
+      <span id="storageBadge" class="badge">DB: 確認中...</span>
+      <span id="userBadge" class="badge">未ログイン</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Login Panel -->
+    <section id="loginSection" class="card">
+      <h2>ログイン</h2>
+      <div class="toolbar">
+        <label>ログインID<input type="text" id="loginIdInput" value="admin" /></label>
+        <label>パスワード<input type="password" id="passwordInput" value="grit2026" /></label>
+        <button class="primary" id="loginBtn">ログイン</button>
+      </div>
+      <p id="loginMsg" style="color:#c53030; font-size:0.86rem;"></p>
+    </section>
+
+    <!-- App Workspace -->
+    <section id="workspaceSection" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-monthly">1. 月次スケジュール（1日〜末日・個別変更）</button>
+        <button class="tab-btn" data-tab="tab-reschedule">2. 欠席申請・振替管理＆LINE通知</button>
+        <button class="tab-btn" data-tab="tab-quota">3. 生徒別 月間コマ数設定</button>
+        <button class="tab-btn" data-tab="tab-defaults">4. 月次デフォルト原本（講師×生徒紐づけ）</button>
+        <button class="tab-btn" data-tab="tab-csv">5. 口座情報CSVインポート＆未入金リスト</button>
+      </div>
+
+      <!-- Tab 1: Monthly Schedule -->
+      <div id="tab-monthly" class="tab-panel active card">
+        <div class="toolbar">
+          <label>対象年月<input type="month" id="targetYearMonth" value="2026-12" /></label>
+          <label>支部フィルタ
+            <select id="filterBranch"><option value="">全支部</option></select>
+          </label>
+          <label>曜日フィルタ
+            <select id="filterWeekday">
+              <option value="">全曜日</option>
+              <option>月曜日</option><option>火曜日</option><option>水曜日</option>
+              <option>木曜日</option><option>金曜日</option><option>土曜日</option><option>日曜日</option>
+            </select>
+          </label>
+          <button class="primary" id="reloadMonthBtn">月初から再展開・読込</button>
+          <button class="success" id="saveAllSchedulesBtn">月次データをDB保存</button>
+        </div>
+        <div id="monthSummaryText" style="font-size:0.88rem; margin-bottom:8px;"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>曜日</th>
+                <th>支部</th>
+                <th>コマ</th>
+                <th>担当講師（変更可）</th>
+                <th>生徒氏名</th>
+                <th>学年・学校</th>
+                <th>科目</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Absence & Reschedule -->
+      <div id="tab-reschedule" class="tab-panel card">
+        <h2>欠席申請＆振替枠割り当て（講師空き枠・振替残日数ドロップダウン）</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>欠席申請の登録</h3>
+            <label>対象コマ（当月スケジュール）
+              <select id="absenceTargetScheduleSelect"></select>
+            </label>
+            <label style="margin-top:8px;">欠席理由
+              <input type="text" id="absenceReasonInput" placeholder="体調不良・学校行事など" />
+            </label>
+            <button class="danger" id="submitAbsenceBtn" style="margin-top:10px;">欠席申請を登録＆振替残日数+1</button>
+          </div>
+
+          <div class="card">
+            <h3>振替枠の確定＆個人LINE通知</h3>
+            <label>欠席生徒（振替残日数付きリスト）
+              <select id="absentStudentDropdown"></select>
+            </label>
+            <div class="toolbar" style="margin-top:8px;">
+              <label>振替日<input type="date" id="rescheduleDateInput" value="2026-12-10" /></label>
+              <label>支部
+                <select id="rescheduleBranchSelect"></select>
+              </label>
+              <label>時間帯（コマ）
+                <select id="rescheduleSlotSelect">
+                  <option>14:30-15:50</option><option>15:00-16:20</option><option>16:40-18:00</option>
+                  <option>16:50-18:10</option><option>17:10-18:30</option><option>17:30-18:50</option>
+                  <option>18:00-19:20</option><option>18:30-19:50</option><option>18:45-20:05</option>
+                  <option selected>19:00-20:20</option><option>19:30-20:50</option>
+                  <option>20:00-21:20</option><option>20:30-21:50</option>
+                </select>
+              </label>
+            </div>
+            <label>講師空き枠（該当日時・支部の空き講師ドロップダウン）
+              <select id="availableTeacherDropdown"></select>
+            </label>
+            <label style="margin-top:8px;">通知先 LINE User ID（未登録時はログ記録）
+              <input type="text" id="targetLineUserIdInput" placeholder="U1234567890abcdef..." />
+            </label>
+            <button class="success" id="confirmRescheduleBtn" style="margin-top:10px;">振替確定＆個人LINE通知送信</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Student Monthly Quota -->
+      <div id="tab-quota" class="tab-panel card">
+        <h2>生徒ごとの月間コマ数設定</h2>
+        <div class="toolbar">
+          <label>生徒選択
+            <select id="quotaStudentSelect"></select>
+          </label>
+          <label>設定コマ数（月）
+            <input type="number" id="quotaValueInput" min="0" max="40" value="4" />
+          </label>
+          <label style="flex-direction:row; align-items:center;">
+            <input type="checkbox" id="quotaOnlyThisMonth" checked />
+            選択中の月（<span id="quotaMonthLabel">2026-12</span>）のみ上書き
+          </label>
+          <button class="primary" id="saveStudentQuotaBtn">コマ数をDB保存</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>支部</th>
+                <th>生徒氏名</th>
+                <th>学年</th>
+                <th>基本月コマ数</th>
+                <th>当月有効コマ数</th>
+                <th>当月割当数</th>
+                <th>残枠</th>
+              </tr>
+            </thead>
+            <tbody id="quotaTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: Default Assignments -->
+      <div id="tab-defaults" class="tab-panel card">
+        <h2>月次デフォルト原本（講師×生徒 曜日紐づけマスタ）</h2>
+        <p style="font-size:0.86rem;">原本の担当講師・曜日・時間帯を変更すると、翌月以降の月初展開に反映されます。</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>曜日</th>
+                <th>支部</th>
+                <th>時間帯</th>
+                <th>デフォルト担当講師</th>
+                <th>生徒氏名</th>
+                <th>科目</th>
+                <th>保存</th>
+              </tr>
+            </thead>
+            <tbody id="defaultTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Bank CSV Import & Unpaid List -->
+      <div id="tab-csv" class="tab-panel card">
+        <h2>口座情報CSVインポート → 未入金リスト反映</h2>
+        <p style="font-size:0.86rem;">銀行・収納代行CSV（ヘッダ例: <code>引落日,口座名義,請求金額,入金額,結果</code>）を選択して消込を行います。</p>
+        <div class="toolbar">
+          <input type="file" id="bankCsvInput" accept=".csv,text/csv" />
+          <button class="primary" id="importCsvBtn">CSVを取り込んで未入金リストを更新</button>
+        </div>
+        <div id="unpaidSummary" style="font-weight:600; margin:8px 0;"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>対象月</th>
+                <th>支部</th>
+                <th>生徒氏名</th>
+                <th>請求額</th>
+                <th>入金額</th>
+                <th>未入金額</th>
+                <th>状態</th>
+                <th>CSV結果備考</th>
+              </tr>
+            </thead>
+            <tbody id="unpaidTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    let authToken = '';
+    let state = {
+      yearMonth: '2026-12',
+      templates: [],
+      students: [],
+      teachers: [],
+      schedules: [],
+      absences: [],
+      unpaidList: [],
+    };
+
+    const apiFetch = async (url, options = {}) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          ...(options.headers || {}),
+        },
+      });
+      return res.json();
+    };
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const loginId = document.getElementById('loginIdInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const data = await apiFetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ loginId, password }),
+      });
+      if (!data.ok) {
+        document.getElementById('loginMsg').textContent = data.error || 'ログイン失敗';
+        return;
+      }
+      authToken = data.token;
+      document.getElementById('storageBadge').textContent = `DB: ${data.storage}`;
+      document.getElementById('userBadge').textContent = `${data.account.name} (${data.account.role})`;
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('workspaceSection').classList.remove('hidden');
+      await loadAllData();
+    });
+
+    async function loadAllData() {
+      const ym = document.getElementById('targetYearMonth').value || '2026-12';
+      state.yearMonth = ym;
+      document.getElementById('quotaMonthLabel').textContent = ym;
+
+      const data = await apiFetch(`/api/schedules?yearMonth=${encodeURIComponent(ym)}`);
+      if (!data.ok) {
+        alert(data.error || 'データ読込失敗');
+        return;
+      }
+      state = { ...state, ...data };
+      populateFilters();
+      renderMonthlyTable();
+      renderRescheduleControls();
+      renderQuotaTable();
+      renderDefaultTable();
+      renderUnpaidTable(state.unpaidList);
+    }
+
+    function populateFilters() {
+      const branches = [...new Set(state.templates.map((t) => t.branch).filter(Boolean))].sort();
+      const branchSel = document.getElementById('filterBranch');
+      const resBranchSel = document.getElementById('rescheduleBranchSelect');
+      branchSel.innerHTML = '<option value="">全支部</option>' + branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+      resBranchSel.innerHTML = branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+    }
+
+    function renderMonthlyTable() {
+      const branch = document.getElementById('filterBranch').value;
+      const weekday = document.getElementById('filterWeekday').value;
+      const filtered = state.schedules.filter((s) => (!branch || s.branch === branch) && (!weekday || s.dayOfWeek === weekday));
+
+      document.getElementById('monthSummaryText').textContent =
+        `${state.yearMonth} 表示件数: ${filtered.length}コマ / 全${state.schedules.length}コマ（1日から曜日順に整列）`;
+
+      const teacherOptionsHtml = (selected) =>
+        state.teachers
+          .map((t) => `<option value="${t.name}" ${t.name === selected ? 'selected' : ''}>${t.name}</option>`)
+          .join('');
+
+      const tbody = document.getElementById('monthlyTableBody');
+      tbody.innerHTML = filtered.slice(0, 300).map((row) => `
+        <tr>
+          <td>${row.date}</td>
+          <td>${row.dayOfWeek}</td>
+          <td>${row.branch}</td>
+          <td>${row.timeSlot}</td>
+          <td>
+            <select data-sched-teacher="${row.scheduleId}">
+              ${teacherOptionsHtml(row.teacherName)}
+            </select>
+          </td>
+          <td>${row.studentName}</td>
+          <td>${row.grade} ${row.school}</td>
+          <td>${row.subject}</td>
+          <td><span class="status-pill st-${row.status}">${row.status}</span></td>
+          <td>
+            <button class="secondary" data-save-row="${row.scheduleId}">変更保存</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('[data-save-row]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.saveRow;
+          const sel = tbody.querySelector(`[data-sched-teacher="${id}"]`);
+          const target = state.schedules.find((s) => s.scheduleId === id);
+          if (!target || !sel) return;
+          target.teacherName = sel.value;
+          await apiFetch('/api/schedules', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'UPDATE_SCHEDULE_ENTRY', payload: { entry: target } }),
+          });
+          alert('個別変更を保存しました');
+        });
+      });
+    }
+
+    function renderRescheduleControls() {
+      const targetSel = document.getElementById('absenceTargetScheduleSelect');
+      targetSel.innerHTML = state.schedules
+        .filter((s) => s.status === 'scheduled')
+        .slice(0, 250)
+        .map((s) => `<option value="${s.scheduleId}">${s.date} (${s.dayOfWeek}) ${s.timeSlot} | ${s.branch} | ${s.studentName} [講師:${s.teacherName}]</option>`)
+        .join('');
+
+      // Absent students with remaining days
+      const stats = new Map();
+      for (const req of state.absences) {
+        if (req.status === 'rejected') continue;
+        const cur = stats.get(req.studentName) || {
+          studentName: req.studentName,
+          branch: req.branch || '',
+          subject: req.subject || '',
+          absent: 0,
+          rescheduled: 0,
+          latestId: req.absenceId,
+        };
+        cur.absent += 1;
+        if (req.status === 'rescheduled') cur.rescheduled += 1;
+        else cur.latestId = req.absenceId;
+        stats.set(req.studentName, cur);
+      }
+
+      const absentSel = document.getElementById('absentStudentDropdown');
+      const opts = Array.from(stats.values())
+        .map((x) => ({ ...x, rem: Math.max(0, x.absent - x.rescheduled) }))
+        .filter((x) => x.rem > 0);
+
+      absentSel.innerHTML = opts.length
+        ? opts.map((o) => `<option value="${o.studentName}" data-absence-id="${o.latestId}" data-branch="${o.branch}" data-subject="${o.subject}">${o.studentName}（${o.branch} / ${o.subject}）— 振替残 ${o.rem}日</option>`).join('')
+        : '<option value="">振替残日数が残っている欠席生徒はありません</option>';
+
+      refreshAvailableTeachers();
+    }
+
+    function refreshAvailableTeachers() {
+      const date = document.getElementById('rescheduleDateInput').value;
+      const branch = document.getElementById('rescheduleBranchSelect').value;
+      const slot = document.getElementById('rescheduleSlotSelect').value;
+
+      const busy = new Set(
+        state.schedules
+          .filter((s) => s.status !== 'cancelled' && s.status !== 'absent' && s.date === date && s.timeSlot === slot)
+          .map((s) => s.teacherName)
+      );
+
+      const freeTeachers = state.teachers.filter(
+        (t) => t.status === '在職中' && (!branch || !t.branches?.length || t.branches.includes(branch)) && !busy.has(t.name)
+      );
+
+      const sel = document.getElementById('availableTeacherDropdown');
+      sel.innerHTML = freeTeachers.length
+        ? freeTeachers.map((t) => `<option value="${t.name}">${t.name}（${date} ${slot} 空き）</option>`).join('')
+        : '<option value="">該当枠に空き講師がありません</option>';
+    }
+
+    function renderQuotaTable() {
+      const stuSel = document.getElementById('quotaStudentSelect');
+      stuSel.innerHTML = state.students
+        .filter((s) => s.status === '在籍中')
+        .map((s) => `<option value="${s.studentId}">${s.name}（${s.branch}）</option>`)
+        .join('');
+
+      const tbody = document.getElementById('quotaTableBody');
+      tbody.innerHTML = state.students
+        .filter((s) => s.status === '在籍中')
+        .map((s) => {
+          const effective = s.overridesByMonth?.[state.yearMonth] ?? s.defaultMonthlyQuota ?? 4;
+          const assigned = state.schedules.filter((r) => r.studentName === s.name && r.status !== 'cancelled').length;
+          const rem = effective - assigned;
+          return `
+            <tr>
+              <td>${s.branch}</td>
+              <td>${s.name}</td>
+              <td>${s.grade}</td>
+              <td>${s.defaultMonthlyQuota}コマ</td>
+              <td><strong>${effective}コマ</strong></td>
+              <td>${assigned}コマ</td>
+              <td style="color:${rem < 0 ? '#c53030' : '#2f855a'}">${rem}コマ</td>
+            </tr>
+          `;
+        }).join('');
+    }
+
+    function renderDefaultTable() {
+      const tbody = document.getElementById('defaultTableBody');
+      tbody.innerHTML = state.templates.slice(0, 200).map((t) => `
+        <tr>
+          <td>${t.assignmentId}</td>
+          <td>${t.dayOfWeek}</td>
+          <td>${t.branch}</td>
+          <td>${t.timeSlot}</td>
+          <td><input type="text" value="${t.teacherName}" data-def-teacher="${t.assignmentId}" /></td>
+          <td>${t.studentName}</td>
+          <td>${t.subject}</td>
+          <td><button class="secondary" data-save-def="${t.assignmentId}">原本更新</button></td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('[data-save-def]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.saveDef;
+          const inp = tbody.querySelector(`[data-def-teacher="${id}"]`);
+          const target = state.templates.find((x) => x.assignmentId === id);
+          if (!target || !inp) return;
+          target.teacherName = inp.value.trim();
+          await apiFetch('/api/schedules', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'UPDATE_DEFAULT_ASSIGNMENT', payload: { assignment: target } }),
+          });
+          alert('デフォルト原本を更新しました');
+        });
+      });
+    }
+
+    function renderUnpaidTable(list = []) {
+      const total = list.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
+      document.getElementById('unpaidSummary').textContent =
+        `未入金件数: ${list.length}件 / 未入金合計: ¥${total.toLocaleString()}`;
+      document.getElementById('unpaidTableBody').innerHTML = list.map((u) => `
+        <tr>
+          <td>${u.yearMonth}</td>
+          <td>${u.branch}</td>
+          <td>${u.studentName}</td>
+          <td>¥${Number(u.billedAmount).toLocaleString()}</td>
+          <td>¥${Number(u.paidAmount).toLocaleString()}</td>
+          <td style="color:#c53030;font-weight:700;">¥${Number(u.unpaidAmount).toLocaleString()}</td>
+          <td>${u.paymentStatus}</td>
+          <td>${u.csvStatus || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Event bindings
+    document.getElementById('reloadMonthBtn').addEventListener('click', loadAllData);
+    document.getElementById('filterBranch').addEventListener('change', renderMonthlyTable);
+    document.getElementById('filterWeekday').addEventListener('change', renderMonthlyTable);
+    document.getElementById('rescheduleDateInput').addEventListener('change', refreshAvailableTeachers);
+    document.getElementById('rescheduleBranchSelect').addEventListener('change', refreshAvailableTeachers);
+    document.getElementById('rescheduleSlotSelect').addEventListener('change', refreshAvailableTeachers);
+
+    document.getElementById('saveAllSchedulesBtn').addEventListener('click', async () => {
+      const res = await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'SAVE_MONTH_SCHEDULES',
+          payload: { yearMonth: state.yearMonth, schedules: state.schedules },
+        }),
+      });
+      alert(res.ok ? `${res.count}件の月次スケジュールを保存しました` : res.error);
+    });
+
+    document.getElementById('submitAbsenceBtn').addEventListener('click', async () => {
+      const schedId = document.getElementById('absenceTargetScheduleSelect').value;
+      const reason = document.getElementById('absenceReasonInput').value.trim();
+      const target = state.schedules.find((s) => s.scheduleId === schedId);
+      if (!target) return;
+
+      await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'CREATE_ABSENCE_REQUEST',
+          payload: {
+            request: {
+              scheduleId: target.scheduleId,
+              studentName: target.studentName,
+              branch: target.branch,
+              subject: target.subject,
+              date: target.date,
+              timeSlot: target.timeSlot,
+              reason,
+            },
+          },
+        }),
+      });
+      alert('欠席申請を登録しました');
+      await loadAllData();
+    });
+
+    document.getElementById('confirmRescheduleBtn').addEventListener('click', async () => {
+      const stuSel = document.getElementById('absentStudentDropdown');
+      const selectedOpt = stuSel.selectedOptions[0];
+      const studentName = stuSel.value;
+      const teacherName = document.getElementById('availableTeacherDropdown').value;
+      const date = document.getElementById('rescheduleDateInput').value;
+      const branch = document.getElementById('rescheduleBranchSelect').value;
+      const timeSlot = document.getElementById('rescheduleSlotSelect').value;
+      const lineUserId = document.getElementById('targetLineUserIdInput').value.trim();
+
+      if (!studentName || !teacherName) {
+        alert('欠席生徒と空き講師を選択してください');
+        return;
+      }
+
+      const absenceId = selectedOpt?.dataset?.absenceId || '';
+      const subject = selectedOpt?.dataset?.subject || '';
+      const newScheduleId = `${date}_resched_${Date.now()}`;
+
+      await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'CONFIRM_RESCHEDULE',
+          payload: {
+            absenceId,
+            rescheduledEntry: {
+              scheduleId: newScheduleId,
+              yearMonth: date.slice(0, 7),
+              date,
+              dayOfWeek: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'][new Date(date).getDay()],
+              branch,
+              timeSlot,
+              teacherName,
+              defaultTeacherName: teacherName,
+              studentName,
+              subject,
+              status: 'rescheduled',
+            },
+          },
+        }),
+      });
+
+      if (lineUserId) {
+        await apiFetch('/api/line-push', {
+          method: 'POST',
+          body: JSON.stringify({
+            to: lineUserId,
+            messages: [{
+              type: 'text',
+              text: `【GRIT指導学院】振替授業確定のお知らせ\n生徒様：${studentName}\n振替日時：${date}（${timeSlot}）\n支部・科目：${branch} / ${subject}\n担当講師：${teacherName}`,
+            }],
+            meta: { type: 'reschedule', studentName, date },
+          }),
+        });
+      }
+
+      alert('振替を確定しました');
+      await loadAllData();
+    });
+
+    document.getElementById('saveStudentQuotaBtn').addEventListener('click', async () => {
+      const studentId = document.getElementById('quotaStudentSelect').value;
+      const val = Number(document.getElementById('quotaValueInput').value) || 0;
+      const onlyMonth = document.getElementById('quotaOnlyThisMonth').checked;
+      const stu = state.students.find((s) => s.studentId === studentId);
+      if (!stu) return;
+
+      if (onlyMonth) {
+        stu.overridesByMonth = { ...(stu.overridesByMonth || {}), [state.yearMonth]: val };
+      } else {
+        stu.defaultMonthlyQuota = val;
+      }
+
+      await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'UPDATE_STUDENT_QUOTA', payload: { student: stu } }),
+      });
+      alert('生徒の月間コマ数を保存しました');
+      renderQuotaTable();
+    });
+
+    document.getElementById('importCsvBtn').addEventListener('click', async () => {
+      const file = document.getElementById('bankCsvInput').files?.[0];
+      if (!file) {
+        alert('CSVファイルを選択してください');
+        return;
+      }
+      const csvText = await file.text();
+      const res = await apiFetch('/api/import-bank-csv', {
+        method: 'POST',
+        body: JSON.stringify({ csvText, yearMonth: state.yearMonth }),
+      });
+      if (!res.ok) {
+        alert(res.error || 'CSVインポート失敗');
+        return;
+      }
+      state.unpaidList = res.unpaidList || [];
+      renderUnpaidTable(state.unpaidList);
+      alert(`CSV ${res.importedRows}行を取り込み、未入金 ${res.unpaidCount}件を反映しました`);
+    });
+  </script>
+</body>
+</html>

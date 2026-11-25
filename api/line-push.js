@@ -1,48 +1,66 @@
-// api/line-push.js
-import { getSessionFromReq } from "./_auth.js";
+import { requireAuth, saveDoc, sendJson } from './_utils.js';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+  if (req.method !== 'POST') {
+    return sendJson(res, 405, { ok: false, error: 'Method Not Allowed' });
   }
 
-  const session = getSessionFromReq(req);
-  if (!session) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  if (!channelAccessToken) {
-    return res.status(500).json({ error: "LINE_CHANNEL_ACCESS_TOKEN not configured" });
-  }
-
-  const { to, message } = req.body || {};
-  const destinationId = to || process.env.LINE_DEFAULT_TO_USER_ID;
-
-  if (!destinationId || !message || typeof message !== "string") {
-    return res.status(400).json({ error: "送信先IDまたはメッセージが不足しています" });
+  const auth = requireAuth(req, ['hq', 'reception', 'teacher']);
+  if (!auth.ok) {
+    return sendJson(res, auth.status, { ok: false, error: auth.error });
   }
 
   try {
-    const lineRes = await fetch("https://api.line.me/v2/bot/message/push", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${channelAccessToken}`,
-      },
-      body: JSON.stringify({
-        to: destinationId,
-        messages: [{ type: "text", text: message.slice(0, 2000) }],
-      }),
-    });
-
-    const data = await lineRes.json().catch(() => ({}));
-    if (!lineRes.ok) {
-      return res.status(lineRes.status).json({ error: "LINE Push failed", detail: data });
+    const { to, messages, meta = {} } = req.body || {};
+    if (!to || !Array.isArray(messages) || messages.length === 0) {
+      return sendJson(res, 400, { ok: false, error: '送信先(to)とmessagesが必要です' });
     }
 
-    return res.status(200).json({ ok: true });
+    const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    const logId = `line_${Date.now()}`;
+
+    if (!accessToken) {
+      await saveDoc('notification_logs', logId, {
+        to,
+        messages,
+        meta,
+        sentBy: auth.user.id,
+        status: 'simulated_no_token',
+      });
+      return sendJson(res, 200, {
+        ok: true,
+        simulated: true,
+        message: 'LINE_CHANNEL_ACCESS_TOKEN未設定のため送信ログのみ記録しました',
+      });
+    }
+
+    const lineRes = await fetch('https://api.line.me/v2/bot/message/push', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ to, messages }),
+    });
+
+    const bodyText = await lineRes.text();
+    await saveDoc('notification_logs', logId, {
+      to,
+      messages,
+      meta,
+      sentBy: auth.user.id,
+      status: lineRes.ok ? 'sent' : 'failed',
+      httpStatus: lineRes.status,
+      response: bodyText,
+    });
+
+    if (!lineRes.ok) {
+      return sendJson(res, 502, { ok: false, error: `LINE APIエラー: ${bodyText}` });
+    }
+
+    return sendJson(res, 200, { ok: true, logId });
   } catch (err) {
-    return res.status(500).json({ error: "LINE API通信エラー" });
+    console.error('LINE push error:', err);
+    return sendJson(res, 500, { ok: false, error: 'LINE通知送信に失敗しました' });
   }
 }

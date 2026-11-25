@@ -1,0 +1,1109 @@
+[
+  {
+    "studentId": "stu_001",
+    "status": "在籍中",
+    "name": "アダチ　ユウト（足立　悠帆）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_002",
+    "status": "在籍中",
+    "name": "アネガワ　メイ（姉川　夢依）",
+    "grade": "中1",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_003",
+    "status": "在籍中",
+    "name": "アネガワ　ユメカ（姉川　夢果）",
+    "grade": "中3",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_004",
+    "status": "在籍中",
+    "name": "イカワ　タツキ（猪川　竜己）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_005",
+    "status": "在籍中",
+    "name": "イカワ　ユリア（猪川　優梨愛）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_006",
+    "status": "在籍中",
+    "name": "イケベ　ヒヨリ（池邊　ひより）",
+    "grade": "中3",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_007",
+    "status": "在籍中",
+    "name": "イシカワ　コウメ（石川　小梅）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_008",
+    "status": "在籍中",
+    "name": "イシカワ　フウタ（石川　楓太）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_009",
+    "status": "在籍中",
+    "name": "イシザカ　ユウヤ（石坂　侑也）",
+    "grade": "中3",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_010",
+    "status": "在籍中",
+    "name": "イソズミ　ジョウ（五十棲　丈）",
+    "grade": "中1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_011",
+    "status": "在籍中",
+    "name": "イチカワ　ハルト（市川　遥翔）",
+    "grade": "中3",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_012",
+    "status": "在籍中",
+    "name": "イトウ　ハナ（伊藤　花）",
+    "grade": "中2",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_013",
+    "status": "在籍中",
+    "name": "イノウエ　カイト（井ノ上　快斗）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_014",
+    "status": "在籍中",
+    "name": "イノウエ　コウ（井上　昊）",
+    "grade": "高1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_015",
+    "status": "在籍中",
+    "name": "イノウエ　ソウマ（井ノ上　壮馬）",
+    "grade": "高3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_016",
+    "status": "在籍中",
+    "name": "ウエキ　リョウスケ（植木　涼介）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_017",
+    "status": "在籍中",
+    "name": "ウエダ　コウタ（上田　琥大）",
+    "grade": "中2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_018",
+    "status": "在籍中",
+    "name": "ウヤマ　ソラ（宇山　蒼空）",
+    "grade": "高2",
+    "branch": "向日",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_019",
+    "status": "在籍中",
+    "name": "オオタ　ミヤ（太田　みや）",
+    "grade": "中3",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_020",
+    "status": "在籍中",
+    "name": "オオツカ　チハヤ（大塚　千榮）",
+    "grade": "中1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_021",
+    "status": "退会済",
+    "name": "オオヤマ　カンナ（大山　栞奈）",
+    "grade": "中2",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_022",
+    "status": "在籍中",
+    "name": "オカダ　シンノスケ（岡田　慎之介）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_023",
+    "status": "在籍中",
+    "name": "オカノ　ソウ（岡野　颯）",
+    "grade": "中2",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_024",
+    "status": "在籍中",
+    "name": "オクダ　コハル（奥田　心春）",
+    "grade": "中1",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_025",
+    "status": "在籍中",
+    "name": "オクヤマ　カナ（奥山　楓菜）",
+    "grade": "中2",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_026",
+    "status": "在籍中",
+    "name": "カジ　ミヤノ（梶　都乃）",
+    "grade": "高1",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_027",
+    "status": "在籍中",
+    "name": "カトウ　ユイ（加藤　優衣）",
+    "grade": "中1",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_028",
+    "status": "在籍中",
+    "name": "カワサキ　チハナ（川﨑　千花）",
+    "grade": "中2",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_029",
+    "status": "在籍中",
+    "name": "キシダ　メイ（岸田　芽依）",
+    "grade": "小3",
+    "branch": "向日",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_030",
+    "status": "在籍中",
+    "name": "キタムラ　ケイ（北村　圭）",
+    "grade": "中3",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_031",
+    "status": "在籍中",
+    "name": "キム　シウン（金　示殷）",
+    "grade": "高3",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_032",
+    "status": "在籍中",
+    "name": "キムラ　ユウヤ（木村　柚哉）",
+    "grade": "中2",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_033",
+    "status": "在籍中",
+    "name": "クサノ　カナメ（草野　要）",
+    "grade": "中3",
+    "branch": "向日",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_034",
+    "status": "在籍中",
+    "name": "コウノ　アツキ（河野　充希）",
+    "grade": "中1",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_035",
+    "status": "在籍中",
+    "name": "コウヤマ　マコ（香山　眞子）",
+    "grade": "高2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_036",
+    "status": "在籍中",
+    "name": "コニシ　ヒナタ（小西　陽葵）",
+    "grade": "中1",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_037",
+    "status": "在籍中",
+    "name": "コハタ　モモコ（木幡　桃子）",
+    "grade": "高3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_038",
+    "status": "在籍中",
+    "name": "コハタ　ユウイチ（木幡　優一）",
+    "grade": "高1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_039",
+    "status": "在籍中",
+    "name": "コヤマ　サトミ（小山　里実）",
+    "grade": "中3",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_040",
+    "status": "在籍中",
+    "name": "サタ　ミサキ（佐田　美咲希）",
+    "grade": "中3",
+    "branch": "向日",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_041",
+    "status": "在籍中",
+    "name": "サトウ　ユウマ（佐藤　佑真）",
+    "grade": "中3",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_042",
+    "status": "在籍中",
+    "name": "シオツカ　タケル（塩塚　健生）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_043",
+    "status": "在籍中",
+    "name": "シオツカ　ユウキ（塩塚　悠生）",
+    "grade": "中2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_044",
+    "status": "在籍中",
+    "name": "シオミ　アミ（塩見　彩未）",
+    "grade": "小6",
+    "branch": "向日",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_045",
+    "status": "在籍中",
+    "name": "シオミ　コウタ（塩見　煌大）",
+    "grade": "高3",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_046",
+    "status": "在籍中",
+    "name": "シオミ　ヒロト（塩見　大都）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_047",
+    "status": "在籍中",
+    "name": "ショウジ　サキノ（庄司　咲乃）",
+    "grade": "小6",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_048",
+    "status": "在籍中",
+    "name": "ショウバヤシ　トワ（正林　冬羽）",
+    "grade": "中2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_049",
+    "status": "在籍中",
+    "name": "スズキ　カナタ（鈴木　奏汰）",
+    "grade": "中1",
+    "branch": "高槻",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_050",
+    "status": "在籍中",
+    "name": "スズキ　サホ（鈴木　咲帆）",
+    "grade": "中2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_051",
+    "status": "在籍中",
+    "name": "タカタニ　アヤノ（髙谷　彩乃）",
+    "grade": "中3",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_052",
+    "status": "在籍中",
+    "name": "タキグチ　コトハ（瀧口　琴葉）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_053",
+    "status": "在籍中",
+    "name": "タキグチ　ハオリ（瀧口　葉織）",
+    "grade": "中1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_054",
+    "status": "在籍中",
+    "name": "タグチ　ショウタ（田口　翔汰）",
+    "grade": "高3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_055",
+    "status": "在籍中",
+    "name": "タグチ　リン（田口　凛）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_056",
+    "status": "在籍中",
+    "name": "タナカ　ユウナ（田中　友奈）",
+    "grade": "中1",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_057",
+    "status": "在籍中",
+    "name": "タニグチ　コトミ（谷口　琴美）",
+    "grade": "高1",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_058",
+    "status": "在籍中",
+    "name": "タニグチ　ハルカ（谷口　陽奏）",
+    "grade": "中1",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_059",
+    "status": "在籍中",
+    "name": "トキダ　ジンタロウ（時田　甚太朗）",
+    "grade": "高2",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_060",
+    "status": "在籍中",
+    "name": "トヨトメ　コタロウ（豊留　琥太朗）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_061",
+    "status": "在籍中",
+    "name": "トヨトメ　リュウタロウ（豊留　琉太朗）",
+    "grade": "中2",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_062",
+    "status": "在籍中",
+    "name": "ナカイ　キヒロ（中井　喜洋）",
+    "grade": "高1",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_063",
+    "status": "在籍中",
+    "name": "ナガイ　ヒナタ（永井　陽太）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_064",
+    "status": "在籍中",
+    "name": "ナカムラ　ウイ（中村　羽良）",
+    "grade": "小6",
+    "branch": "向日",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_065",
+    "status": "在籍中",
+    "name": "ナカムラ　ノドカ（中村　のどか）",
+    "grade": "",
+    "branch": "高槻",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_066",
+    "status": "在籍中",
+    "name": "ナカムラ　ミオ（中村　未央）",
+    "grade": "",
+    "branch": "高槻",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_067",
+    "status": "在籍中",
+    "name": "ニシ　コトノ（西　紀乃）",
+    "grade": "高1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_068",
+    "status": "在籍中",
+    "name": "ニシカワ　シオン（西川　詩温）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_069",
+    "status": "在籍中",
+    "name": "ニシカワ　ユナ（西川　ゆな）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_070",
+    "status": "在籍中",
+    "name": "ニシダ　アイハ（西田　愛葉）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_071",
+    "status": "在籍中",
+    "name": "ニシダ　アラタ（西田　新）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_072",
+    "status": "在籍中",
+    "name": "ニシムラ　カズヒロ（西村　和洋）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_073",
+    "status": "在籍中",
+    "name": "ニシムラ　コト（西村　こと）",
+    "grade": "",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_074",
+    "status": "在籍中",
+    "name": "ニシムラ　ナナコ（西村　南菜子）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_075",
+    "status": "在籍中",
+    "name": "ノザキ　エイト（野﨑　瑛斗）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_076",
+    "status": "在籍中",
+    "name": "ノミヤマ　アンズ（野見山　あんず）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_077",
+    "status": "在籍中",
+    "name": "ハシモト　カイト（橋本　佳生翔）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_078",
+    "status": "在籍中",
+    "name": "ハシモト　マオト（橋本　真生翔）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_079",
+    "status": "在籍中",
+    "name": "ハシモト　ユウト（橋本　侑生翔）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_080",
+    "status": "在籍中",
+    "name": "ハセガワ　ユウセイ（長谷川　悠晟）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_081",
+    "status": "退会済",
+    "name": "ハナノイ　メイナ（花野井　明奈）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_082",
+    "status": "在籍中",
+    "name": "ハヤシ　カイト（林　海人）",
+    "grade": "",
+    "branch": "向日",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_083",
+    "status": "在籍中",
+    "name": "ハヤシ　ユズキ（林　柚希）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_084",
+    "status": "在籍中",
+    "name": "バン　ハルト（伴　波瑠十）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_085",
+    "status": "在籍中",
+    "name": "ヒグチ　サクラ（樋口　さくら）",
+    "grade": "",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_086",
+    "status": "在籍中",
+    "name": "フカワ　ソウ（布川　想）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_087",
+    "status": "在籍中",
+    "name": "フジモト　ユイ（藤本　結衣）",
+    "grade": "",
+    "branch": "高槻",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_088",
+    "status": "在籍中",
+    "name": "フルサワ　ミチカ（古澤　実知花）",
+    "grade": "",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_089",
+    "status": "在籍中",
+    "name": "ホリガミ　カヨ（堀上　賀世）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_090",
+    "status": "在籍中",
+    "name": "ホリガミ　コトヨ（堀上　琴世）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_091",
+    "status": "在籍中",
+    "name": "ホンダ　ケンスケ（本多　健祐）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_092",
+    "status": "在籍中",
+    "name": "ホンモチ　ハナ（本持　葉名）",
+    "grade": "中3",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_093",
+    "status": "在籍中",
+    "name": "マエカワ　ヒビキ（前川　響）",
+    "grade": "",
+    "branch": "",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_094",
+    "status": "在籍中",
+    "name": "マエダ　アキエ（前田　明恵）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_095",
+    "status": "在籍中",
+    "name": "マルヤマ　サラ（圓山　紗羅）",
+    "grade": "",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_096",
+    "status": "在籍中",
+    "name": "ミキ　サクラ（三木　咲来）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_097",
+    "status": "在籍中",
+    "name": "ミサワ　ルカ（見澤　瑠花）",
+    "grade": "",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_098",
+    "status": "在籍中",
+    "name": "ミシナ　イツキ（三品　斎希）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_099",
+    "status": "在籍中",
+    "name": "ミシナ　ユズノ（三品　結柚乃）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_100",
+    "status": "在籍中",
+    "name": "ミゾイ　ルカ（溝井　琉叶）",
+    "grade": "",
+    "branch": "向日",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_101",
+    "status": "在籍中",
+    "name": "ミヤタ　コウキ（宮田　倖季）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_102",
+    "status": "在籍中",
+    "name": "ミヤモト　ユズキ（宮元　柚季）",
+    "grade": "",
+    "branch": "太秦",
+    "defaultMonthlyQuota": 16,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_103",
+    "status": "在籍中",
+    "name": "ムラタ　コトネ（村田　琴音）",
+    "grade": "",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_104",
+    "status": "在籍中",
+    "name": "ムロタ　ユイ（室田　唯衣）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_105",
+    "status": "在籍中",
+    "name": "メセ　ナノカ（目瀬　菜乃佳）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_106",
+    "status": "在籍中",
+    "name": "ヤスダ　イッセイ（安田　一生）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_107",
+    "status": "在籍中",
+    "name": "ヤマウチ　ソウマ（山内　颯真）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_108",
+    "status": "在籍中",
+    "name": "ヤマウチ　ミヅキ（山内　瑞月）",
+    "grade": "中3",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_109",
+    "status": "在籍中",
+    "name": "ヤマシタ　リンカ（山下　凜佳）",
+    "grade": "",
+    "branch": "亀岡",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_110",
+    "status": "在籍中",
+    "name": "ヤマナカ　カノン（山中　花音）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_111",
+    "status": "退会済",
+    "name": "ヤマモト　カケル（山本　翔琉）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_112",
+    "status": "在籍中",
+    "name": "ヤマモト　カムリ（山本　果夢利）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_113",
+    "status": "在籍中",
+    "name": "ヤマモト　ソアラ（山本　空歩来）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_114",
+    "status": "在籍中",
+    "name": "ヤマモト　ソウタ（山本　蒼大）",
+    "grade": "中2",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_115",
+    "status": "在籍中",
+    "name": "ヤマモト　タケハル（山本　丈晴）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_116",
+    "status": "在籍中",
+    "name": "ヨシオカ　アリサ（吉岡　愛理沙）",
+    "grade": "",
+    "branch": "向日",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_117",
+    "status": "在籍中",
+    "name": "ヨシダ　リュウヒ（吉田　龍毘）",
+    "grade": "",
+    "branch": "桂",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_118",
+    "status": "在籍中",
+    "name": "ヨデン　キイ（余田　季生）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 12,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_119",
+    "status": "退会済",
+    "name": "ワカバヤシ　サキ（若林　沙希）",
+    "grade": "",
+    "branch": "家庭教師",
+    "defaultMonthlyQuota": 4,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_120",
+    "status": "在籍中",
+    "name": "ワカバヤシ　レイ（若林　伶）",
+    "grade": "中1",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_121",
+    "status": "在籍中",
+    "name": "ワダ　ナツキ（和田　夏希）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_122",
+    "status": "在籍中",
+    "name": "ワダ　ユウキ（和田　勇希）",
+    "grade": "",
+    "branch": "伏見",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  },
+  {
+    "studentId": "stu_123",
+    "status": "在籍中",
+    "name": "ワタナベ　ヒナノ（渡部　日菜乃）",
+    "grade": "",
+    "branch": "長岡京",
+    "defaultMonthlyQuota": 8,
+    "overridesByMonth": {}
+  }
+]
