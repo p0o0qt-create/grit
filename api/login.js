@@ -7,6 +7,10 @@ import {
   signSessionToken,
   isFirestoreEnabled,
   sendJson,
+  getRateLimitKey,
+  checkLoginRateLimit,
+  recordLoginFailure,
+  clearLoginFailures,
 } from './_utils.js';
 
 export default async function handler(req, res) {
@@ -64,15 +68,33 @@ export default async function handler(req, res) {
       });
     }
 
-    if (!lineUserId) {
-      const valid = verifyPassword(password, account.passwordHash || account.password);
-      if (!valid) {
-        return sendJson(res, 401, {
-          ok: false,
-          error: 'IDまたはパスワードが正しくありません',
-        });
-      }
+    const rateKey = getRateLimitKey(req, loginId || account.loginId || account.id);
+    const rateStatus = checkLoginRateLimit(rateKey);
+    if (rateStatus.locked) {
+      return sendJson(res, 429, {
+        ok: false,
+        error: `ログイン試行回数が上限に達しました。${rateStatus.remainingSec}秒後に再試行してください。`,
+      });
     }
+
+    if (!password) {
+      recordLoginFailure(rateKey);
+      return sendJson(res, 401, {
+        ok: false,
+        error: 'IDまたはパスワードが正しくありません',
+      });
+    }
+
+    const valid = verifyPassword(password, account.passwordHash || account.password);
+    if (!valid) {
+      recordLoginFailure(rateKey);
+      return sendJson(res, 401, {
+        ok: false,
+        error: 'IDまたはパスワードが正しくありません',
+      });
+    }
+
+    clearLoginFailures(rateKey);
 
     const updated = await saveDoc('accounts', account.id, {
       lastLoginAt: new Date().toISOString(),
@@ -82,8 +104,10 @@ export default async function handler(req, res) {
       id: updated.id,
       loginId: updated.loginId || updated.id,
       name: updated.name,
+      kanjiName: updated.kanjiName || '',
       role: updated.role || 'hq',
       branch: updated.branch || '',
+      lineFriendRegistered: Boolean(updated.lineFriendRegistered ?? true),
       linkedStudentName: updated.linkedStudentName || '',
       linkedTeacherName: updated.linkedTeacherName || '',
     });

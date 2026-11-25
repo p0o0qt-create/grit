@@ -200,9 +200,60 @@ export function requireAuth(req, allowedRoles = []) {
   return { ok: true, user };
 }
 
+const LOGIN_ATTEMPTS = new Map();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000;
+
+export function getRateLimitKey(req, loginId = '') {
+  const ip =
+    String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim() ||
+    String(req.headers?.['x-real-ip'] || '').trim() ||
+    'unknown_ip';
+  return `${ip}:${String(loginId || '').trim().toLowerCase()}`;
+}
+
+export function checkLoginRateLimit(key) {
+  const entry = LOGIN_ATTEMPTS.get(key);
+  if (!entry) return { locked: false, remainingSec: 0 };
+  const now = Date.now();
+  if (entry.lockUntil && entry.lockUntil > now) {
+    return {
+      locked: true,
+      remainingSec: Math.ceil((entry.lockUntil - now) / 1000),
+    };
+  }
+  if (entry.lockUntil && entry.lockUntil <= now) {
+    LOGIN_ATTEMPTS.delete(key);
+  }
+  return { locked: false, remainingSec: 0 };
+}
+
+export function recordLoginFailure(key) {
+  const now = Date.now();
+  const prev = LOGIN_ATTEMPTS.get(key) || { count: 0, firstAt: now, lockUntil: 0 };
+  if (now - prev.firstAt > LOCKOUT_WINDOW_MS) {
+    LOGIN_ATTEMPTS.set(key, { count: 1, firstAt: now, lockUntil: 0 });
+    return;
+  }
+  const nextCount = prev.count + 1;
+  const lockUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_WINDOW_MS : 0;
+  LOGIN_ATTEMPTS.set(key, {
+    count: nextCount,
+    firstAt: prev.firstAt,
+    lockUntil,
+  });
+}
+
+export function clearLoginFailures(key) {
+  LOGIN_ATTEMPTS.delete(key);
+}
+
 export function sendJson(res, statusCode, body) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.end(JSON.stringify(body));
 }

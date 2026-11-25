@@ -13,7 +13,82 @@ const VALID_ROLES = ['hq', 'reception', 'teacher', 'student', 'parent'];
 
 const SELF_REGISTER_ROLES = ['teacher', 'student', 'parent'];
 
+const SELF_REGISTER_ROLES = ['teacher', 'student', 'parent'];
+
 export default async function handler(req, res) {
+  if (req.method === 'POST' && req.body?.action === 'SELF_REGISTER') {
+    try {
+      const reg = req.body?.payload?.account || req.body || {};
+      const role = String(reg.role || '').trim();
+      const loginId = String(reg.loginId || '').trim();
+      const name = String(reg.name || '').trim();
+      const kanjiName = String(reg.kanjiName || '').trim();
+      const branch = String(reg.branch || '').trim();
+      const lineFriendRegistered = Boolean(reg.lineFriendRegistered ?? true);
+      const lineUserId = String(reg.lineUserId || '').trim();
+      const linkedStudentName = String(reg.linkedStudentName || '').trim();
+      const linkedTeacherName = String(reg.linkedTeacherName || '').trim();
+      const password = String(reg.password || '').trim();
+      const agreed = Boolean(reg.agreed);
+
+      if (!agreed) {
+        return sendJson(res, 400, { ok: false, error: '必要事項および注意喚起への同意にチェックを入れてください' });
+      }
+      if (!SELF_REGISTER_ROLES.includes(role)) {
+        return sendJson(res, 400, { ok: false, error: '新規申請可能な役職は 講師・生徒・保護者 です' });
+      }
+      if (!/^[a-zA-Z0-9_.-]{3,32}$/.test(loginId)) {
+        return sendJson(res, 400, { ok: false, error: 'ログインIDは半角英数字・._- の3〜32文字で入力してください' });
+      }
+      if (!name && !kanjiName) {
+        return sendJson(res, 400, { ok: false, error: '氏名（または漢字氏名）を入力してください' });
+      }
+      if (!lineFriendRegistered) {
+        return sendJson(res, 400, { ok: false, error: 'LINE公式アカウントの友だち登録による通知設定を確認してください' });
+      }
+
+      const existing = await getDocById('accounts', loginId);
+      if (existing) {
+        return sendJson(res, 409, { ok: false, error: `ログインID「${loginId}」は既に登録または申請中です` });
+      }
+
+      const combinedName = kanjiName && name && !name.includes(kanjiName)
+        ? `${name}（${kanjiName}）`
+        : (kanjiName || name);
+
+      const pendingDoc = {
+        id: loginId,
+        loginId,
+        name: combinedName,
+        kanjiName,
+        role,
+        branch,
+        lineUserId,
+        lineFriendRegistered,
+        lineNotificationMode: 'line_friend',
+        linkedStudentName,
+        linkedTeacherName,
+        passwordHash: hashPassword(password || 'grit2026'),
+        mustChangePassword: true,
+        status: '承認待ち',
+        selfRegisteredAt: new Date().toISOString(),
+        approvedBy: null,
+        approvedAt: null,
+      };
+
+      const saved = await saveDoc('accounts', loginId, pendingDoc);
+      const { password: _p, passwordHash: _ph, ...safeAccount } = saved;
+      return sendJson(res, 200, {
+        ok: true,
+        account: safeAccount,
+        message: '新規登録申請を受け付けました。本部との相互確認完了後にログイン可能となります。',
+      });
+    } catch (err) {
+      console.error('Self-register error:', err);
+      return sendJson(res, 500, { ok: false, error: err.message || '新規登録申請でエラーが発生しました' });
+    }
+  }
+
   if (req.method === 'POST' && req.body?.action === 'SELF_REGISTER') {
     try {
       const reg = req.body?.payload?.account || req.body || {};
@@ -116,10 +191,12 @@ export default async function handler(req, res) {
         const acc = payload?.account || req.body || {};
         const loginId = String(acc.loginId || acc.id || '').trim();
         const name = String(acc.name || '').trim();
+        const kanjiName = String(acc.kanjiName || '').trim();
         const role = String(acc.role || '').trim();
         const branch = String(acc.branch || '').trim();
         const password = String(acc.password || '').trim();
         const lineUserId = String(acc.lineUserId || '').trim();
+        const lineFriendRegistered = acc.lineFriendRegistered !== undefined ? Boolean(acc.lineFriendRegistered) : true;
         const linkedStudentName = String(acc.linkedStudentName || '').trim();
         const linkedTeacherName = String(acc.linkedTeacherName || '').trim();
 
@@ -138,13 +215,19 @@ export default async function handler(req, res) {
           return sendJson(res, 409, { ok: false, error: `ログインID「${loginId}」は既に登録されています` });
         }
 
+        const combinedCreateName = kanjiName && name && !name.includes(kanjiName)
+          ? `${name}（${kanjiName}）`
+          : (kanjiName || name);
         const docData = {
           id: loginId,
           loginId,
-          name,
+          name: combinedCreateName,
+          kanjiName,
           role,
           branch,
           lineUserId,
+          lineFriendRegistered,
+          lineNotificationMode: 'line_friend',
           linkedStudentName,
           linkedTeacherName,
           passwordHash: hashPassword(password || 'grit2026'),
@@ -175,12 +258,17 @@ export default async function handler(req, res) {
         const nextRole = acc.role && VALID_ROLES.includes(acc.role) ? acc.role : (current.role || 'hq');
         const patch = {
           name: acc.name !== undefined ? String(acc.name).trim() : current.name,
+          kanjiName: acc.kanjiName !== undefined ? String(acc.kanjiName).trim() : (current.kanjiName || ''),
           role: nextRole,
           branch: acc.branch !== undefined ? String(acc.branch).trim() : current.branch,
           lineUserId: acc.lineUserId !== undefined ? String(acc.lineUserId).trim() : (current.lineUserId || ''),
+          lineFriendRegistered: acc.lineFriendRegistered !== undefined ? Boolean(acc.lineFriendRegistered) : (current.lineFriendRegistered ?? true),
           linkedStudentName: acc.linkedStudentName !== undefined ? String(acc.linkedStudentName).trim() : (current.linkedStudentName || ''),
           linkedTeacherName: acc.linkedTeacherName !== undefined ? String(acc.linkedTeacherName).trim() : (current.linkedTeacherName || ''),
           status: acc.status !== undefined ? String(acc.status).trim() : (current.status || '有効'),
+          ...(acc.status === '有効' && current.status === '承認待ち'
+            ? { approvedBy: auth.user.id, approvedAt: new Date().toISOString() }
+            : {}),
           ...(acc.status === '有効' && current.status === '承認待ち'
             ? { approvedBy: auth.user.id, approvedAt: new Date().toISOString() }
             : {}),
@@ -190,6 +278,28 @@ export default async function handler(req, res) {
         }
 
         const saved = await saveDoc('accounts', targetId, patch);
+        const savedAfterUpd = await getDocById('accounts', targetId) || { ...current, ...patch };
+        if (savedAfterUpd.role === 'student' && (savedAfterUpd.status === '有効' || !savedAfterUpd.status)) {
+          const stuDisplayName = String(savedAfterUpd.linkedStudentName || savedAfterUpd.kanjiName || savedAfterUpd.name || '').trim();
+          if (stuDisplayName) {
+            const existingQuotas = await listDocs('student_quotas');
+            const alreadyExists = existingQuotas.some(
+              (s) => String(s?.name || '').trim() === stuDisplayName
+            );
+            if (!alreadyExists) {
+              const studentId = `stu_acc_${String(savedAfterUpd.loginId || savedAfterUpd.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+              await saveDoc('student_quotas', studentId, {
+                studentId,
+                status: '在籍中',
+                name: stuDisplayName,
+                grade: '',
+                branch: savedAfterUpd.branch || '',
+                defaultMonthlyQuota: 4,
+                overridesByMonth: {},
+              });
+            }
+          }
+        }
         if (saved.role === 'student' && (saved.status === '有効' || !saved.status)) {
           const stuDisplayName = String(saved.linkedStudentName || saved.name || '').trim();
           if (stuDisplayName) {
@@ -223,8 +333,25 @@ export default async function handler(req, res) {
         if (targetId === 'admin' || targetId === auth.user.id) {
           return sendJson(res, 400, { ok: false, error: '初期管理者（admin）または現在ログイン中のアカウントは削除できません' });
         }
+        const targetAcc = await getDocById('accounts', targetId);
         await deleteDocById('accounts', targetId);
-        return sendJson(res, 200, { ok: true, deletedId: targetId });
+        if (targetAcc && targetAcc.role === 'student') {
+          const candidateNames = new Set(
+            [targetAcc.linkedStudentName, targetAcc.kanjiName, targetAcc.name, targetAcc.loginId, targetId]
+              .map((v) => String(v || '').trim())
+              .filter(Boolean)
+          );
+          const quotas = await listDocs('student_quotas');
+          for (const q of quotas) {
+            const qName = String(q?.name || '').trim();
+            const qId = String(q?.studentId || q?.id || '').trim();
+            const expectedStuId = `stu_acc_${String(targetAcc.loginId || targetId).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+            if (qId === expectedStuId || (qName && candidateNames.has(qName))) {
+              await deleteDocById('student_quotas', qId);
+            }
+          }
+        }
+        return sendJson(res, 200, { ok: true, deletedId: targetId, deletedAccount: targetAcc || null });
       }
 
       return sendJson(res, 400, { ok: false, error: '未対応のactionです' });

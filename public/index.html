@@ -131,6 +131,82 @@
 
     <!-- First-Time Registration Panel (Shown on initial screen before login) -->
     <section id="firstTimeRegistrationSection" class="card">
+      <h2 style="margin-top:0;">初めての方へ（必要事項・注意喚起の確認と新規登録申請・LINE友だち通知設定）</h2>
+      <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:0.86rem; line-height:1.6;">
+        <strong>【必要事項】</strong>
+        <ul style="margin:6px 0 10px 18px; padding:0;">
+          <li>対象役職：<strong>講師・生徒・保護者</strong>（該当する役職を選択してください）</li>
+          <li>希望ログインID・氏名（カナ等）・<strong>氏名（漢字）</strong>・所属支部・紐づけ生徒氏名（生徒・保護者）</li>
+          <li><strong>LINE通知設定（友だち登録）</strong>：LINE IDの手入力は不要です。GRIT指導学院のLINE公式アカウントを<strong>友だち登録</strong>することで通知設定を行います。</li>
+        </ul>
+        <strong style="color:#c53030;">【注意喚起・相互確認制について】</strong>
+        <ul style="margin:6px 0 0 18px; padding:0;">
+          <li>新規登録は<strong>相互確認制</strong>です。申請直後は「承認待ち」となり、本部との相互確認・承認完了後にログインが可能になります。</li>
+          <li>LINE公式アカウントの友だち登録やブロック解除が行われていない場合、欠席申請や振替案内などの通知が届かないことがあります。</li>
+          <li>氏名（漢字）や紐づけ氏名の誤りがある場合、リスト表示や対象照合が正しく行われないことがあります。</li>
+        </ul>
+      </div>
+
+      <div class="toolbar">
+        <label>役職区分
+          <select id="selfRegRole">
+            <option value="student">生徒（student）</option>
+            <option value="parent">保護者（parent）</option>
+            <option value="teacher">講師（teacher）</option>
+          </select>
+        </label>
+        <label>希望ログインID
+          <input type="text" id="selfRegLoginId" placeholder="例: stu_tanaka01" style="width:165px;" />
+        </label>
+        <label>氏名・表示名（カナ等）
+          <input type="text" id="selfRegName" placeholder="例: タナカ　ハナコ" style="width:175px;" />
+        </label>
+        <label>氏名（漢字・必須）
+          <input type="text" id="selfRegKanjiName" placeholder="例: 田中　花子" style="width:175px;" />
+        </label>
+        <label>所属支部
+          <select id="selfRegBranch">
+            <option value="亀岡">亀岡</option>
+            <option value="長岡京">長岡京</option>
+            <option value="桂">桂</option>
+            <option value="太秦">太秦</option>
+            <option value="向日">向日</option>
+            <option value="伏見">伏見</option>
+            <option value="家庭教師">家庭教師</option>
+            <option value="高槻">高槻</option>
+          </select>
+        </label>
+        <label>紐づけ生徒氏名（生徒・保護者）
+          <input type="text" id="selfRegLinkedStudent" placeholder="例: アダチ　ユウト（足立　悠帆）" style="width:210px;" />
+        </label>
+        <label>希望パスワード（任意）
+          <input type="password" id="selfRegPassword" style="width:155px;" />
+        </label>
+      </div>
+
+      <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin:10px 0;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">
+          <label style="flex-direction:row; align-items:center; gap:8px; font-weight:600; cursor:pointer; margin:0;">
+            <input type="checkbox" id="selfRegFriendCheck" checked />
+            LINE公式アカウントを友だち登録して通知設定を有効にします（LINE ID手入力不要）
+          </label>
+          <a href="https://line.me/R/" target="_blank" rel="noopener noreferrer" class="secondary" style="display:inline-block; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.84rem; font-weight:600;">LINE友だち登録画面を開く</a>
+        </div>
+      </div>
+
+      <div style="margin:10px 0 12px 0;">
+        <label style="flex-direction:row; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
+          <input type="checkbox" id="selfRegAgreeCheck" />
+          上記の必要事項および注意喚起（相互確認制・LINE友だち登録による通知設定）を確認し、同意して新規登録を申請します。
+        </label>
+      </div>
+
+      <button class="primary" id="selfRegisterBtn">必要事項を確認して新規登録を申請（相互確認・承認待ち）</button>
+      <p id="selfRegMsg" style="margin:10px 0 0 0; font-size:0.88rem; font-weight:600;"></p>
+    </section>
+
+    <!-- First-Time Registration Panel (Shown on initial screen before login) -->
+    <section id="firstTimeRegistrationSection" class="card">
       <h2 style="margin-top:0;">初めての方へ（必要事項・注意喚起の確認と新規登録申請・LINE ID登録）</h2>
       <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:0.86rem; line-height:1.6;">
         <strong>【必要事項】</strong>
@@ -768,6 +844,7 @@
       document.getElementById('storageBadge').textContent = `DB: ${data.storage}`;
       document.getElementById('userBadge').textContent = `${data.account.name} (${data.account.role})`;
       document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('firstTimeRegistrationSection')?.classList.add('hidden');
       document.getElementById('firstTimeRegistrationSection')?.classList.add('hidden');
       const role = data.account.role || 'hq';
       if (['student', 'parent', 'teacher'].includes(role)) {
@@ -1951,13 +2028,49 @@
       tbody.querySelectorAll('[data-del-acc]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const accId = btn.dataset.delAcc;
-          if (!confirm(`アカウント「${accId}」を削除しますか？`)) return;
+          const accObj = (state.accounts || []).find((a) => String(a.id || a.loginId) === String(accId));
+          const needles = [accObj?.linkedStudentName, accObj?.kanjiName, accObj?.name, accObj?.loginId, accObj?.id]
+            .map((v) => String(v || '').trim())
+            .filter(Boolean);
+          const matchedUnpaid = (state.unpaidList || []).filter((u) => {
+            const uName = String(u?.studentName || '').trim();
+            if (!uName) return false;
+            return needles.some((n) => uName === n || uName.includes(n) || n.includes(uName));
+          });
+
+          let msg = `アカウント「${accId}」を削除しますか？`;
+          if (matchedUnpaid.length > 0) {
+            const sumUnpaid = matchedUnpaid.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
+            const lines = matchedUnpaid
+              .map((x) => `・${x.yearMonth || ''} ${x.studentName || ''}：未入金 ¥${Number(x.unpaidAmount || 0).toLocaleString()}`)
+              .join('\n');
+            msg =
+              `【警告】退会・削除対象に未入金リストのデータが含まれています！\n` +
+              `該当件数: ${matchedUnpaid.length}件 ／ 未入金合計: ¥${sumUnpaid.toLocaleString()}\n` +
+              `${lines}\n\n` +
+              `未入金が残っていますが、アカウント「${accId}」を削除（退会処理）しますか？`;
+          }
+
+          if (!confirm(msg)) return;
           const res = await apiFetch('/api/accounts', {
             method: 'POST',
             body: JSON.stringify({ action: 'DELETE_ACCOUNT', payload: { accountId: accId } }),
           });
           if (res.ok) {
-            alert('アカウントを削除しました');
+            state.accounts = (state.accounts || []).filter((a) => String(a.id || a.loginId) !== String(accId));
+            if (accObj?.role === 'student') {
+              const stuNames = new Set(needles);
+              const expectedStuId = `stu_acc_${String(accObj.loginId || accId).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+              state.students = (state.students || []).filter((s) => {
+                const sId = String(s?.studentId || s?.id || '').trim();
+                const sName = String(s?.name || '').trim();
+                return sId !== expectedStuId && !stuNames.has(sName);
+              });
+            }
+            renderAccountsTable();
+            renderQuotaTable();
+            populateMasterDataLists();
+            alert('アカウントを削除し、各リスト・コマ数設定を更新しました');
             await loadAccounts();
           } else {
             alert(res.error || '削除に失敗しました');
@@ -2261,6 +2374,57 @@
       document.getElementById('selfRegLineId').value = '';
       document.getElementById('selfRegPassword').value = '';
       document.getElementById('selfRegAgreeCheck').checked = false;
+    });
+
+  
+    document.getElementById('selfRegisterBtn')?.addEventListener('click', async () => {
+      const msgEl = document.getElementById('selfRegMsg');
+      const role = document.getElementById('selfRegRole').value;
+      const loginId = document.getElementById('selfRegLoginId').value.trim();
+      const name = document.getElementById('selfRegName').value.trim();
+      const kanjiName = document.getElementById('selfRegKanjiName').value.trim();
+      const branch = document.getElementById('selfRegBranch').value.trim();
+      const linkedStudentName = document.getElementById('selfRegLinkedStudent').value.trim();
+      const lineFriendRegistered = document.getElementById('selfRegFriendCheck').checked;
+      const password = document.getElementById('selfRegPassword').value;
+      const agreed = document.getElementById('selfRegAgreeCheck').checked;
+
+      const res = await apiFetch('/api/accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'SELF_REGISTER',
+          payload: {
+            account: {
+              role,
+              loginId,
+              name,
+              kanjiName,
+              branch,
+              linkedStudentName,
+              lineFriendRegistered,
+              password,
+              agreed,
+            },
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        if (msgEl) {
+          msgEl.style.color = '#c53030';
+          msgEl.textContent = res.error || '新規登録申請に失敗しました';
+        }
+        return;
+      }
+
+      if (msgEl) {
+        msgEl.style.color = '#2f855a';
+        msgEl.textContent = `申請完了：ログインID「${loginId}」（漢字氏名: ${kanjiName || name}／LINE友だち通知設定: 有効）を「承認待ち」で登録しました。本部との相互確認・承認完了後にログインしてください。`;
+      }
+      document.getElementById('selfRegLoginId').value = '';
+      document.getElementById('selfRegName').value = '';
+      document.getElementById('selfRegKanjiName').value = '';
+      document.getElementById('selfRegLinkedStudent').value = '';
     });
 
     </script>
