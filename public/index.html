@@ -136,14 +136,13 @@
         <strong>【必要事項】</strong>
         <ul style="margin:6px 0 10px 18px; padding:0;">
           <li>対象役職：<strong>講師・生徒・保護者</strong>（該当する役職を選択してください）</li>
-          <li>希望ログインID・お名前・所属支部・紐づけ対象（生徒／講師氏名）</li>
+          <li>希望ログインID・お名前・所属支部・紐づけ生徒氏名（生徒・保護者）</li>
           <li><strong>LINE ID（LINE User ID）</strong>：欠席申請や振替案内などの通知配信に必須となるため、この登録時に必ずご入力ください。</li>
         </ul>
-        <strong style="color:#c53030;">【注意喚起・本部の許可制について】</strong>
+        <strong style="color:#c53030;">【注意喚起・相互確認制について】</strong>
         <ul style="margin:6px 0 0 18px; padding:0;">
-          <li>新規登録は<strong>本部の許可（承認）制</strong>です。申請直後は「承認待ち」となり、本部での承認完了後にログインが可能になります。</li>
+          <li>新規登録は<strong>相互確認制</strong>です。申請直後は「承認待ち」となり、本部との相互確認・承認完了後にログインが可能になります。</li>
           <li>LINE IDの誤入力や紐づけ氏名の誤りがある場合、欠席通知やスケジュール表示が正しく行われないことがあります。</li>
-          <li>初期パスワード未入力時は <code>grit2026</code> が設定されます。承認後の初回ログイン時に変更してください。</li>
         </ul>
       </div>
 
@@ -176,9 +175,6 @@
         <label>紐づけ生徒氏名（生徒・保護者）
           <input type="text" id="selfRegLinkedStudent" placeholder="例: アダチ　ユウト（足立　悠帆）" style="width:210px;" />
         </label>
-        <label>紐づけ講師氏名（講師）
-          <input type="text" id="selfRegLinkedTeacher" placeholder="例: イノウエ　カナコ" style="width:175px;" />
-        </label>
         <label>LINE ID（LINE User ID・必須）
           <input type="text" id="selfRegLineId" placeholder="例: U1234567890abcdef..." style="width:200px;" />
         </label>
@@ -190,11 +186,11 @@
       <div style="margin:10px 0 12px 0;">
         <label style="flex-direction:row; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
           <input type="checkbox" id="selfRegAgreeCheck" />
-          上記の必要事項および注意喚起（本部の許可制・LINE ID登録の必要性）を確認し、同意して新規登録を申請します。
+          上記の必要事項および注意喚起（相互確認制・LINE ID登録の必要性）を確認し、同意して新規登録を申請します。
         </label>
       </div>
 
-      <button class="primary" id="selfRegisterBtn">必要事項を確認して新規登録を申請（本部承認待ち）</button>
+      <button class="primary" id="selfRegisterBtn">必要事項を確認して新規登録を申請（相互確認・承認待ち）</button>
       <p id="selfRegMsg" style="margin:10px 0 0 0; font-size:0.88rem; font-weight:600;"></p>
     </section>
 
@@ -580,6 +576,7 @@
                 <th>氏名・表示名</th>
                 <th>役職</th>
                 <th>所属支部</th>
+                <th>紐づけ講師／生徒</th>
                 <th>LINE連携</th>
                 <th>状態</th>
                 <th>操作</th>
@@ -1777,32 +1774,53 @@
                   </select>
                 </td>
                 <td><input type="text" value="${(acc.branch || '').replace(/"/g, '&quot;')}" data-acc-branch="${accId}" style="width:110px;" /></td>
+                <td>
+                  <input type="text" list="masterTeacherNamesList" value="${(acc.linkedTeacherName || '').replace(/"/g, '&quot;')}" data-acc-linked-teacher="${accId}" placeholder="紐づけ講師氏名" style="width:145px;" />
+                  <input type="text" list="masterStudentNamesList" value="${(acc.linkedStudentName || '').replace(/"/g, '&quot;')}" data-acc-linked-student="${accId}" placeholder="紐づけ生徒氏名" style="width:145px; margin-top:4px;" />
+                </td>
                 <td>${acc.lineUserId ? '連携済' : '未連携'}</td>
                 <td>${acc.status || '有効'}</td>
                 <td style="white-space:nowrap;">
-                  ${acc.status === '承認待ち' ? `<button class="success" data-approve-acc="${accId}">本部許可（有効化）</button>` : ''}
-                  <button class="secondary" data-save-acc="${accId}">役職更新</button>
+                  ${acc.status === '承認待ち' ? `<button class="success" data-approve-acc="${accId}">相互確認・承認</button>` : ''}
+                  <button class="secondary" data-save-acc="${accId}">更新</button>
                   ${accId !== 'admin' ? `<button class="danger" data-del-acc="${accId}">削除</button>` : ''}
                 </td>
               </tr>
             `;
           }).join('')
-        : '<tr><td colspan="7">登録済みアカウントがありません</td></tr>';
+        : '<tr><td colspan="8">登録済みアカウントがありません</td></tr>';
 
       tbody.querySelectorAll('[data-approve-acc]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const accId = btn.dataset.approveAcc;
+          const roleSel = tbody.querySelector(`[data-acc-role="${accId}"]`);
+          const brInp = tbody.querySelector(`[data-acc-branch="${accId}"]`);
+          const tchInp = tbody.querySelector(`[data-acc-linked-teacher="${accId}"]`);
+          const stuInp = tbody.querySelector(`[data-acc-linked-student="${accId}"]`);
+          const linkedTeacherName = tchInp ? tchInp.value.trim() : '';
+          const linkedStudentName = stuInp ? stuInp.value.trim() : '';
+          if ((roleSel?.value === 'teacher') && !linkedTeacherName) {
+            alert('講師アカウントの承認時には紐づけ講師氏名を入力してください');
+            return;
+          }
           const res = await apiFetch('/api/accounts', {
             method: 'POST',
             body: JSON.stringify({
               action: 'UPDATE_ACCOUNT',
               payload: {
-                account: { id: accId, status: '有効' },
+                account: {
+                  id: accId,
+                  role: roleSel ? roleSel.value : undefined,
+                  branch: brInp ? brInp.value.trim() : undefined,
+                  linkedTeacherName,
+                  linkedStudentName,
+                  status: '有効',
+                },
               },
             }),
           });
           if (res.ok) {
-            alert(`アカウント「${accId}」を本部許可（有効）にしました`);
+            alert(`アカウント「${accId}」の相互確認を完了し、有効化しました`);
             await loadAccounts();
           } else {
             alert(res.error || '承認処理に失敗しました');
@@ -1815,6 +1833,8 @@
           const accId = btn.dataset.saveAcc;
           const roleSel = tbody.querySelector(`[data-acc-role="${accId}"]`);
           const brInp = tbody.querySelector(`[data-acc-branch="${accId}"]`);
+          const tchInp = tbody.querySelector(`[data-acc-linked-teacher="${accId}"]`);
+          const stuInp = tbody.querySelector(`[data-acc-linked-student="${accId}"]`);
           const res = await apiFetch('/api/accounts', {
             method: 'POST',
             body: JSON.stringify({
@@ -1824,6 +1844,8 @@
                   id: accId,
                   role: roleSel ? roleSel.value : undefined,
                   branch: brInp ? brInp.value.trim() : undefined,
+                  linkedTeacherName: tchInp ? tchInp.value.trim() : undefined,
+                  linkedStudentName: stuInp ? stuInp.value.trim() : undefined,
                 },
               },
             }),
@@ -2109,7 +2131,6 @@
       const name = document.getElementById('selfRegName').value.trim();
       const branch = document.getElementById('selfRegBranch').value.trim();
       const linkedStudentName = document.getElementById('selfRegLinkedStudent').value.trim();
-      const linkedTeacherName = document.getElementById('selfRegLinkedTeacher').value.trim();
       const lineUserId = document.getElementById('selfRegLineId').value.trim();
       const password = document.getElementById('selfRegPassword').value;
       const agreed = document.getElementById('selfRegAgreeCheck').checked;
@@ -2125,7 +2146,6 @@
               name,
               branch,
               linkedStudentName,
-              linkedTeacherName,
               lineUserId,
               password,
               agreed,
@@ -2144,12 +2164,11 @@
 
       if (msgEl) {
         msgEl.style.color = '#2f855a';
-        msgEl.textContent = `申請完了：ログインID「${loginId}」（LINE ID: ${lineUserId}）を「承認待ち」で登録しました。本部の許可完了後にログインしてください。`;
+        msgEl.textContent = `申請完了：ログインID「${loginId}」（LINE ID: ${lineUserId}）を「承認待ち」で登録しました。本部との相互確認・承認完了後にログインしてください。`;
       }
       document.getElementById('selfRegLoginId').value = '';
       document.getElementById('selfRegName').value = '';
       document.getElementById('selfRegLinkedStudent').value = '';
-      document.getElementById('selfRegLinkedTeacher').value = '';
       document.getElementById('selfRegLineId').value = '';
       document.getElementById('selfRegPassword').value = '';
       document.getElementById('selfRegAgreeCheck').checked = false;

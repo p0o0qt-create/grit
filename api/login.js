@@ -54,7 +54,7 @@ export default async function handler(req, res) {
     if (account.status === '承認待ち') {
       return sendJson(res, 403, {
         ok: false,
-        error: '現在、本部の承認待ちです。承認完了後にログイン可能となります。',
+        error: '現在、本部との相互確認待ちです。相互確認完了後にログイン可能となります。',
       });
     }
     if (account.status === '無効') {

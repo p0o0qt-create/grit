@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, {
         ok: true,
         account: safeAccount,
-        message: '新規登録申請を受け付けました。本部の許可（承認）完了後にログイン可能となります。',
+        message: '新規登録申請を受け付けました。本部との相互確認完了後にログイン可能となります。',
       });
     } catch (err) {
       console.error('Self-register error:', err);
