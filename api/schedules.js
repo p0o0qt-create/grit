@@ -4,6 +4,7 @@ import {
   listDocs,
   saveDoc,
   batchSaveDocs,
+  deleteDocById,
   requireAuth,
   isFirestoreEnabled,
   sendJson,
@@ -113,13 +114,41 @@ export default async function handler(req, res) {
         return sendJson(res, 200, { ok: true, entry: saved });
       }
 
+      if (action === 'CREATE_DEFAULT_ASSIGNMENT') {
+        const { assignment } = payload || {};
+        const { normalizeAssignment } = await import('../lib/schedule-engine.js');
+        const existing = await listDocs('monthly_templates');
+        const maxOrder = existing.reduce((m, x) => Math.max(m, Number(x.sortOrder || 0)), 0);
+        const nextNum = existing.length + 1;
+        const assignmentId = assignment?.assignmentId || `def_${String(nextNum).padStart(3, '0')}_${Date.now().toString().slice(-4)}`;
+        const normalized = normalizeAssignment({
+          ...assignment,
+          assignmentId,
+          sortOrder: Number(assignment?.sortOrder ?? maxOrder + 1),
+          isActive: assignment?.isActive !== false,
+        }, maxOrder);
+        const saved = await saveDoc('monthly_templates', normalized.assignmentId, normalized);
+        return sendJson(res, 200, { ok: true, assignment: saved });
+      }
+
       if (action === 'UPDATE_DEFAULT_ASSIGNMENT') {
         const { assignment } = payload || {};
         if (!assignment?.assignmentId) {
           return sendJson(res, 400, { ok: false, error: 'assignmentIdが必要です' });
         }
-        const saved = await saveDoc('monthly_templates', assignment.assignmentId, assignment);
+        const { normalizeAssignment } = await import('../lib/schedule-engine.js');
+        const normalized = normalizeAssignment(assignment);
+        const saved = await saveDoc('monthly_templates', normalized.assignmentId, normalized);
         return sendJson(res, 200, { ok: true, assignment: saved });
+      }
+
+      if (action === 'DELETE_DEFAULT_ASSIGNMENT') {
+        const { assignmentId } = payload || {};
+        if (!assignmentId) {
+          return sendJson(res, 400, { ok: false, error: 'assignmentIdが必要です' });
+        }
+        await deleteDocById('monthly_templates', assignmentId);
+        return sendJson(res, 200, { ok: true, deletedId: assignmentId });
       }
 
       if (action === 'UPDATE_STUDENT_QUOTA') {

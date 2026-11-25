@@ -280,24 +280,109 @@
 
       <!-- Tab 4: Default Assignments -->
       <div id="tab-defaults" class="tab-panel card">
-        <h2>月次デフォルト原本（講師×生徒 曜日紐づけマスタ）</h2>
-        <p style="font-size:0.86rem;">原本の担当講師・曜日・時間帯を変更すると、翌月以降の月初展開に反映されます。</p>
-        <div class="toolbar">
-          <input type="file" id="defaultJsonInput" accept=".json,application/json" />
-          <button class="primary" id="importDefaultJsonBtn">JSONを取り込んで原本保存</button>
+        <h2>月次デフォルト原本（追加・変更・削除／講師・生徒リスト選択）</h2>
+        <p style="font-size:0.86rem;">原本の曜日・支部・時間帯・担当講師・生徒・科目を追加・変更・削除すると、翌月以降の月初展開に反映されます（生徒未割当時は「空き」を選択）。</p>
+
+        <div class="card" style="background:#f8fafc; margin-bottom:14px;">
+          <h3 style="margin-top:0; font-size:0.98rem;">新規デフォルト枠の追加</h3>
+          <div class="toolbar" style="margin-bottom:0;">
+            <label>曜日
+              <select id="newDefWeekday">
+                <option value="月曜日">月</option>
+                <option value="火曜日">火</option>
+                <option value="水曜日">水</option>
+                <option value="木曜日">木</option>
+                <option value="金曜日">金</option>
+                <option value="土曜日">土</option>
+                <option value="日曜日">日</option>
+              </select>
+            </label>
+            <label>支部
+              <select id="newDefBranch"></select>
+            </label>
+            <label>時間帯
+              <select id="newDefSlot">
+                <option>14:30-15:50</option>
+                <option>15:00-16:20</option>
+                <option>16:40-18:00</option>
+                <option>16:50-18:10</option>
+                <option>17:10-18:30</option>
+                <option>17:30-18:50</option>
+                <option>18:00-19:20</option>
+                <option>18:30-19:50</option>
+                <option>18:45-20:05</option>
+                <option selected>19:00-20:20</option>
+                <option>19:30-20:50</option>
+                <option>20:00-21:20</option>
+                <option>20:30-21:50</option>
+              </select>
+            </label>
+            <label>担当講師
+              <select id="newDefTeacher"></select>
+            </label>
+            <label>生徒氏名
+              <select id="newDefStudent"></select>
+            </label>
+            <label>学年
+              <input type="text" id="newDefGrade" placeholder="例: 中3" style="width:76px;" />
+            </label>
+            <label>学校名
+              <input type="text" id="newDefSchool" placeholder="例: 詳徳中" style="width:110px;" />
+            </label>
+            <label>科目
+              <input type="text" id="newDefSubject" placeholder="例: 英語・数学 / 空き枠" style="width:150px;" />
+            </label>
+            <button class="primary" id="addDefaultAssignmentBtn">原本に追加</button>
+          </div>
         </div>
+
+        <div class="toolbar">
+          <label>原本・JSON取込
+            <input type="file" id="defaultJsonInput" accept=".json,application/json" />
+          </label>
+          <button class="primary" id="importDefaultJsonBtn">JSONを取り込んで原本保存</button>
+          <label>曜日絞り込み
+            <select id="defFilterWeekday">
+              <option value="">全曜日</option>
+              <option value="月曜日">月</option>
+              <option value="火曜日">火</option>
+              <option value="水曜日">水</option>
+              <option value="木曜日">木</option>
+              <option value="金曜日">金</option>
+              <option value="土曜日">土</option>
+              <option value="日曜日">日</option>
+            </select>
+          </label>
+          <label>支部絞り込み
+            <select id="defFilterBranch"><option value="">全支部</option></select>
+          </label>
+          <label>講師絞り込み
+            <select id="defFilterTeacher"><option value="">全講師</option></select>
+          </label>
+          <label>生徒絞り込み
+            <select id="defFilterStudent"><option value="">全生徒・空き</option></select>
+          </label>
+          <label>検索
+            <input type="text" id="defFilterKeyword" placeholder="生徒・講師・科目など" />
+          </label>
+          <button class="secondary" id="resetDefFiltersBtn">絞り込み解除</button>
+        </div>
+
+        <div id="defaultSummaryText" style="font-size:0.86rem; margin-bottom:8px;"></div>
+
         <div class="table-wrap">
-          <table>
+          <table class="kamoku-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>順</th>
                 <th>曜日</th>
                 <th>支部</th>
                 <th>時間帯</th>
                 <th>デフォルト担当講師</th>
                 <th>生徒氏名</th>
+                <th>学年・学校</th>
                 <th>科目</th>
-                <th>保存</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody id="defaultTableBody"></tbody>
@@ -693,34 +778,250 @@
         }).join('');
     }
 
+    function getAllStudentNames() {
+      const set = new Set();
+      (state.students || []).forEach((s) => {
+        if (s?.name && String(s.name).trim()) set.add(String(s.name).trim());
+      });
+      (state.templates || []).forEach((t) => {
+        const name = String(t?.studentName || '').trim();
+        if (name && name !== '空き') set.add(name);
+      });
+      (state.schedules || []).forEach((r) => {
+        const name = String(r?.studentName || '').trim();
+        if (name && name !== '空き') set.add(name);
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, 'ja'));
+    }
+
+    function populateDefaultControls() {
+      const branches = [...new Set([
+        '亀岡', '長岡京', '桂', '太秦', '向日', '伏見', '家庭教師', '高槻',
+        ...(state.templates || []).map((t) => t.branch).filter(Boolean),
+        ...(state.schedules || []).map((s) => s.branch).filter(Boolean),
+      ])];
+      const teachers = getAllTeacherNames();
+      const students = getAllStudentNames();
+
+      const newBr = document.getElementById('newDefBranch');
+      if (newBr) {
+        const prev = newBr.value;
+        newBr.innerHTML = branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+        if (prev && branches.includes(prev)) newBr.value = prev;
+      }
+
+      const newTch = document.getElementById('newDefTeacher');
+      if (newTch) {
+        const prev = newTch.value;
+        newTch.innerHTML = ['<option value="">（未割当）</option>', ...teachers.map((n) => `<option value="${n}">${n}</option>`)].join('');
+        if (prev) newTch.value = prev;
+      }
+
+      const newStu = document.getElementById('newDefStudent');
+      if (newStu) {
+        const prev = newStu.value;
+        newStu.innerHTML = ['<option value="空き">空き</option>', ...students.map((n) => `<option value="${n}">${n}</option>`)].join('');
+        if (prev) newStu.value = prev;
+      }
+
+      const fBr = document.getElementById('defFilterBranch');
+      if (fBr) {
+        const prev = fBr.value;
+        fBr.innerHTML = '<option value="">全支部</option>' + branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+        if (prev) fBr.value = prev;
+      }
+
+      const fTch = document.getElementById('defFilterTeacher');
+      if (fTch) {
+        const prev = fTch.value;
+        fTch.innerHTML = '<option value="">全講師</option><option value="__UNASSIGNED__">（未割当）</option>' + teachers.map((n) => `<option value="${n}">${n}</option>`).join('');
+        if (prev) fTch.value = prev;
+      }
+
+      const fStu = document.getElementById('defFilterStudent');
+      if (fStu) {
+        const prev = fStu.value;
+        fStu.innerHTML = '<option value="">全生徒・空き</option><option value="空き">空き枠のみ</option>' + students.map((n) => `<option value="${n}">${n}</option>`).join('');
+        if (prev) fStu.value = prev;
+      }
+    }
+
     function renderDefaultTable() {
+      populateDefaultControls();
       const tbody = document.getElementById('defaultTableBody');
-      const sortedTemplates = [...state.templates].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-      tbody.innerHTML = sortedTemplates.map((t) => `
-        <tr>
-          <td>${t.assignmentId}</td>
-          <td>${t.dayOfWeek}</td>
-          <td>${t.branch}</td>
-          <td>${t.timeSlot}</td>
-          <td><input type="text" value="${t.teacherName}" data-def-teacher="${t.assignmentId}" /></td>
-          <td>${t.studentName}</td>
-          <td>${t.subject}</td>
-          <td><button class="secondary" data-save-def="${t.assignmentId}">原本更新</button></td>
-        </tr>
-      `).join('');
+      const fWd = document.getElementById('defFilterWeekday')?.value || '';
+      const fBr = document.getElementById('defFilterBranch')?.value || '';
+      const fTch = document.getElementById('defFilterTeacher')?.value || '';
+      const fStu = document.getElementById('defFilterStudent')?.value || '';
+      const fKw = String(document.getElementById('defFilterKeyword')?.value || '').trim().toLowerCase();
+
+      const sortedTemplates = [...(state.templates || [])].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      const filtered = sortedTemplates.filter((t) => {
+        const vacant = isRowVacant(t);
+        const stuName = vacant ? '空き' : String(t.studentName || '').trim();
+        const tchName = String(t.teacherName || '').trim();
+        if (fWd && t.dayOfWeek !== fWd) return false;
+        if (fBr && t.branch !== fBr) return false;
+        if (fTch === '__UNASSIGNED__' && tchName !== '') return false;
+        if (fTch && fTch !== '__UNASSIGNED__' && tchName !== fTch) return false;
+        if (fStu && stuName !== fStu) return false;
+        if (fKw) {
+          const hay = [t.dayOfWeek, t.branch, t.timeSlot, tchName, stuName, t.grade, t.school, t.subject].join(' ').toLowerCase();
+          if (!hay.includes(fKw)) return false;
+        }
+        return true;
+      });
+
+      const sumEl = document.getElementById('defaultSummaryText');
+      if (sumEl) {
+        sumEl.textContent = `原本表示件数: ${filtered.length}件 / 全${sortedTemplates.length}件`;
+      }
+
+      const allTeachers = getAllTeacherNames();
+      const allStudents = getAllStudentNames();
+      const allBranches = [...new Set([
+        '亀岡', '長岡京', '桂', '太秦', '向日', '伏見', '家庭教師', '高槻',
+        ...sortedTemplates.map((x) => x.branch).filter(Boolean),
+      ])];
+      const allSlots = [...new Set([
+        '14:30-15:50', '15:00-16:20', '16:40-18:00', '16:50-18:10', '17:10-18:30',
+        '17:30-18:50', '18:00-19:20', '18:30-19:50', '18:45-20:05', '19:00-20:20',
+        '19:30-20:50', '20:00-21:20', '20:30-21:50',
+        ...sortedTemplates.map((x) => x.timeSlot).filter(Boolean),
+      ])];
+
+      const teacherOptionsHtml = (selected) => {
+        const selTrim = String(selected || '').trim();
+        const list = [...allTeachers];
+        if (selTrim && !list.includes(selTrim)) list.unshift(selTrim);
+        return [
+          '<option value="">（未割当）</option>',
+          ...list.map((n) => `<option value="${n}" ${n === selTrim ? 'selected' : ''}>${n}</option>`),
+        ].join('');
+      };
+
+      const studentOptionsHtml = (selected, isVacantRow) => {
+        const selTrim = isVacantRow ? '空き' : String(selected || '').trim();
+        const list = [...allStudents];
+        if (selTrim && selTrim !== '空き' && !list.includes(selTrim)) list.unshift(selTrim);
+        return [
+          `<option value="空き" ${selTrim === '空き' ? 'selected' : ''}>空き</option>`,
+          ...list.map((n) => `<option value="${n}" ${n === selTrim ? 'selected' : ''}>${n}</option>`),
+        ].join('');
+      };
+
+      tbody.innerHTML = filtered.map((t, idx) => {
+        const vacant = isRowVacant(t);
+        const wdCls = WEEKDAY_CLASS[t.dayOfWeek] || '';
+        const brBg = BRANCH_BG[t.branch] || '#ffffff';
+        const slotList = [...allSlots];
+        if (t.timeSlot && !slotList.includes(t.timeSlot)) slotList.unshift(t.timeSlot);
+        const brList = [...allBranches];
+        if (t.branch && !brList.includes(t.branch)) brList.unshift(t.branch);
+
+        return `
+          <tr class="${vacant ? 'row-vacant' : ''}">
+            <td style="text-align:center;">${t.sortOrder ?? idx + 1}</td>
+            <td style="text-align:center;">
+              <select data-def-wd="${t.assignmentId}" class="${wdCls}" style="font-weight:700;">
+                ${['月曜日','火曜日','水曜日','木曜日','金曜日','土曜日','日曜日'].map((w) => `<option value="${w}" ${w === t.dayOfWeek ? 'selected' : ''}>${formatShortWeekday(w)}</option>`).join('')}
+              </select>
+            </td>
+            <td style="background:${brBg};">
+              <select data-def-br="${t.assignmentId}" style="background:${brBg};font-weight:600;">
+                ${brList.map((b) => `<option value="${b}" ${b === t.branch ? 'selected' : ''}>${b}</option>`).join('')}
+              </select>
+            </td>
+            <td>
+              <select data-def-slot="${t.assignmentId}">
+                ${slotList.map((s) => `<option value="${s}" ${s === t.timeSlot ? 'selected' : ''}>${s}</option>`).join('')}
+              </select>
+            </td>
+            <td>
+              <select class="teacher-select" data-def-teacher="${t.assignmentId}">
+                ${teacherOptionsHtml(t.teacherName)}
+              </select>
+            </td>
+            <td>
+              <select class="teacher-select" data-def-student="${t.assignmentId}">
+                ${studentOptionsHtml(t.studentName, vacant)}
+              </select>
+            </td>
+            <td>
+              <input type="text" value="${(t.grade || '').replace(/"/g, '&quot;')}" data-def-grade="${t.assignmentId}" style="width:58px;" placeholder="学年" />
+              <input type="text" value="${(t.school || '').replace(/"/g, '&quot;')}" data-def-school="${t.assignmentId}" style="width:92px;" placeholder="学校" />
+            </td>
+            <td>
+              <input type="text" value="${(t.subject || '').replace(/"/g, '&quot;')}" data-def-subject="${t.assignmentId}" style="width:130px;" />
+            </td>
+            <td style="white-space:nowrap;">
+              <button class="secondary" data-save-def="${t.assignmentId}">更新</button>
+              <button class="danger" data-del-def="${t.assignmentId}">削除</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       tbody.querySelectorAll('[data-save-def]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const id = btn.dataset.saveDef;
-          const inp = tbody.querySelector(`[data-def-teacher="${id}"]`);
           const target = state.templates.find((x) => x.assignmentId === id);
-          if (!target || !inp) return;
-          target.teacherName = inp.value.trim();
-          await apiFetch('/api/schedules', {
+          if (!target) return;
+          const wdEl = tbody.querySelector(`[data-def-wd="${id}"]`);
+          const brEl = tbody.querySelector(`[data-def-br="${id}"]`);
+          const slotEl = tbody.querySelector(`[data-def-slot="${id}"]`);
+          const tchEl = tbody.querySelector(`[data-def-teacher="${id}"]`);
+          const stuEl = tbody.querySelector(`[data-def-student="${id}"]`);
+          const grdEl = tbody.querySelector(`[data-def-grade="${id}"]`);
+          const schEl = tbody.querySelector(`[data-def-school="${id}"]`);
+          const subEl = tbody.querySelector(`[data-def-subject="${id}"]`);
+
+          const nextStu = stuEl ? stuEl.value : target.studentName;
+          const vacant = nextStu === '空き' || !String(nextStu || '').trim();
+          const nextSub = subEl ? subEl.value.trim() : target.subject;
+
+          target.dayOfWeek = wdEl ? wdEl.value : target.dayOfWeek;
+          target.branch = brEl ? brEl.value : target.branch;
+          target.timeSlot = slotEl ? slotEl.value : target.timeSlot;
+          target.teacherName = tchEl ? tchEl.value.trim() : target.teacherName;
+          target.defaultTeacherName = target.teacherName;
+          target.studentName = vacant ? '空き' : String(nextStu).trim();
+          target.grade = grdEl ? grdEl.value.trim() : (target.grade || '');
+          target.school = schEl ? schEl.value.trim() : (target.school || '');
+          target.subject = vacant ? (nextSub || '空き枠') : nextSub;
+          target.isVacant = vacant;
+
+          const res = await apiFetch('/api/schedules', {
             method: 'POST',
             body: JSON.stringify({ action: 'UPDATE_DEFAULT_ASSIGNMENT', payload: { assignment: target } }),
           });
-          alert('デフォルト原本を更新しました');
+          if (res.ok) {
+            alert('デフォルト原本を更新しました');
+            renderDefaultTable();
+          } else {
+            alert(res.error || '更新に失敗しました');
+          }
+        });
+      });
+
+      tbody.querySelectorAll('[data-del-def]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.delDef;
+          const target = state.templates.find((x) => x.assignmentId === id);
+          if (!confirm(`このデフォルト原本（${target?.dayOfWeek || ''} ${target?.branch || ''} ${target?.studentName || ''}）を削除しますか？`)) {
+            return;
+          }
+          const res = await apiFetch('/api/schedules', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'DELETE_DEFAULT_ASSIGNMENT', payload: { assignmentId: id } }),
+          });
+          if (res.ok) {
+            state.templates = state.templates.filter((x) => x.assignmentId !== id);
+            alert('デフォルト原本を削除しました');
+            renderDefaultTable();
+          } else {
+            alert(res.error || '削除に失敗しました');
+          }
         });
       });
     }
@@ -899,6 +1200,64 @@
       state.unpaidList = res.unpaidList || [];
       renderUnpaidTable(state.unpaidList);
       alert(`CSV ${res.importedRows}行を取り込み、未入金 ${res.unpaidCount}件を反映しました`);
+    });
+
+    document.getElementById('addDefaultAssignmentBtn').addEventListener('click', async () => {
+      const dayOfWeek = document.getElementById('newDefWeekday').value;
+      const branch = document.getElementById('newDefBranch').value;
+      const timeSlot = document.getElementById('newDefSlot').value;
+      const teacherName = document.getElementById('newDefTeacher').value.trim();
+      const rawStu = document.getElementById('newDefStudent').value.trim();
+      const grade = document.getElementById('newDefGrade').value.trim();
+      const school = document.getElementById('newDefSchool').value.trim();
+      const rawSub = document.getElementById('newDefSubject').value.trim();
+
+      const vacant = rawStu === '空き' || !rawStu;
+      const res = await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'CREATE_DEFAULT_ASSIGNMENT',
+          payload: {
+            assignment: {
+              dayOfWeek,
+              branch,
+              timeSlot,
+              teacherName,
+              defaultTeacherName: teacherName,
+              studentName: vacant ? '空き' : rawStu,
+              grade,
+              school,
+              subject: vacant ? (rawSub || '空き枠') : rawSub,
+              isVacant: vacant,
+            },
+          },
+        }),
+      });
+      if (!res.ok) {
+        alert(res.error || '追加に失敗しました');
+        return;
+      }
+      if (res.assignment) {
+        state.templates.push(res.assignment);
+      }
+      document.getElementById('newDefGrade').value = '';
+      document.getElementById('newDefSchool').value = '';
+      document.getElementById('newDefSubject').value = '';
+      alert('デフォルト原本に追加しました');
+      renderDefaultTable();
+    });
+
+    ['defFilterWeekday', 'defFilterBranch', 'defFilterTeacher', 'defFilterStudent'].forEach((elId) => {
+      document.getElementById(elId).addEventListener('change', renderDefaultTable);
+    });
+    document.getElementById('defFilterKeyword').addEventListener('input', renderDefaultTable);
+    document.getElementById('resetDefFiltersBtn').addEventListener('click', () => {
+      document.getElementById('defFilterWeekday').value = '';
+      document.getElementById('defFilterBranch').value = '';
+      document.getElementById('defFilterTeacher').value = '';
+      document.getElementById('defFilterStudent').value = '';
+      document.getElementById('defFilterKeyword').value = '';
+      renderDefaultTable();
     });
 
     document.getElementById('importDefaultJsonBtn').addEventListener('click', async () => {
