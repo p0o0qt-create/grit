@@ -380,10 +380,14 @@
       document.getElementById('monthSummaryText').textContent =
         `${state.yearMonth} 表示件数: ${filtered.length}コマ / 全${state.schedules.length}コマ（1日から曜日順に整列）`;
 
-      const teacherOptionsHtml = (selected) =>
-        state.teachers
-          .map((t) => `<option value="${t.name}" ${t.name === selected ? 'selected' : ''}>${t.name}</option>`)
-          .join('');
+      const teacherOptionsHtml = (selected) => {
+        const selTrim = String(selected || '').trim();
+        const names = state.teachers.map((t) => t.name);
+        if (selTrim && !names.includes(selTrim)) {
+          names.unshift(selTrim);
+        }
+        return ['<option value="">（未割当）</option>', ...names.map((n) => `<option value="${n}" ${n === selTrim ? 'selected' : ''}>${n}</option>`)].join('');
+      };
 
       const tbody = document.getElementById('monthlyTableBody');
       tbody.innerHTML = filtered.slice(0, 300).map((row) => `
@@ -426,7 +430,7 @@
     function renderRescheduleControls() {
       const targetSel = document.getElementById('absenceTargetScheduleSelect');
       targetSel.innerHTML = state.schedules
-        .filter((s) => s.status === 'scheduled')
+        .filter((s) => s.status === 'scheduled' && !s.isVacant && s.studentName !== '空き')
         .slice(0, 250)
         .map((s) => `<option value="${s.scheduleId}">${s.date} (${s.dayOfWeek}) ${s.timeSlot} | ${s.branch} | ${s.studentName} [講師:${s.teacherName}]</option>`)
         .join('');
@@ -512,7 +516,8 @@
 
     function renderDefaultTable() {
       const tbody = document.getElementById('defaultTableBody');
-      tbody.innerHTML = state.templates.map((t) => `
+      const sortedTemplates = [...state.templates].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      tbody.innerHTML = sortedTemplates.map((t) => `
         <tr>
           <td>${t.assignmentId}</td>
           <td>${t.dayOfWeek}</td>

@@ -9,6 +9,7 @@
     "school": "詳徳中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 1
   },
   {
@@ -21,6 +22,7 @@
     "school": "東輝中",
     "grade": "中2",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 2
   },
   {
@@ -33,6 +35,7 @@
     "school": "詳徳中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 3
   },
   {
@@ -45,6 +48,7 @@
     "school": "詳徳中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 4
   },
   {
@@ -57,6 +61,7 @@
     "school": "東輝中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 5
   },
   {
@@ -69,6 +74,7 @@
     "school": "東輝中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 6
   },
   {
@@ -81,6 +87,7 @@
     "school": "",
     "grade": "小6",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 7
   },
   {
@@ -93,6 +100,7 @@
     "school": "",
     "grade": "小6",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 8
   },
   {
@@ -105,6 +113,7 @@
     "school": "",
     "grade": "小6",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 9
   },
   {
@@ -117,6 +126,7 @@
     "school": "",
     "grade": "小5",
     "subject": "算数",
+    "isVacant": false,
     "sortOrder": 10
   },
   {
@@ -129,6 +139,7 @@
     "school": "",
     "grade": "小6",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 11
   },
   {
@@ -141,6 +152,7 @@
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 12
   },
   {
@@ -153,6 +165,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 13
   },
   {
@@ -165,6 +178,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 14
   },
   {
@@ -177,6 +191,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 15
   },
   {
@@ -189,6 +204,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 16
   },
   {
@@ -201,6 +217,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 17
   },
   {
@@ -213,6 +230,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 18
   },
   {
@@ -225,6 +243,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 19
   },
   {
@@ -237,6 +256,7 @@
     "school": "長岡第2中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 20
   },
   {
@@ -249,6 +269,7 @@
     "school": "長岡中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 21
   },
   {
@@ -261,6 +282,7 @@
     "school": "長岡中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 22
   },
   {
@@ -273,6 +295,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 23
   },
   {
@@ -285,6 +308,7 @@
     "school": "長岡中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 24
   },
   {
@@ -297,6 +321,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 25
   },
   {
@@ -309,6 +334,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 26
   },
   {
@@ -321,6 +347,7 @@
     "school": "長岡第3中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 27
   },
   {
@@ -333,6 +360,7 @@
     "school": "長岡第2中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 28
   },
   {
@@ -345,6 +373,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 29
   },
   {
@@ -357,6 +386,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 30
   },
   {
@@ -369,6 +399,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 31
   },
   {
@@ -381,6 +412,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 32
   },
   {
@@ -393,6 +425,7 @@
     "school": "勝山中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 33
   },
   {
@@ -405,6 +438,7 @@
     "school": "長岡第2中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 34
   },
   {
@@ -417,6 +451,7 @@
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 35
   },
   {
@@ -429,6 +464,7 @@
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 36
   },
   {
@@ -441,6 +477,7 @@
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 37
   },
   {
@@ -453,6 +490,7 @@
     "school": "同志社女子高",
     "grade": "高3",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 38
   },
   {
@@ -465,6 +503,7 @@
     "school": "美山高校",
     "grade": "高2",
     "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 39
   },
   {
@@ -477,6 +516,7 @@
     "school": "関西大高等",
     "grade": "高1",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 40
   },
   {
@@ -489,6 +529,7 @@
     "school": "芸術工芸",
     "grade": "高3",
     "subject": "高校国語",
+    "isVacant": false,
     "sortOrder": 41
   },
   {
@@ -501,6 +542,7 @@
     "school": "美山高校",
     "grade": "高2",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 42
   },
   {
@@ -513,6 +555,7 @@
     "school": "乙訓高校",
     "grade": "高2",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 43
   },
   {
@@ -525,6 +568,7 @@
     "school": "大谷高校",
     "grade": "高3",
     "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 44
   },
   {
@@ -537,6 +581,7 @@
     "school": "関西大高等",
     "grade": "高1",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 45
   },
   {
@@ -549,6 +594,7 @@
     "school": "京都すばる高校",
     "grade": "高3",
     "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 46
   },
   {
@@ -561,6 +607,7 @@
     "school": "桂中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 47
   },
   {
@@ -573,6 +620,7 @@
     "school": "桂中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 48
   },
   {
@@ -585,6 +633,7 @@
     "school": "桂中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 49
   },
   {
@@ -597,6 +646,7 @@
     "school": "紫野高校",
     "grade": "高2",
     "subject": "高校現代文",
+    "isVacant": false,
     "sortOrder": 50
   },
   {
@@ -609,6 +659,7 @@
     "school": "桂中",
     "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 51
   },
   {
@@ -621,6 +672,7 @@
     "school": "桂中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 52
   },
   {
@@ -633,6 +685,7 @@
     "school": "桂中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 53
   },
   {
@@ -645,6 +698,7 @@
     "school": "桂中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 54
   },
   {
@@ -657,6 +711,7 @@
     "school": "桂中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 55
   },
   {
@@ -669,6 +724,7 @@
     "school": "桂中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 56
   },
   {
@@ -681,6 +737,7 @@
     "school": "紫野高校",
     "grade": "高2",
     "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 57
   },
   {
@@ -693,18 +750,20 @@
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 58
   },
   {
     "assignmentId": "def_059",
     "dayOfWeek": "月曜日",
-    "branch": "太秦",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ナガヤ　ユウタ",
-    "studentName": "コニシ　ヒナタ（小西　陽葵）",
-    "school": "双ヶ岡中",
-    "grade": "中1",
-    "subject": "集団クラス（理科・社会）",
+    "branch": "桂",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "空き",
+    "school": "",
+    "grade": "",
+    "subject": "英語・数学",
+    "isVacant": true,
     "sortOrder": 59
   },
   {
@@ -713,22 +772,24 @@
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "タニグチ　ハルカ（谷口　陽奏）",
+    "studentName": "コニシ　ヒナタ（小西　陽葵）",
     "school": "双ヶ岡中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 60
   },
   {
     "assignmentId": "def_061",
     "dayOfWeek": "月曜日",
     "branch": "太秦",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "オオタ　ミヤ（太田　みや）",
-    "school": "太秦中",
-    "grade": "中3",
+    "studentName": "タニグチ　ハルカ（谷口　陽奏）",
+    "school": "双ヶ岡中",
+    "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 61
   },
   {
@@ -737,10 +798,11 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
+    "studentName": "オオタ　ミヤ（太田　みや）",
     "school": "太秦中",
-    "grade": "",
+    "grade": "中3",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 62
   },
   {
@@ -749,10 +811,11 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "ミヤモト　ユズキ（宮元　柚季）",
-    "school": "双ヶ岡中",
+    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
+    "school": "太秦中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 63
   },
   {
@@ -761,10 +824,11 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
-    "school": "太秦中",
+    "studentName": "ミヤモト　ユズキ（宮元　柚季）",
+    "school": "双ヶ岡中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 64
   },
   {
@@ -773,22 +837,24 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "フルサワ　ミチカ（古澤　実知花）",
+    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
     "school": "太秦中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 65
   },
   {
     "assignmentId": "def_066",
     "dayOfWeek": "月曜日",
-    "branch": "向日",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "シオミ　アミ（塩見　彩未）",
-    "school": "",
-    "grade": "小6",
-    "subject": "算数・英語",
+    "branch": "太秦",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "ナガヤ　ユウタ",
+    "studentName": "フルサワ　ミチカ（古澤　実知花）",
+    "school": "太秦中",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 66
   },
   {
@@ -797,10 +863,11 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ナカムラ　ウイ（中村　羽良）",
+    "studentName": "シオミ　アミ（塩見　彩未）",
     "school": "",
     "grade": "小6",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 67
   },
   {
@@ -809,10 +876,11 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "オクダ　コハル（奥田　心春）",
-    "school": "西ノ岡中",
-    "grade": "中1",
-    "subject": "集団クラス（理科・社会）",
+    "studentName": "ナカムラ　ウイ（中村　羽良）",
+    "school": "",
+    "grade": "小6",
+    "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 68
   },
   {
@@ -820,11 +888,12 @@
     "dayOfWeek": "月曜日",
     "branch": "向日",
     "timeSlot": "19:00-20:20",
-    "teacherName": "イワナガ　ケイ",
-    "studentName": "サタ　ミサキ（佐田　美咲希）",
-    "school": "勝山中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "オクダ　コハル（奥田　心春）",
+    "school": "西ノ岡中",
+    "grade": "中1",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 69
   },
   {
@@ -833,10 +902,11 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "クサノ　カナメ（草野　要）",
+    "studentName": "サタ　ミサキ（佐田　美咲希）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 70
   },
   {
@@ -845,22 +915,24 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "マルヤマ　サラ（圓山　紗羅）",
-    "school": "大阪大谷中",
-    "grade": "中2",
-    "subject": "英語",
+    "studentName": "クサノ　カナメ（草野　要）",
+    "school": "勝山中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 71
   },
   {
     "assignmentId": "def_072",
     "dayOfWeek": "月曜日",
     "branch": "向日",
-    "timeSlot": "20:30-21:50",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "シオミ　コウタ（塩見　煌大）",
-    "school": "乙訓高校",
-    "grade": "高3",
-    "subject": "高校英語",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "イワナガ　ケイ",
+    "studentName": "マルヤマ　サラ（圓山　紗羅）",
+    "school": "大阪大谷中",
+    "grade": "中2",
+    "subject": "英語",
+    "isVacant": false,
     "sortOrder": 72
   },
   {
@@ -869,10 +941,11 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ヨシオカ　アリサ（吉岡　愛理沙）",
-    "school": "同志社女子高",
-    "grade": "高1",
+    "studentName": "シオミ　コウタ（塩見　煌大）",
+    "school": "乙訓高校",
+    "grade": "高3",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 73
   },
   {
@@ -881,10 +954,11 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ウヤマ　ソラ（宇山　蒼空）",
-    "school": "乙訓高校",
-    "grade": "高2",
+    "studentName": "ヨシオカ　アリサ（吉岡　愛理沙）",
+    "school": "同志社女子高",
+    "grade": "高1",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 74
   },
   {
@@ -892,11 +966,12 @@
     "dayOfWeek": "月曜日",
     "branch": "向日",
     "timeSlot": "20:30-21:50",
-    "teacherName": "イワナガ　ケイ",
-    "studentName": "サタ　ミサキ（佐田　美咲希）",
-    "school": "勝山中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "ウヤマ　ソラ（宇山　蒼空）",
+    "school": "乙訓高校",
+    "grade": "高2",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 75
   },
   {
@@ -905,10 +980,11 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "クサノ　カナメ（草野　要）",
+    "studentName": "サタ　ミサキ（佐田　美咲希）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 76
   },
   {
@@ -917,22 +993,24 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ハヤシ　カイト（林　海人）",
-    "school": "日吉ヶ丘高校",
-    "grade": "高2",
-    "subject": "高校英語",
+    "studentName": "クサノ　カナメ（草野　要）",
+    "school": "勝山中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 77
   },
   {
     "assignmentId": "def_078",
     "dayOfWeek": "月曜日",
-    "branch": "伏見",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ミヨシ　トモユキ",
-    "studentName": "ワダ　ユウキ（和田　勇希）",
-    "school": "伏見中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "branch": "向日",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "イワナガ　ケイ",
+    "studentName": "ハヤシ　カイト（林　海人）",
+    "school": "日吉ヶ丘高校",
+    "grade": "高2",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 78
   },
   {
@@ -941,10 +1019,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "バン　ハルト（伴　波瑠十）",
+    "studentName": "ワダ　ユウキ（和田　勇希）",
     "school": "伏見中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 79
   },
   {
@@ -953,22 +1032,24 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "ノザキ　エイト（野﨑　瑛斗）",
+    "studentName": "バン　ハルト（伴　波瑠十）",
     "school": "伏見中",
-    "grade": "中3",
+    "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 80
   },
   {
     "assignmentId": "def_081",
     "dayOfWeek": "月曜日",
     "branch": "伏見",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "マエダ　アキエ（前田　明恵）",
-    "school": "精華高校",
-    "grade": "高2",
-    "subject": "高校古文",
+    "studentName": "ノザキ　エイト（野﨑　瑛斗）",
+    "school": "伏見中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 81
   },
   {
@@ -977,22 +1058,24 @@
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "トキダ　ジンタロウ（時田　甚太朗）",
-    "school": "大谷高校",
+    "studentName": "マエダ　アキエ（前田　明恵）",
+    "school": "精華高校",
     "grade": "高2",
     "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 82
   },
   {
     "assignmentId": "def_083",
-    "dayOfWeek": "火曜日",
-    "branch": "家庭教師",
-    "timeSlot": "17:10-18:30",
-    "teacherName": "オオムラ　サオリ",
-    "studentName": "ニシカワ　ユナ（西川　ゆな）",
-    "school": "清明高校",
-    "grade": "高3",
-    "subject": "高校数学",
+    "dayOfWeek": "月曜日",
+    "branch": "伏見",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "ミヨシ　トモユキ",
+    "studentName": "トキダ　ジンタロウ（時田　甚太朗）",
+    "school": "大谷高校",
+    "grade": "高2",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 83
   },
   {
@@ -1001,22 +1084,24 @@
     "branch": "家庭教師",
     "timeSlot": "17:10-18:30",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ニシカワ　シオン（西川　詩温）",
-    "school": "長岡第3中",
-    "grade": "中2",
-    "subject": "算数・英語",
+    "studentName": "ニシカワ　ユナ（西川　ゆな）",
+    "school": "清明高校",
+    "grade": "高3",
+    "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 84
   },
   {
     "assignmentId": "def_085",
     "dayOfWeek": "火曜日",
     "branch": "家庭教師",
-    "timeSlot": "18:45-20:05",
+    "timeSlot": "17:10-18:30",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "イカワ　タツキ（猪川　竜己）",
-    "school": "",
-    "grade": "小6",
+    "studentName": "ニシカワ　シオン（西川　詩温）",
+    "school": "長岡第3中",
+    "grade": "中2",
     "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 85
   },
   {
@@ -1025,14 +1110,28 @@
     "branch": "家庭教師",
     "timeSlot": "18:45-20:05",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "イカワ　ユリア（猪川　優梨愛）",
-    "school": "長岡第3中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "studentName": "イカワ　タツキ（猪川　竜己）",
+    "school": "",
+    "grade": "小6",
+    "subject": "算数・英語",
+    "isVacant": false,
     "sortOrder": 86
   },
   {
     "assignmentId": "def_087",
+    "dayOfWeek": "火曜日",
+    "branch": "家庭教師",
+    "timeSlot": "18:45-20:05",
+    "teacherName": "オオムラ　サオリ",
+    "studentName": "イカワ　ユリア（猪川　優梨愛）",
+    "school": "長岡第3中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 87
+  },
+  {
+    "assignmentId": "def_088",
     "dayOfWeek": "火曜日",
     "branch": "家庭教師",
     "timeSlot": "20:30-21:50",
@@ -1041,18 +1140,7 @@
     "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
-    "sortOrder": 87
-  },
-  {
-    "assignmentId": "def_088",
-    "dayOfWeek": "火曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ウエダ　コウタ（上田　琥大）",
-    "school": "長岡第3中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 88
   },
   {
@@ -1061,10 +1149,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ヤマモト　ソアラ（山本　空歩来）",
+    "studentName": "ウエダ　コウタ（上田　琥大）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 89
   },
   {
@@ -1073,10 +1162,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ショウバヤシ　トワ（正林　冬羽）",
+    "studentName": "ヤマモト　ソアラ（山本　空歩来）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 90
   },
   {
@@ -1084,11 +1174,12 @@
     "dayOfWeek": "火曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "タバナ　ヨシカズ",
-    "studentName": "シオツカ　ユウキ（塩塚　悠生）",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "ショウバヤシ　トワ（正林　冬羽）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 91
   },
   {
@@ -1097,10 +1188,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "トヨトメ　リュウタロウ（豊留　琉太朗）",
+    "studentName": "シオツカ　ユウキ（塩塚　悠生）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 92
   },
   {
@@ -1109,22 +1201,24 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "ホンダ　ケンスケ（本多　健祐）",
+    "studentName": "トヨトメ　リュウタロウ（豊留　琉太朗）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 93
   },
   {
     "assignmentId": "def_094",
     "dayOfWeek": "火曜日",
     "branch": "長岡京",
-    "timeSlot": "20:30-21:50",
-    "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "スズキ　サホ（鈴木　咲帆）",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "タバナ　ヨシカズ",
+    "studentName": "ホンダ　ケンスケ（本多　健祐）",
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 94
   },
   {
@@ -1133,10 +1227,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "コウヤマ　マコ（香山　眞子）",
-    "school": "同志社女子高校",
-    "grade": "高1",
-    "subject": "高校英語",
+    "studentName": "スズキ　サホ（鈴木　咲帆）",
+    "school": "長岡第3中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 95
   },
   {
@@ -1144,11 +1239,12 @@
     "dayOfWeek": "火曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
-    "teacherName": "タバナ　ヨシカズ",
-    "studentName": "イノウエ　カイト（井ノ上　快斗）",
-    "school": "長岡第3中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "コウヤマ　マコ（香山　眞子）",
+    "school": "同志社女子高校",
+    "grade": "高1",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 96
   },
   {
@@ -1157,10 +1253,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "ハセガワ　ユウセイ（長谷川　悠晟）",
+    "studentName": "イノウエ　カイト（井ノ上　快斗）",
     "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 97
   },
   {
@@ -1169,22 +1266,24 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "シオミ　ヒロト（塩見　大都）",
-    "school": "長岡第2中",
+    "studentName": "ハセガワ　ユウセイ（長谷川　悠晟）",
+    "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 98
   },
   {
     "assignmentId": "def_099",
-    "dayOfWeek": "水曜日",
+    "dayOfWeek": "火曜日",
     "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "キタイ　ミチオ",
-    "studentName": "オカダ　シンノスケ（岡田　慎之介）",
-    "school": "長岡中",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "タバナ　ヨシカズ",
+    "studentName": "シオミ　ヒロト（塩見　大都）",
+    "school": "長岡第2中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 99
   },
   {
@@ -1193,10 +1292,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "キタイ　ミチオ",
-    "studentName": "フカワ　ソウ（布川　想）",
-    "school": "長岡第3中",
+    "studentName": "オカダ　シンノスケ（岡田　慎之介）",
+    "school": "長岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 100
   },
   {
@@ -1205,10 +1305,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "キタイ　ミチオ",
-    "studentName": "アダチ　ユウト（足立　悠帆）",
+    "studentName": "フカワ　ソウ（布川　想）",
     "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 101
   },
   {
@@ -1216,11 +1317,12 @@
     "dayOfWeek": "水曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "タバナ　ヨシカズ",
-    "studentName": "ヨデン　キイ（余田　季生）",
-    "school": "勝山中",
+    "teacherName": "キタイ　ミチオ",
+    "studentName": "アダチ　ユウト（足立　悠帆）",
+    "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 102
   },
   {
@@ -1229,10 +1331,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "イノウエ　カイト（井ノ上　快斗）",
-    "school": "長岡第3中",
+    "studentName": "ヨデン　キイ（余田　季生）",
+    "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 103
   },
   {
@@ -1240,11 +1343,12 @@
     "dayOfWeek": "水曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "タキグチ　ハオリ（瀧口　葉織）",
+    "teacherName": "タバナ　ヨシカズ",
+    "studentName": "イノウエ　カイト（井ノ上　快斗）",
     "school": "長岡第3中",
-    "grade": "中1",
-    "subject": "集団クラス（理科・社会）",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 104
   },
   {
@@ -1253,10 +1357,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "イソズミ　ジョウ（五十棲　丈）",
+    "studentName": "タキグチ　ハオリ（瀧口　葉織）",
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 105
   },
   {
@@ -1265,10 +1370,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "オオツカ　チハヤ（大塚　千榮）",
+    "studentName": "イソズミ　ジョウ（五十棲　丈）",
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 106
   },
   {
@@ -1277,10 +1383,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "メセ　ナノカ（目瀬　菜乃佳）",
+    "studentName": "オオツカ　チハヤ（大塚　千榮）",
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 107
   },
   {
@@ -1289,10 +1396,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ノミヤマ　アンズ（野見山　あんず）",
+    "studentName": "メセ　ナノカ（目瀬　菜乃佳）",
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 108
   },
   {
@@ -1301,22 +1409,24 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ハヤシ　ユズキ（林　柚希）",
-    "school": "勝山中",
+    "studentName": "ノミヤマ　アンズ（野見山　あんず）",
+    "school": "長岡第3中",
     "grade": "中1",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 109
   },
   {
     "assignmentId": "def_110",
     "dayOfWeek": "水曜日",
     "branch": "長岡京",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ホリガミ　カヨ（堀上　賀世）",
-    "school": "嵯峨野高校",
-    "grade": "高1",
-    "subject": "高校古文",
+    "studentName": "ハヤシ　ユズキ（林　柚希）",
+    "school": "勝山中",
+    "grade": "中1",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 110
   },
   {
@@ -1325,10 +1435,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ホリガミ　コトヨ（堀上　琴世）",
-    "school": "京都教育大付属高校",
+    "studentName": "ホリガミ　カヨ（堀上　賀世）",
+    "school": "嵯峨野高校",
     "grade": "高1",
-    "subject": "高校数学",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 111
   },
   {
@@ -1336,11 +1447,12 @@
     "dayOfWeek": "水曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
-    "teacherName": "タバナ　ヨシカズ",
-    "studentName": "タグチ　ショウタ（田口　翔汰）",
-    "school": "京都すばる高校",
-    "grade": "高3",
-    "subject": "高校英語",
+    "teacherName": "ナカヤマ　ショウタ",
+    "studentName": "ホリガミ　コトヨ（堀上　琴世）",
+    "school": "京都教育大付属高校",
+    "grade": "高1",
+    "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 112
   },
   {
@@ -1349,10 +1461,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "イノウエ　コウ（井上　昊）",
-    "school": "京都外大西高校",
-    "grade": "高1",
+    "studentName": "タグチ　ショウタ（田口　翔汰）",
+    "school": "京都すばる高校",
+    "grade": "高3",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 113
   },
   {
@@ -1361,10 +1474,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "タバナ　ヨシカズ",
-    "studentName": "コウヤマ　マコ（香山　眞子）",
-    "school": "同志社女子高校",
+    "studentName": "イノウエ　コウ（井上　昊）",
+    "school": "京都外大西高校",
     "grade": "高1",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 114
   },
   {
@@ -1372,11 +1486,12 @@
     "dayOfWeek": "水曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
-    "teacherName": "キタイ　ミチオ",
-    "studentName": "オカダ　シンノスケ（岡田　慎之介）",
-    "school": "長岡中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "teacherName": "タバナ　ヨシカズ",
+    "studentName": "コウヤマ　マコ（香山　眞子）",
+    "school": "同志社女子高校",
+    "grade": "高1",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 115
   },
   {
@@ -1385,10 +1500,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "キタイ　ミチオ",
-    "studentName": "フカワ　ソウ（布川　想）",
-    "school": "長岡第3中",
+    "studentName": "オカダ　シンノスケ（岡田　慎之介）",
+    "school": "長岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 116
   },
   {
@@ -1397,22 +1513,24 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "キタイ　ミチオ",
-    "studentName": "イシカワ　フウタ（石川　楓太）",
-    "school": "長岡中",
+    "studentName": "フカワ　ソウ（布川　想）",
+    "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 117
   },
   {
     "assignmentId": "def_118",
     "dayOfWeek": "水曜日",
-    "branch": "桂",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ヤマナカ　カノン（山中　花音）",
-    "school": "桂中",
+    "branch": "長岡京",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "キタイ　ミチオ",
+    "studentName": "イシカワ　フウタ（石川　楓太）",
+    "school": "長岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 118
   },
   {
@@ -1421,10 +1539,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ミシナ　イツキ（三品　斎希）",
+    "studentName": "ヤマナカ　カノン（山中　花音）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 119
   },
   {
@@ -1433,10 +1552,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "イチカワ　ハルト（市川　遥翔）",
+    "studentName": "ミシナ　イツキ（三品　斎希）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 120
   },
   {
@@ -1444,11 +1564,12 @@
     "dayOfWeek": "水曜日",
     "branch": "桂",
     "timeSlot": "18:30-19:50",
-    "teacherName": "ミヨシ　トモユキ",
-    "studentName": "サトウ　ユウマ（佐藤　佑真）",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "イチカワ　ハルト（市川　遥翔）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 121
   },
   {
@@ -1457,10 +1578,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "キタムラ　ケイ（北村　圭）",
+    "studentName": "サトウ　ユウマ（佐藤　佑真）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 122
   },
   {
@@ -1469,22 +1591,24 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "イシザカ　ユウヤ（石坂　侑也）",
+    "studentName": "キタムラ　ケイ（北村　圭）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 123
   },
   {
     "assignmentId": "def_124",
     "dayOfWeek": "水曜日",
     "branch": "桂",
-    "timeSlot": "20:00-21:20",
-    "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ヤマナカ　カノン（山中　花音）",
+    "timeSlot": "18:30-19:50",
+    "teacherName": "ミヨシ　トモユキ",
+    "studentName": "イシザカ　ユウヤ（石坂　侑也）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 124
   },
   {
@@ -1493,10 +1617,11 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ミシナ　イツキ（三品　斎希）",
+    "studentName": "ヤマナカ　カノン（山中　花音）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 125
   },
   {
@@ -1505,10 +1630,11 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "イチカワ　ハルト（市川　遥翔）",
+    "studentName": "ミシナ　イツキ（三品　斎希）",
     "school": "桂中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 126
   },
   {
@@ -1516,11 +1642,12 @@
     "dayOfWeek": "水曜日",
     "branch": "桂",
     "timeSlot": "20:00-21:20",
-    "teacherName": "ミヨシ　トモユキ",
-    "studentName": "ミキ　サクラ（三木　咲来）",
-    "school": "紫野高校",
-    "grade": "高2",
-    "subject": "高校英語",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "イチカワ　ハルト（市川　遥翔）",
+    "school": "桂中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 127
   },
   {
@@ -1529,22 +1656,24 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "ミヨシ　トモユキ",
-    "studentName": "カトウ　ユイ（加藤　優衣）",
-    "school": "桂中",
-    "grade": "中1",
-    "subject": "英語・数学",
+    "studentName": "ミキ　サクラ（三木　咲来）",
+    "school": "紫野高校",
+    "grade": "高2",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 128
   },
   {
     "assignmentId": "def_129",
     "dayOfWeek": "水曜日",
-    "branch": "太秦",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "コニシ　ヒナタ（小西　陽葵）",
-    "school": "双ヶ岡中",
+    "branch": "桂",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "ミヨシ　トモユキ",
+    "studentName": "カトウ　ユイ（加藤　優衣）",
+    "school": "桂中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 129
   },
   {
@@ -1553,10 +1682,11 @@
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
     "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "タニグチ　ハルカ（谷口　陽奏）",
+    "studentName": "コニシ　ヒナタ（小西　陽葵）",
     "school": "双ヶ岡中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 130
   },
   {
@@ -1565,10 +1695,11 @@
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
     "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "ミヤモト　ユズキ（宮元　柚季）",
+    "studentName": "タニグチ　ハルカ（谷口　陽奏）",
     "school": "双ヶ岡中",
-    "grade": "中3",
+    "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 131
   },
   {
@@ -1576,11 +1707,12 @@
     "dayOfWeek": "水曜日",
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
-    "teacherName": "クロキ　ユウダイ",
+    "teacherName": "ハシヅメ　ミサオ",
     "studentName": "ミヤモト　ユズキ（宮元　柚季）",
     "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 132
   },
   {
@@ -1589,22 +1721,24 @@
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
     "teacherName": "クロキ　ユウダイ",
-    "studentName": "ホンモチ　ハナ（本持　葉名）",
+    "studentName": "ミヤモト　ユズキ（宮元　柚季）",
     "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 133
   },
   {
     "assignmentId": "def_134",
     "dayOfWeek": "水曜日",
     "branch": "太秦",
-    "timeSlot": "20:00-21:20",
-    "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
-    "school": "太秦中",
+    "timeSlot": "18:30-19:50",
+    "teacherName": "クロキ　ユウダイ",
+    "studentName": "ホンモチ　ハナ（本持　葉名）",
+    "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 134
   },
   {
@@ -1613,10 +1747,11 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
+    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
     "school": "太秦中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 135
   },
   {
@@ -1625,10 +1760,11 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "ハシヅメ　ミサオ",
-    "studentName": "ホンモチ　ハナ（本持　葉名）",
-    "school": "双ヶ岡中",
+    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
+    "school": "太秦中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 136
   },
   {
@@ -1636,11 +1772,12 @@
     "dayOfWeek": "水曜日",
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
-    "teacherName": "クロキ　ユウダイ",
-    "studentName": "フルサワ　ミチカ（古澤　実知花）",
-    "school": "太秦中",
+    "teacherName": "ハシヅメ　ミサオ",
+    "studentName": "ホンモチ　ハナ（本持　葉名）",
+    "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 137
   },
   {
@@ -1649,22 +1786,24 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "クロキ　ユウダイ",
-    "studentName": "オオタ　ミヤ（太田　みや）",
+    "studentName": "フルサワ　ミチカ（古澤　実知花）",
     "school": "太秦中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 138
   },
   {
     "assignmentId": "def_139",
     "dayOfWeek": "水曜日",
-    "branch": "向日",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "イトウ　ハナ（伊藤　花）",
-    "school": "西ノ岡中",
-    "grade": "中2",
+    "branch": "太秦",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "クロキ　ユウダイ",
+    "studentName": "オオタ　ミヤ（太田　みや）",
+    "school": "太秦中",
+    "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 139
   },
   {
@@ -1673,10 +1812,11 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "カワサキ　チハナ（川﨑　千花）",
-    "school": "寺戸中",
+    "studentName": "イトウ　ハナ（伊藤　花）",
+    "school": "西ノ岡中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 140
   },
   {
@@ -1685,22 +1825,24 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "マエカワ　ヒビキ（前川　響）",
-    "school": "西ノ岡中",
+    "studentName": "カワサキ　チハナ（川﨑　千花）",
+    "school": "寺戸中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 141
   },
   {
     "assignmentId": "def_142",
     "dayOfWeek": "水曜日",
     "branch": "向日",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "シオミ　コウタ（塩見　煌大）",
-    "school": "乙訓高校",
-    "grade": "高3",
-    "subject": "高校古文",
+    "studentName": "マエカワ　ヒビキ（前川　響）",
+    "school": "西ノ岡中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 142
   },
   {
@@ -1709,10 +1851,11 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ヨシオカ　アリサ（吉岡　愛理沙）",
-    "school": "同志社女子高",
-    "grade": "高1",
+    "studentName": "シオミ　コウタ（塩見　煌大）",
+    "school": "乙訓高校",
+    "grade": "高3",
     "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 143
   },
   {
@@ -1721,22 +1864,24 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ミゾイ　ルカ（溝井　琉叶）",
-    "school": "山城高校",
-    "grade": "高3",
+    "studentName": "ヨシオカ　アリサ（吉岡　愛理沙）",
+    "school": "同志社女子高",
+    "grade": "高1",
     "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 144
   },
   {
     "assignmentId": "def_145",
     "dayOfWeek": "水曜日",
-    "branch": "伏見",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ホンダ　ユウト",
-    "studentName": "ワダ　ナツキ（和田　夏希）",
-    "school": "伏見中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "branch": "向日",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "ミゾイ　ルカ（溝井　琉叶）",
+    "school": "山城高校",
+    "grade": "高3",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 145
   },
   {
@@ -1745,10 +1890,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "ホンダ　ユウト",
-    "studentName": "タナカ　ユウナ（田中　友奈）",
+    "studentName": "ワダ　ナツキ（和田　夏希）",
     "school": "伏見中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 146
   },
   {
@@ -1756,11 +1902,12 @@
     "dayOfWeek": "水曜日",
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
-    "teacherName": "クリモト　チカ",
-    "studentName": "ノザキ　エイト（野﨑　瑛斗）",
+    "teacherName": "ホンダ　ユウト",
+    "studentName": "タナカ　ユウナ（田中　友奈）",
     "school": "伏見中",
-    "grade": "中3",
+    "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 147
   },
   {
@@ -1769,10 +1916,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "クリモト　チカ",
-    "studentName": "ヤマモト　ソウタ（山本　蒼大）",
-    "school": "洛水中",
-    "grade": "中2",
+    "studentName": "ノザキ　エイト（野﨑　瑛斗）",
+    "school": "伏見中",
+    "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 148
   },
   {
@@ -1781,22 +1929,24 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "クリモト　チカ",
-    "studentName": "オカノ　ソウ（岡野　颯）",
+    "studentName": "ヤマモト　ソウタ（山本　蒼大）",
     "school": "洛水中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 149
   },
   {
     "assignmentId": "def_150",
     "dayOfWeek": "水曜日",
     "branch": "伏見",
-    "timeSlot": "20:00-21:20",
-    "teacherName": "ホンダ　ユウト",
-    "studentName": "キム　シウン（金　示殷）",
-    "school": "同志社国際高校",
-    "grade": "高3",
-    "subject": "高校数学",
+    "timeSlot": "18:30-19:50",
+    "teacherName": "クリモト　チカ",
+    "studentName": "オカノ　ソウ（岡野　颯）",
+    "school": "洛水中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 150
   },
   {
@@ -1805,10 +1955,11 @@
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
     "teacherName": "ホンダ　ユウト",
-    "studentName": "ニシムラ　カズヒロ（西村　和洋）",
-    "school": "京産大付属高校",
-    "grade": "高1",
+    "studentName": "キム　シウン（金　示殷）",
+    "school": "同志社国際高校",
+    "grade": "高3",
     "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 151
   },
   {
@@ -1816,11 +1967,12 @@
     "dayOfWeek": "水曜日",
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
-    "teacherName": "クリモト　チカ",
-    "studentName": "マエダ　アキエ（前田　明恵）",
-    "school": "京都精華高校",
-    "grade": "高2",
-    "subject": "高校現代文",
+    "teacherName": "ホンダ　ユウト",
+    "studentName": "ニシムラ　カズヒロ（西村　和洋）",
+    "school": "京産大付属高校",
+    "grade": "高1",
+    "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 152
   },
   {
@@ -1829,22 +1981,24 @@
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
     "teacherName": "クリモト　チカ",
-    "studentName": "トキダ　ジンタロウ（時田　甚太朗）",
-    "school": "大谷高校",
+    "studentName": "マエダ　アキエ（前田　明恵）",
+    "school": "京都精華高校",
     "grade": "高2",
-    "subject": "高校英語",
+    "subject": "高校現代文",
+    "isVacant": false,
     "sortOrder": 153
   },
   {
     "assignmentId": "def_154",
-    "dayOfWeek": "木曜日",
-    "branch": "亀岡",
-    "timeSlot": "18:00-19:20",
-    "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ヒグチ　サクラ（樋口　さくら）",
-    "school": "亀岡高校",
-    "grade": "高3",
-    "subject": "小論文",
+    "dayOfWeek": "水曜日",
+    "branch": "伏見",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "クリモト　チカ",
+    "studentName": "トキダ　ジンタロウ（時田　甚太朗）",
+    "school": "大谷高校",
+    "grade": "高2",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 154
   },
   {
@@ -1853,10 +2007,11 @@
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "コヤマ　サトミ（小山　里実）",
-    "school": "詳徳中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "studentName": "ヒグチ　サクラ（樋口　さくら）",
+    "school": "亀岡高校",
+    "grade": "高3",
+    "subject": "小論文",
+    "isVacant": false,
     "sortOrder": 155
   },
   {
@@ -1865,10 +2020,11 @@
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ナカイ　キヒロ（中井　喜洋）",
-    "school": "聖カタリナ高校",
-    "grade": "高1",
-    "subject": "高校英語",
+    "studentName": "コヤマ　サトミ（小山　里実）",
+    "school": "詳徳中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 156
   },
   {
@@ -1876,11 +2032,12 @@
     "dayOfWeek": "木曜日",
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
-    "teacherName": "ツガ　ナルキ",
-    "studentName": "ミサワ　ルカ（見澤　瑠花）",
-    "school": "東輝中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "teacherName": "ナカヤマ　ショウタ",
+    "studentName": "ナカイ　キヒロ（中井　喜洋）",
+    "school": "聖カタリナ高校",
+    "grade": "高1",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 157
   },
   {
@@ -1889,22 +2046,24 @@
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
     "teacherName": "ツガ　ナルキ",
-    "studentName": "ムラタ　コトネ（村田　琴音）",
+    "studentName": "ミサワ　ルカ（見澤　瑠花）",
     "school": "東輝中",
-    "grade": "中3",
+    "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 158
   },
   {
     "assignmentId": "def_159",
     "dayOfWeek": "木曜日",
     "branch": "亀岡",
-    "timeSlot": "19:30-20:50",
-    "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "アネガワ　ユメカ（姉川　夢果）",
-    "school": "詳徳中",
+    "timeSlot": "18:00-19:20",
+    "teacherName": "ツガ　ナルキ",
+    "studentName": "ムラタ　コトネ（村田　琴音）",
+    "school": "東輝中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 159
   },
   {
@@ -1913,10 +2072,11 @@
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "コヤマ　サトミ（小山　里実）",
+    "studentName": "アネガワ　ユメカ（姉川　夢果）",
     "school": "詳徳中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 160
   },
   {
@@ -1925,10 +2085,11 @@
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ヒグチ　サクラ（樋口　さくら）",
-    "school": "亀岡高校",
-    "grade": "高3",
-    "subject": "高校英語",
+    "studentName": "コヤマ　サトミ（小山　里実）",
+    "school": "詳徳中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 161
   },
   {
@@ -1936,11 +2097,12 @@
     "dayOfWeek": "木曜日",
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
-    "teacherName": "ツガ　ナルキ",
-    "studentName": "アネガワ　メイ（姉川　夢依）",
-    "school": "詳徳中",
-    "grade": "中1",
-    "subject": "英語・数学",
+    "teacherName": "ナカヤマ　ショウタ",
+    "studentName": "ヒグチ　サクラ（樋口　さくら）",
+    "school": "亀岡高校",
+    "grade": "高3",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 162
   },
   {
@@ -1949,22 +2111,24 @@
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
     "teacherName": "ツガ　ナルキ",
-    "studentName": "タニグチ　コトミ（谷口　琴美）",
-    "school": "洛北高校",
-    "grade": "高1",
-    "subject": "高校英語",
+    "studentName": "アネガワ　メイ（姉川　夢依）",
+    "school": "詳徳中",
+    "grade": "中1",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 163
   },
   {
     "assignmentId": "def_164",
     "dayOfWeek": "木曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "コバヤシ　ミク",
-    "studentName": "タキグチ　ハオリ（瀧口　葉織）",
-    "school": "長岡第3中",
-    "grade": "中1",
-    "subject": "英語・数学",
+    "branch": "亀岡",
+    "timeSlot": "19:30-20:50",
+    "teacherName": "ツガ　ナルキ",
+    "studentName": "タニグチ　コトミ（谷口　琴美）",
+    "school": "洛北高校",
+    "grade": "高1",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 164
   },
   {
@@ -1973,10 +2137,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "コバヤシ　ミク",
-    "studentName": "メセ　ナノカ（目瀬　菜乃佳）",
+    "studentName": "タキグチ　ハオリ（瀧口　葉織）",
     "school": "長岡第3中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 165
   },
   {
@@ -1985,10 +2150,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "コバヤシ　ミク",
-    "studentName": "ハヤシ　ユズキ（林　柚希）",
-    "school": "勝山中",
+    "studentName": "メセ　ナノカ（目瀬　菜乃佳）",
+    "school": "長岡第3中",
     "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 166
   },
   {
@@ -1996,11 +2162,12 @@
     "dayOfWeek": "木曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "イワナガ　ケイ",
-    "studentName": "タグチ　リン（田口　凛）",
+    "teacherName": "コバヤシ　ミク",
+    "studentName": "ハヤシ　ユズキ（林　柚希）",
     "school": "勝山中",
-    "grade": "中3",
+    "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 167
   },
   {
@@ -2009,10 +2176,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ワタナベ　ヒナノ（渡部　日菜乃）",
+    "studentName": "タグチ　リン（田口　凛）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 168
   },
   {
@@ -2021,22 +2189,24 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ミヤタ　コウキ（宮田　倖季）",
+    "studentName": "ワタナベ　ヒナノ（渡部　日菜乃）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 169
   },
   {
     "assignmentId": "def_170",
     "dayOfWeek": "木曜日",
     "branch": "長岡京",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ヨデン　キイ（余田　季生）",
+    "studentName": "ミヤタ　コウキ（宮田　倖季）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 170
   },
   {
@@ -2045,10 +2215,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ミヤタ　コウキ（宮田　倖季）",
+    "studentName": "ヨデン　キイ（余田　季生）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 171
   },
   {
@@ -2057,10 +2228,11 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "イワナガ　ケイ",
-    "studentName": "ナガイ　ヒナタ（永井　陽太）",
+    "studentName": "ミヤタ　コウキ（宮田　倖季）",
     "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 172
   },
   {
@@ -2068,11 +2240,12 @@
     "dayOfWeek": "木曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
-    "teacherName": "コバヤシ　ミク",
-    "studentName": "ヤマウチ　ミヅキ（山内　瑞月）",
-    "school": "長岡第2中",
+    "teacherName": "イワナガ　ケイ",
+    "studentName": "ナガイ　ヒナタ（永井　陽太）",
+    "school": "勝山中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 173
   },
   {
@@ -2081,22 +2254,24 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "コバヤシ　ミク",
-    "studentName": "ワカバヤシ　レイ（若林　伶）",
+    "studentName": "ヤマウチ　ミヅキ（山内　瑞月）",
     "school": "長岡第2中",
-    "grade": "中1",
+    "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 174
   },
   {
     "assignmentId": "def_175",
     "dayOfWeek": "木曜日",
-    "branch": "桂",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ヤスダ　イッセイ（安田　一生）",
-    "school": "樫原中",
-    "grade": "中2",
-    "subject": "集団クラス（理科・社会）",
+    "branch": "長岡京",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "コバヤシ　ミク",
+    "studentName": "ワカバヤシ　レイ（若林　伶）",
+    "school": "長岡第2中",
+    "grade": "中1",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 175
   },
   {
@@ -2105,10 +2280,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ヨシダ　リュウヒ（吉田　龍毘）",
+    "studentName": "ヤスダ　イッセイ（安田　一生）",
     "school": "樫原中",
-    "grade": "",
+    "grade": "中2",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 176
   },
   {
@@ -2117,10 +2293,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "キムラ　ユウヤ（木村　柚哉）",
+    "studentName": "ヨシダ　リュウヒ（吉田　龍毘）",
     "school": "樫原中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 177
   },
   {
@@ -2129,10 +2306,11 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "オクヤマ　カナ（奥山　楓菜）",
-    "school": "松尾中",
+    "studentName": "キムラ　ユウヤ（木村　柚哉）",
+    "school": "樫原中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 178
   },
   {
@@ -2141,22 +2319,24 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "ムロタ　ユイ（室田　唯衣）",
-    "school": "桂中",
+    "studentName": "オクヤマ　カナ（奥山　楓菜）",
+    "school": "松尾中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 179
   },
   {
     "assignmentId": "def_180",
     "dayOfWeek": "木曜日",
     "branch": "桂",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "キタムラ　ケイ（北村　圭）",
+    "studentName": "ムロタ　ユイ（室田　唯衣）",
     "school": "桂中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 180
   },
   {
@@ -2165,10 +2345,11 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "サトウ　ユウマ（佐藤　佑真）",
-    "school": "",
-    "grade": "",
+    "studentName": "キタムラ　ケイ（北村　圭）",
+    "school": "桂中",
+    "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 181
   },
   {
@@ -2177,22 +2358,24 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "オオヤギ　ノゾミ",
-    "studentName": "キムラ　ユウヤ（木村　柚哉）",
-    "school": "桂中",
-    "grade": "中3",
+    "studentName": "サトウ　ユウマ（佐藤　佑真）",
+    "school": "",
+    "grade": "",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 182
   },
   {
     "assignmentId": "def_183",
     "dayOfWeek": "木曜日",
-    "branch": "伏見",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "ワダ　ユウキ（和田　勇希）",
-    "school": "伏見中",
-    "grade": "中2",
-    "subject": "集団クラス（理科・社会）",
+    "branch": "桂",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "オオヤギ　ノゾミ",
+    "studentName": "キムラ　ユウヤ（木村　柚哉）",
+    "school": "桂中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 183
   },
   {
@@ -2201,10 +2384,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ワダ　ナツキ（和田　夏希）",
+    "studentName": "ワダ　ユウキ（和田　勇希）",
     "school": "伏見中",
-    "grade": "",
+    "grade": "中2",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 184
   },
   {
@@ -2213,10 +2397,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "タナカ　ユウナ（田中　友奈）",
+    "studentName": "ワダ　ナツキ（和田　夏希）",
     "school": "伏見中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 185
   },
   {
@@ -2225,10 +2410,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "バン　ハルト（伴　波瑠十）",
+    "studentName": "タナカ　ユウナ（田中　友奈）",
     "school": "伏見中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 186
   },
   {
@@ -2237,10 +2423,11 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ヤマモト　ソウタ（山本　蒼大）",
-    "school": "洛水中",
+    "studentName": "バン　ハルト（伴　波瑠十）",
+    "school": "伏見中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 187
   },
   {
@@ -2249,22 +2436,24 @@
     "branch": "伏見",
     "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "オカノ　ソウ（岡野　颯）",
+    "studentName": "ヤマモト　ソウタ（山本　蒼大）",
     "school": "洛水中",
     "grade": "",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 188
   },
   {
     "assignmentId": "def_189",
     "dayOfWeek": "木曜日",
     "branch": "伏見",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "ニシムラ　カズヒロ（西村　和洋）",
-    "school": "京産大付属高校",
-    "grade": "高1",
-    "subject": "高校数学",
+    "studentName": "オカノ　ソウ（岡野　颯）",
+    "school": "洛水中",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 189
   },
   {
@@ -2273,10 +2462,11 @@
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "キム　シウン（金　示殷）",
-    "school": "同志社国際高校",
-    "grade": "高3",
-    "subject": "高校現代文",
+    "studentName": "ニシムラ　カズヒロ（西村　和洋）",
+    "school": "京産大付属高校",
+    "grade": "高1",
+    "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 190
   },
   {
@@ -2285,22 +2475,24 @@
     "branch": "伏見",
     "timeSlot": "20:00-21:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "マエダ　アキエ（前田　明恵）",
-    "school": "京都精華高校",
-    "grade": "高2",
-    "subject": "高校英語",
+    "studentName": "キム　シウン（金　示殷）",
+    "school": "同志社国際高校",
+    "grade": "高3",
+    "subject": "高校現代文",
+    "isVacant": false,
     "sortOrder": 191
   },
   {
     "assignmentId": "def_192",
     "dayOfWeek": "木曜日",
-    "branch": "高槻",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "オオムラ　サオリ",
-    "studentName": "フジモト　ユイ（藤本　結衣）",
-    "school": "立命館中",
-    "grade": "中2",
-    "subject": "数学",
+    "branch": "伏見",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "マエダ　アキエ（前田　明恵）",
+    "school": "京都精華高校",
+    "grade": "高2",
+    "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 192
   },
   {
@@ -2309,10 +2501,11 @@
     "branch": "高槻",
     "timeSlot": "19:00-20:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ナカムラ　ミオ（中村　未央）",
+    "studentName": "フジモト　ユイ（藤本　結衣）",
     "school": "立命館中",
     "grade": "中2",
     "subject": "数学",
+    "isVacant": false,
     "sortOrder": 193
   },
   {
@@ -2321,22 +2514,24 @@
     "branch": "高槻",
     "timeSlot": "19:00-20:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "スズキ　カナタ（鈴木　奏汰）",
-    "school": "高槻第一中",
-    "grade": "中1",
-    "subject": "英語・数学",
+    "studentName": "ナカムラ　ミオ（中村　未央）",
+    "school": "立命館中",
+    "grade": "中2",
+    "subject": "数学",
+    "isVacant": false,
     "sortOrder": 194
   },
   {
     "assignmentId": "def_195",
     "dayOfWeek": "木曜日",
     "branch": "高槻",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ナカムラ　ミオ（中村　未央）",
-    "school": "立命館中",
-    "grade": "中2",
-    "subject": "数学",
+    "studentName": "スズキ　カナタ（鈴木　奏汰）",
+    "school": "高槻第一中",
+    "grade": "中1",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 195
   },
   {
@@ -2345,22 +2540,24 @@
     "branch": "高槻",
     "timeSlot": "20:30-21:50",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ナカムラ　ノドカ（中村　のどか）",
-    "school": "立命館高",
-    "grade": "高1",
+    "studentName": "ナカムラ　ミオ（中村　未央）",
+    "school": "立命館中",
+    "grade": "中2",
     "subject": "数学",
+    "isVacant": false,
     "sortOrder": 196
   },
   {
     "assignmentId": "def_197",
-    "dayOfWeek": "金曜日",
-    "branch": "亀岡",
-    "timeSlot": "18:00-19:20",
+    "dayOfWeek": "木曜日",
+    "branch": "高槻",
+    "timeSlot": "20:30-21:50",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ニシムラ　コト（西村　こと）",
-    "school": "東輝中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "studentName": "ナカムラ　ノドカ（中村　のどか）",
+    "school": "立命館高",
+    "grade": "高1",
+    "subject": "数学",
+    "isVacant": false,
     "sortOrder": 197
   },
   {
@@ -2369,10 +2566,11 @@
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ムラタ　コトネ（村田　琴音）",
+    "studentName": "ニシムラ　コト（西村　こと）",
     "school": "東輝中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 198
   },
   {
@@ -2381,34 +2579,37 @@
     "branch": "亀岡",
     "timeSlot": "18:00-19:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ナカイ　キヒロ（中井　喜洋）",
-    "school": "聖カタリナ高校",
-    "grade": "高1",
-    "subject": "高校古文",
+    "studentName": "ムラタ　コトネ（村田　琴音）",
+    "school": "東輝中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 199
   },
   {
     "assignmentId": "def_200",
     "dayOfWeek": "金曜日",
     "branch": "亀岡",
-    "timeSlot": "19:30-20:50",
+    "timeSlot": "18:00-19:20",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ヒグチ　サクラ（樋口　さくら）",
-    "school": "亀岡高校",
-    "grade": "高3",
-    "subject": "高校数学",
+    "studentName": "ナカイ　キヒロ（中井　喜洋）",
+    "school": "聖カタリナ高校",
+    "grade": "高1",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 200
   },
   {
     "assignmentId": "def_201",
     "dayOfWeek": "金曜日",
     "branch": "亀岡",
-    "timeSlot": "19:30-20:50",
-    "teacherName": "オオムラ　サオリ",
-    "studentName": "タニグチ　コトミ（谷口　琴美）",
-    "school": "洛北高校",
-    "grade": "高1",
+    "timeSlot": "18:00-19:20",
+    "teacherName": "オカノ　リュウト",
+    "studentName": "空き",
+    "school": "",
+    "grade": "",
     "subject": "高校古文",
+    "isVacant": true,
     "sortOrder": 201
   },
   {
@@ -2417,14 +2618,41 @@
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
     "teacherName": "オオムラ　サオリ",
-    "studentName": "ニシムラ　コト（西村　こと）",
-    "school": "東輝中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "studentName": "ヒグチ　サクラ（樋口　さくら）",
+    "school": "亀岡高校",
+    "grade": "高3",
+    "subject": "高校数学",
+    "isVacant": false,
     "sortOrder": 202
   },
   {
     "assignmentId": "def_203",
+    "dayOfWeek": "金曜日",
+    "branch": "亀岡",
+    "timeSlot": "19:30-20:50",
+    "teacherName": "オオムラ　サオリ",
+    "studentName": "タニグチ　コトミ（谷口　琴美）",
+    "school": "洛北高校",
+    "grade": "高1",
+    "subject": "高校古文",
+    "isVacant": false,
+    "sortOrder": 203
+  },
+  {
+    "assignmentId": "def_204",
+    "dayOfWeek": "金曜日",
+    "branch": "亀岡",
+    "timeSlot": "19:30-20:50",
+    "teacherName": "オオムラ　サオリ",
+    "studentName": "ニシムラ　コト（西村　こと）",
+    "school": "東輝中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 204
+  },
+  {
+    "assignmentId": "def_205",
     "dayOfWeek": "金曜日",
     "branch": "亀岡",
     "timeSlot": "19:30-20:50",
@@ -2433,30 +2661,7 @@
     "school": "京都成章高校",
     "grade": "高2",
     "subject": "高校英語",
-    "sortOrder": 203
-  },
-  {
-    "assignmentId": "def_204",
-    "dayOfWeek": "金曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "クマノ　イチロウ",
-    "studentName": "イシカワ　フウタ（石川　楓太）",
-    "school": "長岡中",
-    "grade": "中3",
-    "subject": "英語・数学",
-    "sortOrder": 204
-  },
-  {
-    "assignmentId": "def_205",
-    "dayOfWeek": "金曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "クマノ　イチロウ",
-    "studentName": "ウエキ　リョウスケ（植木　涼介）",
-    "school": "長岡中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 205
   },
   {
@@ -2465,10 +2670,11 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "クマノ　イチロウ",
-    "studentName": "アダチ　ユウト（足立　悠帆）",
-    "school": "長岡第3中",
+    "studentName": "イシカワ　フウタ（石川　楓太）",
+    "school": "長岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 206
   },
   {
@@ -2476,11 +2682,12 @@
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ハセガワ　ユウセイ（長谷川　悠晟）",
-    "school": "長岡第3中",
+    "teacherName": "クマノ　イチロウ",
+    "studentName": "ウエキ　リョウスケ（植木　涼介）",
+    "school": "長岡中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 207
   },
   {
@@ -2488,11 +2695,12 @@
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
-    "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "シオミ　ヒロト（塩見　大都）",
-    "school": "長岡第2中",
+    "teacherName": "クマノ　イチロウ",
+    "studentName": "アダチ　ユウト（足立　悠帆）",
+    "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 208
   },
   {
@@ -2501,14 +2709,41 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナカヤマ　ショウタ",
-    "studentName": "ナガイ　ヒナタ（永井　陽太）",
-    "school": "勝山中",
+    "studentName": "ハセガワ　ユウセイ（長谷川　悠晟）",
+    "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 209
   },
   {
     "assignmentId": "def_210",
+    "dayOfWeek": "金曜日",
+    "branch": "長岡京",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "ナカヤマ　ショウタ",
+    "studentName": "シオミ　ヒロト（塩見　大都）",
+    "school": "長岡第2中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 210
+  },
+  {
+    "assignmentId": "def_211",
+    "dayOfWeek": "金曜日",
+    "branch": "長岡京",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "ナカヤマ　ショウタ",
+    "studentName": "ナガイ　ヒナタ（永井　陽太）",
+    "school": "勝山中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 211
+  },
+  {
+    "assignmentId": "def_212",
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
@@ -2517,10 +2752,11 @@
     "school": "京都教育大付属高校",
     "grade": "高1",
     "subject": "高校英語",
-    "sortOrder": 210
+    "isVacant": false,
+    "sortOrder": 212
   },
   {
-    "assignmentId": "def_211",
+    "assignmentId": "def_213",
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
@@ -2529,10 +2765,11 @@
     "school": "嵯峨野高校",
     "grade": "高1",
     "subject": "高校英語",
-    "sortOrder": 211
+    "isVacant": false,
+    "sortOrder": 213
   },
   {
-    "assignmentId": "def_212",
+    "assignmentId": "def_214",
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
@@ -2541,10 +2778,11 @@
     "school": "芸術工芸",
     "grade": "高3",
     "subject": "高校英語",
-    "sortOrder": 212
+    "isVacant": false,
+    "sortOrder": 214
   },
   {
-    "assignmentId": "def_213",
+    "assignmentId": "def_215",
     "dayOfWeek": "金曜日",
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
@@ -2553,30 +2791,7 @@
     "school": "大谷高校",
     "grade": "高3",
     "subject": "高校英語",
-    "sortOrder": 213
-  },
-  {
-    "assignmentId": "def_214",
-    "dayOfWeek": "金曜日",
-    "branch": "桂",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ヒノキオ　リリ",
-    "studentName": "ニシムラ　ナナコ（西村　南菜子）",
-    "school": "桂中",
-    "grade": "中1",
-    "subject": "英語・数学",
-    "sortOrder": 214
-  },
-  {
-    "assignmentId": "def_215",
-    "dayOfWeek": "金曜日",
-    "branch": "桂",
-    "timeSlot": "18:30-19:50",
-    "teacherName": "ヒノキオ　リリ",
-    "studentName": "ミシナ　ユズノ（三品　結柚乃）",
-    "school": "桂中",
-    "grade": "中1",
-    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 215
   },
   {
@@ -2585,34 +2800,37 @@
     "branch": "桂",
     "timeSlot": "18:30-19:50",
     "teacherName": "ヒノキオ　リリ",
-    "studentName": "オクヤマ　カナ（奥山　楓菜）",
-    "school": "松尾中",
-    "grade": "中2",
+    "studentName": "ニシムラ　ナナコ（西村　南菜子）",
+    "school": "桂中",
+    "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 216
   },
   {
     "assignmentId": "def_217",
     "dayOfWeek": "金曜日",
     "branch": "桂",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "ヒノキオ　リリ",
-    "studentName": "ムロタ　ユイ（室田　唯衣）",
+    "studentName": "ミシナ　ユズノ（三品　結柚乃）",
     "school": "桂中",
-    "grade": "中2",
+    "grade": "中1",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 217
   },
   {
     "assignmentId": "def_218",
     "dayOfWeek": "金曜日",
     "branch": "桂",
-    "timeSlot": "20:00-21:20",
+    "timeSlot": "18:30-19:50",
     "teacherName": "ヒノキオ　リリ",
-    "studentName": "ヤスダ　イッセイ（安田　一生）",
-    "school": "樫原中",
+    "studentName": "オクヤマ　カナ（奥山　楓菜）",
+    "school": "松尾中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 218
   },
   {
@@ -2621,14 +2839,41 @@
     "branch": "桂",
     "timeSlot": "20:00-21:20",
     "teacherName": "ヒノキオ　リリ",
-    "studentName": "ヨシダ　リュウヒ（吉田　龍毘）",
-    "school": "樫原中",
+    "studentName": "ムロタ　ユイ（室田　唯衣）",
+    "school": "桂中",
     "grade": "中2",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 219
   },
   {
     "assignmentId": "def_220",
+    "dayOfWeek": "金曜日",
+    "branch": "桂",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "ヒノキオ　リリ",
+    "studentName": "ヤスダ　イッセイ（安田　一生）",
+    "school": "樫原中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 220
+  },
+  {
+    "assignmentId": "def_221",
+    "dayOfWeek": "金曜日",
+    "branch": "桂",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "ヒノキオ　リリ",
+    "studentName": "ヨシダ　リュウヒ（吉田　龍毘）",
+    "school": "樫原中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 221
+  },
+  {
+    "assignmentId": "def_222",
     "dayOfWeek": "金曜日",
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
@@ -2637,10 +2882,11 @@
     "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
-    "sortOrder": 220
+    "isVacant": false,
+    "sortOrder": 222
   },
   {
-    "assignmentId": "def_221",
+    "assignmentId": "def_223",
     "dayOfWeek": "金曜日",
     "branch": "太秦",
     "timeSlot": "18:30-19:50",
@@ -2649,30 +2895,7 @@
     "school": "双ヶ岡中",
     "grade": "中3",
     "subject": "英語・数学",
-    "sortOrder": 221
-  },
-  {
-    "assignmentId": "def_222",
-    "dayOfWeek": "金曜日",
-    "branch": "太秦",
-    "timeSlot": "20:00-21:20",
-    "teacherName": "キシモト　カエデ",
-    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
-    "school": "太秦中",
-    "grade": "中3",
-    "subject": "英語・数学",
-    "sortOrder": 222
-  },
-  {
-    "assignmentId": "def_223",
-    "dayOfWeek": "金曜日",
-    "branch": "太秦",
-    "timeSlot": "20:00-21:20",
-    "teacherName": "キシモト　カエデ",
-    "studentName": "オオタ　ミヤ（太田　みや）",
-    "school": "太秦中",
-    "grade": "中3",
-    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 223
   },
   {
@@ -2681,34 +2904,37 @@
     "branch": "太秦",
     "timeSlot": "20:00-21:20",
     "teacherName": "キシモト　カエデ",
-    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
+    "studentName": "イケベ　ヒヨリ（池邊　ひより）",
     "school": "太秦中",
     "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 224
   },
   {
     "assignmentId": "def_225",
     "dayOfWeek": "金曜日",
-    "branch": "向日",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "オクダ　コハル（奥田　心春）",
-    "school": "西ノ岡中",
-    "grade": "中1",
+    "branch": "太秦",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "キシモト　カエデ",
+    "studentName": "オオタ　ミヤ（太田　みや）",
+    "school": "太秦中",
+    "grade": "中3",
     "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 225
   },
   {
     "assignmentId": "def_226",
     "dayOfWeek": "金曜日",
-    "branch": "向日",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "モトイエ　アヤ",
-    "studentName": "キシダ　メイ（岸田　芽依）",
-    "school": "向陽小",
-    "grade": "小3",
-    "subject": "算数",
+    "branch": "太秦",
+    "timeSlot": "20:00-21:20",
+    "teacherName": "キシモト　カエデ",
+    "studentName": "タカタニ　アヤノ（髙谷　彩乃）",
+    "school": "太秦中",
+    "grade": "中3",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 226
   },
   {
@@ -2717,10 +2943,11 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "モトイエ　アヤ",
-    "studentName": "マルヤマ　サラ（圓山　紗羅）",
-    "school": "大阪大谷中",
-    "grade": "中2",
-    "subject": "数学",
+    "studentName": "オクダ　コハル（奥田　心春）",
+    "school": "西ノ岡中",
+    "grade": "中1",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 227
   },
   {
@@ -2728,11 +2955,12 @@
     "dayOfWeek": "金曜日",
     "branch": "向日",
     "timeSlot": "19:00-20:20",
-    "teacherName": "ナガヤ　ユウタ",
-    "studentName": "イトウ　ハナ（伊藤　花）",
-    "school": "西ノ岡中",
-    "grade": "中2",
-    "subject": "集団クラス（理科・社会）",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "キシダ　メイ（岸田　芽依）",
+    "school": "向陽小",
+    "grade": "小3",
+    "subject": "算数",
+    "isVacant": false,
     "sortOrder": 228
   },
   {
@@ -2740,11 +2968,12 @@
     "dayOfWeek": "金曜日",
     "branch": "向日",
     "timeSlot": "19:00-20:20",
-    "teacherName": "ナガヤ　ユウタ",
-    "studentName": "カワサキ　チハナ（川﨑　千花）",
-    "school": "寺戸中",
-    "grade": "",
-    "subject": "集団クラス（理科・社会）",
+    "teacherName": "モトイエ　アヤ",
+    "studentName": "マルヤマ　サラ（圓山　紗羅）",
+    "school": "大阪大谷中",
+    "grade": "中2",
+    "subject": "数学",
+    "isVacant": false,
     "sortOrder": 229
   },
   {
@@ -2753,14 +2982,41 @@
     "branch": "向日",
     "timeSlot": "19:00-20:20",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "マエカワ　ヒビキ（前川　響）",
+    "studentName": "イトウ　ハナ（伊藤　花）",
     "school": "西ノ岡中",
-    "grade": "",
+    "grade": "中2",
     "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 230
   },
   {
     "assignmentId": "def_231",
+    "dayOfWeek": "金曜日",
+    "branch": "向日",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "ナガヤ　ユウタ",
+    "studentName": "カワサキ　チハナ（川﨑　千花）",
+    "school": "寺戸中",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
+    "sortOrder": 231
+  },
+  {
+    "assignmentId": "def_232",
+    "dayOfWeek": "金曜日",
+    "branch": "向日",
+    "timeSlot": "19:00-20:20",
+    "teacherName": "ナガヤ　ユウタ",
+    "studentName": "マエカワ　ヒビキ（前川　響）",
+    "school": "西ノ岡中",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
+    "sortOrder": 232
+  },
+  {
+    "assignmentId": "def_233",
     "dayOfWeek": "金曜日",
     "branch": "向日",
     "timeSlot": "20:30-21:50",
@@ -2769,10 +3025,11 @@
     "school": "同志社女子高",
     "grade": "高1",
     "subject": "高校数学",
-    "sortOrder": 231
+    "isVacant": false,
+    "sortOrder": 233
   },
   {
-    "assignmentId": "def_232",
+    "assignmentId": "def_234",
     "dayOfWeek": "金曜日",
     "branch": "向日",
     "timeSlot": "20:30-21:50",
@@ -2781,30 +3038,7 @@
     "school": "山城高校",
     "grade": "高3",
     "subject": "高校英語",
-    "sortOrder": 232
-  },
-  {
-    "assignmentId": "def_233",
-    "dayOfWeek": "金曜日",
-    "branch": "向日",
-    "timeSlot": "20:30-21:50",
-    "teacherName": "ナガヤ　ユウタ",
-    "studentName": "クサノ　カナメ（草野　要）",
-    "school": "勝山中",
-    "grade": "中3",
-    "subject": "集団クラス（理科・社会）",
-    "sortOrder": 233
-  },
-  {
-    "assignmentId": "def_234",
-    "dayOfWeek": "金曜日",
-    "branch": "向日",
-    "timeSlot": "20:30-21:50",
-    "teacherName": "ナガヤ　ユウタ",
-    "studentName": "サタ　ミサキ（佐田　美咲希）",
-    "school": "勝山中",
-    "grade": "",
-    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 234
   },
   {
@@ -2813,14 +3047,41 @@
     "branch": "向日",
     "timeSlot": "20:30-21:50",
     "teacherName": "ナガヤ　ユウタ",
-    "studentName": "マエカワ　ヒビキ（前川　響）",
-    "school": "西ノ岡中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "studentName": "クサノ　カナメ（草野　要）",
+    "school": "勝山中",
+    "grade": "中3",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
     "sortOrder": 235
   },
   {
     "assignmentId": "def_236",
+    "dayOfWeek": "金曜日",
+    "branch": "向日",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "ナガヤ　ユウタ",
+    "studentName": "サタ　ミサキ（佐田　美咲希）",
+    "school": "勝山中",
+    "grade": "",
+    "subject": "集団クラス（理科・社会）",
+    "isVacant": false,
+    "sortOrder": 236
+  },
+  {
+    "assignmentId": "def_237",
+    "dayOfWeek": "金曜日",
+    "branch": "向日",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "ナガヤ　ユウタ",
+    "studentName": "マエカワ　ヒビキ（前川　響）",
+    "school": "西ノ岡中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
+    "sortOrder": 237
+  },
+  {
+    "assignmentId": "def_238",
     "dayOfWeek": "土曜日",
     "branch": "家庭教師",
     "timeSlot": "14:30-15:50",
@@ -2829,10 +3090,11 @@
     "school": "寺戸中",
     "grade": "中1",
     "subject": "英語・数学",
-    "sortOrder": 236
+    "isVacant": false,
+    "sortOrder": 238
   },
   {
-    "assignmentId": "def_237",
+    "assignmentId": "def_239",
     "dayOfWeek": "土曜日",
     "branch": "家庭教師",
     "timeSlot": "16:40-18:00",
@@ -2841,10 +3103,11 @@
     "school": "長岡第3中",
     "grade": "中2",
     "subject": "英語・数学",
-    "sortOrder": 237
+    "isVacant": false,
+    "sortOrder": 239
   },
   {
-    "assignmentId": "def_238",
+    "assignmentId": "def_240",
     "dayOfWeek": "土曜日",
     "branch": "家庭教師",
     "timeSlot": "19:00-20:20",
@@ -2853,10 +3116,11 @@
     "school": "文教高校",
     "grade": "高1",
     "subject": "高校英語",
-    "sortOrder": 238
+    "isVacant": false,
+    "sortOrder": 240
   },
   {
-    "assignmentId": "def_239",
+    "assignmentId": "def_241",
     "dayOfWeek": "土曜日",
     "branch": "家庭教師",
     "timeSlot": "20:30-21:50",
@@ -2865,30 +3129,7 @@
     "school": "文教高校",
     "grade": "高1",
     "subject": "高校古文",
-    "sortOrder": 239
-  },
-  {
-    "assignmentId": "def_240",
-    "dayOfWeek": "土曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "キシモト　カエデ",
-    "studentName": "ハシモト　マオト（橋本　真生翔）",
-    "school": "乙訓高校",
-    "grade": "高1",
-    "subject": "高校古文",
-    "sortOrder": 240
-  },
-  {
-    "assignmentId": "def_241",
-    "dayOfWeek": "土曜日",
-    "branch": "長岡京",
-    "timeSlot": "19:00-20:20",
-    "teacherName": "キシモト　カエデ",
-    "studentName": "ニシ　コトノ（西　紀乃）",
-    "school": "乙訓高校",
-    "grade": "高1",
-    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 241
   },
   {
@@ -2897,34 +3138,37 @@
     "branch": "長岡京",
     "timeSlot": "19:00-20:20",
     "teacherName": "キシモト　カエデ",
-    "studentName": "ハシモト　ユウト（橋本　侑生翔）",
-    "school": "長岡第3中",
-    "grade": "中2",
-    "subject": "英語・数学",
+    "studentName": "ハシモト　マオト（橋本　真生翔）",
+    "school": "乙訓高校",
+    "grade": "高1",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 242
   },
   {
     "assignmentId": "def_243",
     "dayOfWeek": "土曜日",
     "branch": "長岡京",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "キシモト　カエデ",
-    "studentName": "ハシモト　マオト（橋本　真生翔）",
+    "studentName": "ニシ　コトノ（西　紀乃）",
     "school": "乙訓高校",
     "grade": "高1",
-    "subject": "高校英語",
+    "subject": "高校古文",
+    "isVacant": false,
     "sortOrder": 243
   },
   {
     "assignmentId": "def_244",
     "dayOfWeek": "土曜日",
     "branch": "長岡京",
-    "timeSlot": "20:30-21:50",
+    "timeSlot": "19:00-20:20",
     "teacherName": "キシモト　カエデ",
-    "studentName": "ニシ　コトノ（西　紀乃）",
-    "school": "乙訓高校",
-    "grade": "高1",
-    "subject": "高校英語",
+    "studentName": "ハシモト　ユウト（橋本　侑生翔）",
+    "school": "長岡第3中",
+    "grade": "中2",
+    "subject": "英語・数学",
+    "isVacant": false,
     "sortOrder": 244
   },
   {
@@ -2933,14 +3177,41 @@
     "branch": "長岡京",
     "timeSlot": "20:30-21:50",
     "teacherName": "キシモト　カエデ",
-    "studentName": "タグチ　ショウタ（田口　翔汰）",
-    "school": "京都すばる高校",
-    "grade": "高3",
+    "studentName": "ハシモト　マオト（橋本　真生翔）",
+    "school": "乙訓高校",
+    "grade": "高1",
     "subject": "高校英語",
+    "isVacant": false,
     "sortOrder": 245
   },
   {
     "assignmentId": "def_246",
+    "dayOfWeek": "土曜日",
+    "branch": "長岡京",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "キシモト　カエデ",
+    "studentName": "ニシ　コトノ（西　紀乃）",
+    "school": "乙訓高校",
+    "grade": "高1",
+    "subject": "高校英語",
+    "isVacant": false,
+    "sortOrder": 246
+  },
+  {
+    "assignmentId": "def_247",
+    "dayOfWeek": "土曜日",
+    "branch": "長岡京",
+    "timeSlot": "20:30-21:50",
+    "teacherName": "キシモト　カエデ",
+    "studentName": "タグチ　ショウタ（田口　翔汰）",
+    "school": "京都すばる高校",
+    "grade": "高3",
+    "subject": "高校英語",
+    "isVacant": false,
+    "sortOrder": 247
+  },
+  {
+    "assignmentId": "def_248",
     "dayOfWeek": "土曜日",
     "branch": "高槻",
     "timeSlot": "19:00-20:20",
@@ -2949,10 +3220,11 @@
     "school": "立命館中",
     "grade": "中2",
     "subject": "数学",
-    "sortOrder": 246
+    "isVacant": false,
+    "sortOrder": 248
   },
   {
-    "assignmentId": "def_247",
+    "assignmentId": "def_249",
     "dayOfWeek": "土曜日",
     "branch": "高槻",
     "timeSlot": "19:00-20:20",
@@ -2961,10 +3233,11 @@
     "school": "高槻第一中",
     "grade": "中1",
     "subject": "英語・数学",
-    "sortOrder": 247
+    "isVacant": false,
+    "sortOrder": 249
   },
   {
-    "assignmentId": "def_248",
+    "assignmentId": "def_250",
     "dayOfWeek": "日曜日",
     "branch": "家庭教師",
     "timeSlot": "15:00-16:20",
@@ -2973,10 +3246,11 @@
     "school": "寺戸中",
     "grade": "中2",
     "subject": "英語・数学",
-    "sortOrder": 248
+    "isVacant": false,
+    "sortOrder": 250
   },
   {
-    "assignmentId": "def_249",
+    "assignmentId": "def_251",
     "dayOfWeek": "日曜日",
     "branch": "家庭教師",
     "timeSlot": "16:50-18:10",
@@ -2985,10 +3259,11 @@
     "school": "長岡第9小",
     "grade": "小3",
     "subject": "算数",
-    "sortOrder": 249
+    "isVacant": false,
+    "sortOrder": 251
   },
   {
-    "assignmentId": "def_250",
+    "assignmentId": "def_252",
     "dayOfWeek": "日曜日",
     "branch": "家庭教師",
     "timeSlot": "18:30-19:50",
@@ -2997,6 +3272,7 @@
     "school": "長岡第3中",
     "grade": "中3",
     "subject": "英語・数学",
-    "sortOrder": 250
+    "isVacant": false,
+    "sortOrder": 252
   }
 ]

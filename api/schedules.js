@@ -87,14 +87,8 @@ export default async function handler(req, res) {
           return sendJson(res, 400, { ok: false, error: '取り込む配列データがありません' });
         }
 
-        const normalized = assignments.map((item, idx) => ({
-          ...item,
-          assignmentId: String(
-            item.assignmentId || `def_${String(idx + 1).padStart(3, '0')}`
-          ),
-          sortOrder: Number(item.sortOrder ?? idx + 1),
-          isActive: item.isActive !== false,
-        }));
+        const { normalizeAssignment } = await import('../lib/schedule-engine.js');
+        const normalized = assignments.map((item, idx) => normalizeAssignment(item, idx));
 
         await batchSaveDocs('monthly_templates', normalized, 'assignmentId');
         return sendJson(res, 200, { ok: true, count: normalized.length });
