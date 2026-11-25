@@ -1427,7 +1427,7 @@
       const target = state.schedules.find((s) => s.scheduleId === schedId);
       if (!target) return;
 
-      await apiFetch('/api/schedules', {
+      const res = await apiFetch('/api/schedules', {
         method: 'POST',
         body: JSON.stringify({
           action: 'CREATE_ABSENCE_REQUEST',
@@ -1435,6 +1435,8 @@
             request: {
               scheduleId: target.scheduleId,
               studentName: target.studentName,
+              teacherName: target.teacherName,
+              dayOfWeek: target.dayOfWeek,
               branch: target.branch,
               subject: target.subject,
               date: target.date,
@@ -1444,15 +1446,18 @@
           },
         }),
       });
-      (() => {
-        const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
-        const sentCount = deliveries.filter((d) => d.status === 'sent' || d.status === 'simulated_no_token').length;
-        const skippedCount = deliveries.filter((d) => d.status === 'skipped_no_line_id').length;
-        alert(
-          `欠席申請を登録しました。振替対象リストに反映されています。\n` +
-          `紐づき役職へのLINE配信処理: 対象${deliveries.length}件（送信/ログ記録${sentCount}件・LINE未連携${skippedCount}件）`
-        );
-      })()      await loadAllData();
+      if (!res.ok) {
+        alert(res.error || '欠席申請の登録に失敗しました');
+        return;
+      }
+      const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
+      const sentCount = deliveries.filter((d) => d.status === 'sent' || d.status === 'simulated_no_token').length;
+      const skippedCount = deliveries.filter((d) => d.status === 'skipped_no_line_id').length;
+      alert(
+        `欠席申請を登録しました。振替対象リストに反映されています。\n` +
+        `紐づき役職へのLINE配信処理: 対象${deliveries.length}件（送信/ログ記録${sentCount}件・LINE未連携${skippedCount}件）`
+      );
+      await loadAllData();
     });
 
     document.getElementById('confirmRescheduleBtn').addEventListener('click', async () => {
