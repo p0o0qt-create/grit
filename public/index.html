@@ -137,6 +137,7 @@
         <button class="tab-btn" data-tab="tab-quota">3. 生徒別 月間コマ数設定</button>
         <button class="tab-btn" data-tab="tab-defaults">4. 月次デフォルト原本（講師×生徒紐づけ）</button>
         <button class="tab-btn" data-tab="tab-csv">5. 口座情報CSVインポート＆未入金リスト</button>
+        <button class="tab-btn" data-tab="tab-roles">6. 新規役職・アカウント登録</button>
       </div>
 
       <!-- Tab 1: Monthly Schedule -->
@@ -248,29 +249,44 @@
       <div id="tab-quota" class="tab-panel card">
         <h2>生徒ごとの月間コマ数設定</h2>
         <div class="toolbar">
+          <label>支部絞り込み
+            <select id="quotaFilterBranch"><option value="">全支部</option></select>
+          </label>
+          <label>在籍区分
+            <select id="quotaFilterStatus">
+              <option value="在籍中">在籍中のみ</option>
+              <option value="ALL">全生徒（退会済含む）</option>
+            </select>
+          </label>
+          <label>生徒検索
+            <input type="text" id="quotaFilterKeyword" placeholder="生徒氏名で検索" />
+          </label>
           <label>生徒選択
-            <select id="quotaStudentSelect"></select>
+            <select id="quotaStudentSelect" style="min-width:220px;"></select>
           </label>
           <label>設定コマ数（月）
-            <input type="number" id="quotaValueInput" min="0" max="40" value="4" />
+            <input type="number" id="quotaValueInput" min="0" max="60" value="4" style="width:90px;" />
           </label>
-          <label style="flex-direction:row; align-items:center;">
+          <label style="flex-direction:row; align-items:center; gap:6px;">
             <input type="checkbox" id="quotaOnlyThisMonth" checked />
             選択中の月（<span id="quotaMonthLabel">2026-12</span>）のみ上書き
           </label>
           <button class="primary" id="saveStudentQuotaBtn">コマ数をDB保存</button>
         </div>
+        <div id="quotaSummaryText" style="font-size:0.86rem; margin-bottom:8px;"></div>
         <div class="table-wrap">
-          <table>
+          <table class="kamoku-table">
             <thead>
               <tr>
                 <th>支部</th>
                 <th>生徒氏名</th>
                 <th>学年</th>
+                <th>状態</th>
                 <th>基本月コマ数</th>
                 <th>当月有効コマ数</th>
                 <th>当月割当数</th>
                 <th>残枠</th>
+                <th>直接変更・保存</th>
               </tr>
             </thead>
             <tbody id="quotaTableBody"></tbody>
@@ -413,7 +429,86 @@
                 <th>CSV結果備考</th>
               </tr>
             </thead>
-            <tbody id="unpaidTableBody"></tbody>
+            <tbody      <!-- Tab 6: Role & Account Registration -->
+      <div id="tab-roles" class="tab-panel card">
+        <h2>新規役職・アカウント登録（本部・受付・講師・生徒・保護者）</h2>
+        <p style="font-size:0.86rem;">各役職のログインアカウントを発行・管理できます。パスワード未入力時は初期パスワード <code>grit2026</code> が設定されます。</p>
+
+        <div class="card" style="background:#f8fafc; margin-bottom:14px;">
+          <h3 style="margin-top:0; font-size:0.98rem;">新規アカウント登録</h3>
+          <div class="toolbar" style="margin-bottom:0;">
+            <label>役職
+              <select id="newAccRole">
+                <option value="hq">本部（hq）</option>
+                <option value="reception">受付担当スタッフ（reception）</option>
+                <option value="teacher" selected>講師（teacher）</option>
+                <option value="student">生徒（student）</option>
+                <option value="parent">保護者（parent）</option>
+              </select>
+            </label>
+            <label>ログインID
+              <input type="text" id="newAccLoginId" placeholder="例: teacher_suzuki" style="width:160px;" />
+            </label>
+            <label>氏名・表示名
+              <input type="text" id="newAccName" placeholder="例: スズキ　タロウ" style="width:180px;" />
+            </label>
+            <label>所属支部・区分
+              <select id="newAccBranch">
+                <option value="本部">本部</option>
+                <option value="全支部">全支部</option>
+                <option value="亀岡">亀岡</option>
+                <option value="長岡京">長岡京</option>
+                <option value="桂">桂</option>
+                <option value="太秦">太秦</option>
+                <option value="向日">向日</option>
+                <option value="伏見">伏見</option>
+                <option value="家庭教師">家庭教師</option>
+                <option value="高槻">高槻</option>
+              </select>
+            </label>
+            <label>初期パスワード
+              <input type="password" id="newAccPassword" placeholder="未入力時は grit2026" style="width:155px;" />
+            </label>
+            <label>LINE User ID（任意）
+              <input type="text" id="newAccLineId" placeholder="U..." style="width:150px;" />
+            </label>
+            <button class="primary" id="createAccountBtn">役職アカウントを登録</button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label>役職絞り込み
+            <select id="accFilterRole">
+              <option value="">全役職</option>
+              <option value="hq">本部（hq）</option>
+              <option value="reception">受付（reception）</option>
+              <option value="teacher">講師（teacher）</option>
+              <option value="student">生徒（student）</option>
+              <option value="parent">保護者（parent）</option>
+            </select>
+          </label>
+          <button class="secondary" id="reloadAccountsBtn">アカウント一覧を更新</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="kamoku-table">
+            <thead>
+              <tr>
+                <th>ログインID</th>
+                <th>氏名・表示名</th>
+                <th>役職</th>
+                <th>所属支部</th>
+                <th>LINE連携</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="accountsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+ id="unpaidTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -430,6 +525,7 @@
       schedules: [],
       absences: [],
       unpaidList: [],
+      accounts: [],
     };
 
     const apiFetch = async (url, options = {}) => {
@@ -491,6 +587,7 @@
       renderQuotaTable();
       renderDefaultTable();
       renderUnpaidTable(state.unpaidList);
+      await loadAccounts();
     }
 
     const WEEKDAY_SHORT = {
@@ -750,32 +847,158 @@
         : '<option value="">該当枠に空き講師がありません</option>';
     }
 
-    function renderQuotaTable() {
+    function getQuotaStudentsList() {
+      const base = Array.isArray(state.students) ? [...state.students] : [];
+      const seenNames = new Set(base.map((s) => String(s?.name || '').trim()).filter(Boolean));
+      const extraNames = new Set();
+      (state.templates || []).forEach((t) => {
+        const n = String(t?.studentName || '').trim();
+        if (n && n !== '空き' && !seenNames.has(n)) extraNames.add(n);
+      });
+      (state.schedules || []).forEach((r) => {
+        const n = String(r?.studentName || '').trim();
+        if (n && n !== '空き' && !seenNames.has(n)) extraNames.add(n);
+      });
+      let seq = base.length + 1;
+      extraNames.forEach((n) => {
+        base.push({
+          studentId: `stu_auto_${seq++}`,
+          status: '在籍中',
+          name: n,
+          grade: '',
+          branch: '',
+          defaultMonthlyQuota: 4,
+          overridesByMonth: {},
+        });
+      });
+      return base;
+    }
+
+    function syncQuotaInputFromSelected() {
       const stuSel = document.getElementById('quotaStudentSelect');
-      stuSel.innerHTML = state.students
-        .filter((s) => s.status === '在籍中')
-        .map((s) => `<option value="${s.studentId}">${s.name}（${s.branch}）</option>`)
-        .join('');
+      const valInp = document.getElementById('quotaValueInput');
+      const onlyMonth = document.getElementById('quotaOnlyThisMonth')?.checked ?? true;
+      if (!stuSel || !valInp) return;
+      const allStus = getQuotaStudentsList();
+      const stu = allStus.find((s) => s.studentId === stuSel.value);
+      if (!stu) return;
+      const effective = onlyMonth
+        ? (stu.overridesByMonth?.[state.yearMonth] ?? stu.defaultMonthlyQuota ?? 4)
+        : (stu.defaultMonthlyQuota ?? 4);
+      valInp.value = Number(effective);
+    }
+
+    function renderQuotaTable() {
+      const allStus = getQuotaStudentsList();
+      const branches = [...new Set([
+        '亀岡', '長岡京', '桂', '太秦', '向日', '伏見', '家庭教師', '高槻',
+        ...allStus.map((s) => s.branch).filter(Boolean),
+      ])];
+
+      const brFilterEl = document.getElementById('quotaFilterBranch');
+      if (brFilterEl) {
+        const prevBr = brFilterEl.value;
+        brFilterEl.innerHTML = '<option value="">全支部</option>' + branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+        if (prevBr && branches.includes(prevBr)) brFilterEl.value = prevBr;
+      }
+
+      const fBranch = document.getElementById('quotaFilterBranch')?.value || '';
+      const fStatus = document.getElementById('quotaFilterStatus')?.value || '在籍中';
+      const fKw = String(document.getElementById('quotaFilterKeyword')?.value || '').trim().toLowerCase();
+
+      const filtered = allStus
+        .filter((s) => {
+          if (fStatus !== 'ALL' && (s.status || '在籍中') !== fStatus) return false;
+          if (fBranch && s.branch !== fBranch) return false;
+          if (fKw) {
+            const hay = [s.name, s.branch, s.grade].join(' ').toLowerCase();
+            if (!hay.includes(fKw)) return false;
+          }
+          return true;
+        })
+        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ja'));
+
+      const stuSel = document.getElementById('quotaStudentSelect');
+      const prevSelected = stuSel.value;
+      stuSel.innerHTML = filtered.length
+        ? filtered.map((s) => `<option value="${s.studentId}">${s.name}（${s.branch || '支部未定'}・${s.status || '在籍中'}）</option>`).join('')
+        : '<option value="">該当する生徒がいません</option>';
+
+      if (prevSelected && filtered.some((s) => s.studentId === prevSelected)) {
+        stuSel.value = prevSelected;
+      } else if (filtered.length > 0) {
+        stuSel.value = filtered[0].studentId;
+      }
+      syncQuotaInputFromSelected();
+
+      const sumEl = document.getElementById('quotaSummaryText');
+      if (sumEl) {
+        sumEl.textContent = `表示生徒数: ${filtered.length}名 / 全${allStus.length}名（対象月: ${state.yearMonth}）`;
+      }
 
       const tbody = document.getElementById('quotaTableBody');
-      tbody.innerHTML = state.students
-        .filter((s) => s.status === '在籍中')
-        .map((s) => {
-          const effective = s.overridesByMonth?.[state.yearMonth] ?? s.defaultMonthlyQuota ?? 4;
-          const assigned = state.schedules.filter((r) => r.studentName === s.name && r.status !== 'cancelled').length;
-          const rem = effective - assigned;
-          return `
-            <tr>
-              <td>${s.branch}</td>
-              <td>${s.name}</td>
-              <td>${s.grade}</td>
-              <td>${s.defaultMonthlyQuota}コマ</td>
-              <td><strong>${effective}コマ</strong></td>
-              <td>${assigned}コマ</td>
-              <td style="color:${rem < 0 ? '#c53030' : '#2f855a'}">${rem}コマ</td>
-            </tr>
-          `;
-        }).join('');
+      tbody.innerHTML = filtered.map((s) => {
+        const baseQuota = Number(s.defaultMonthlyQuota ?? 4);
+        const effective = Number(s.overridesByMonth?.[state.yearMonth] ?? baseQuota);
+        const assigned = (state.schedules || []).filter(
+          (r) => String(r.studentName || '').trim() === String(s.name || '').trim()
+            && r.status !== 'cancelled'
+            && !r.isVacant
+        ).length;
+        const rem = effective - assigned;
+        const brBg = BRANCH_BG[s.branch] || '#ffffff';
+
+        return `
+          <tr>
+            <td style="background:${brBg};font-weight:600;">${s.branch || ''}</td>
+            <td>${s.name}</td>
+            <td>${s.grade || ''}</td>
+            <td>${s.status || '在籍中'}</td>
+            <td>${baseQuota}コマ</td>
+            <td><strong>${effective}コマ</strong></td>
+            <td>${assigned}コマ</td>
+            <td style="color:${rem < 0 ? '#c53030' : '#2f855a'};font-weight:700;">${rem}コマ</td>
+            <td style="white-space:nowrap;">
+              <input type="number" min="0" max="60" value="${effective}" data-row-quota="${s.studentId}" style="width:68px;" />
+              <button class="secondary" data-save-row-quota="${s.studentId}">保存</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.querySelectorAll('[data-save-row-quota]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const sid = btn.dataset.saveRowQuota;
+          const inp = tbody.querySelector(`[data-row-quota="${sid}"]`);
+          const val = Math.max(0, Number(inp?.value ?? 0));
+          const onlyMonth = document.getElementById('quotaOnlyThisMonth')?.checked ?? true;
+          const allList = getQuotaStudentsList();
+          const stu = allList.find((x) => x.studentId === sid);
+          if (!stu) return;
+
+          const updated = {
+            ...stu,
+            defaultMonthlyQuota: onlyMonth ? Number(stu.defaultMonthlyQuota ?? 4) : val,
+            overridesByMonth: onlyMonth
+              ? { ...(stu.overridesByMonth || {}), [state.yearMonth]: val }
+              : { ...(stu.overridesByMonth || {}) },
+          };
+
+          const res = await apiFetch('/api/schedules', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'UPDATE_STUDENT_QUOTA', payload: { student: updated } }),
+          });
+          if (res.ok) {
+            const idx = state.students.findIndex((x) => x.studentId === sid);
+            if (idx >= 0) state.students[idx] = res.student || updated;
+            else state.students.push(res.student || updated);
+            alert(`${stu.name} のコマ数（${val}コマ）を保存しました`);
+            renderQuotaTable();
+          } else {
+            alert(res.error || 'コマ数保存に失敗しました');
+          }
+        });
+      });
     }
 
     function getAllStudentNames() {
@@ -1161,24 +1384,44 @@
       await loadAllData();
     });
 
+    ['quotaFilterBranch', 'quotaFilterStatus'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', renderQuotaTable);
+    });
+    document.getElementById('quotaFilterKeyword').addEventListener('input', renderQuotaTable);
+    document.getElementById('quotaStudentSelect').addEventListener('change', syncQuotaInputFromSelected);
+    document.getElementById('quotaOnlyThisMonth').addEventListener('change', syncQuotaInputFromSelected);
+
     document.getElementById('saveStudentQuotaBtn').addEventListener('click', async () => {
       const studentId = document.getElementById('quotaStudentSelect').value;
-      const val = Number(document.getElementById('quotaValueInput').value) || 0;
+      const val = Math.max(0, Number(document.getElementById('quotaValueInput').value) || 0);
       const onlyMonth = document.getElementById('quotaOnlyThisMonth').checked;
-      const stu = state.students.find((s) => s.studentId === studentId);
-      if (!stu) return;
-
-      if (onlyMonth) {
-        stu.overridesByMonth = { ...(stu.overridesByMonth || {}), [state.yearMonth]: val };
-      } else {
-        stu.defaultMonthlyQuota = val;
+      const allList = getQuotaStudentsList();
+      const stu = allList.find((s) => s.studentId === studentId);
+      if (!stu) {
+        alert('対象の生徒を選択してください');
+        return;
       }
 
-      await apiFetch('/api/schedules', {
+      const updated = {
+        ...stu,
+        defaultMonthlyQuota: onlyMonth ? Number(stu.defaultMonthlyQuota ?? 4) : val,
+        overridesByMonth: onlyMonth
+          ? { ...(stu.overridesByMonth || {}), [state.yearMonth]: val }
+          : { ...(stu.overridesByMonth || {}) },
+      };
+
+      const res = await apiFetch('/api/schedules', {
         method: 'POST',
-        body: JSON.stringify({ action: 'UPDATE_STUDENT_QUOTA', payload: { student: stu } }),
+        body: JSON.stringify({ action: 'UPDATE_STUDENT_QUOTA', payload: { student: updated } }),
       });
-      alert('生徒の月間コマ数を保存しました');
+      if (!res.ok) {
+        alert(res.error || '生徒の月間コマ数保存に失敗しました');
+        return;
+      }
+      const idx = state.students.findIndex((s) => s.studentId === studentId);
+      if (idx >= 0) state.students[idx] = res.student || updated;
+      else state.students.push(res.student || updated);
+      alert(`${stu.name} の月間コマ数（${val}コマ）を保存しました`);
       renderQuotaTable();
     });
 
@@ -1292,6 +1535,132 @@
         alert('JSONファイルの読み込みまたは保存に失敗しました');
       }
     });
-  </script>
+
+    const ROLE_LABELS = {
+      hq: '本部（hq）',
+      reception: '受付担当スタッフ（reception）',
+      teacher: '講師（teacher）',
+      student: '生徒（student）',
+      parent: '保護者（parent）',
+    };
+
+    async function loadAccounts() {
+      const res = await apiFetch('/api/accounts');
+      if (res.ok && Array.isArray(res.accounts)) {
+        state.accounts = res.accounts;
+        renderAccountsTable();
+      }
+    }
+
+    function renderAccountsTable() {
+      const tbody = document.getElementById('accountsTableBody');
+      if (!tbody) return;
+      const roleFilter = document.getElementById('accFilterRole')?.value || '';
+      const list = (state.accounts || []).filter((a) => !roleFilter || a.role === roleFilter);
+
+      tbody.innerHTML = list.length
+        ? list.map((acc) => {
+            const accId = acc.id || acc.loginId;
+            return `
+              <tr>
+                <td><strong>${acc.loginId || accId}</strong></td>
+                <td>${acc.name || ''}</td>
+                <td>
+                  <select data-acc-role="${accId}">
+                    ${Object.entries(ROLE_LABELS).map(([k, lbl]) => `<option value="${k}" ${acc.role === k ? 'selected' : ''}>${lbl}</option>`).join('')}
+                  </select>
+                </td>
+                <td><input type="text" value="${(acc.branch || '').replace(/"/g, '&quot;')}" data-acc-branch="${accId}" style="width:110px;" /></td>
+                <td>${acc.lineUserId ? '連携済' : '未連携'}</td>
+                <td>${acc.status || '有効'}</td>
+                <td style="white-space:nowrap;">
+                  <button class="secondary" data-save-acc="${accId}">役職更新</button>
+                  ${accId !== 'admin' ? `<button class="danger" data-del-acc="${accId}">削除</button>` : ''}
+                </td>
+              </tr>
+            `;
+          }).join('')
+        : '<tr><td colspan="7">登録済みアカウントがありません</td></tr>';
+
+      tbody.querySelectorAll('[data-save-acc]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const accId = btn.dataset.saveAcc;
+          const roleSel = tbody.querySelector(`[data-acc-role="${accId}"]`);
+          const brInp = tbody.querySelector(`[data-acc-branch="${accId}"]`);
+          const res = await apiFetch('/api/accounts', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'UPDATE_ACCOUNT',
+              payload: {
+                account: {
+                  id: accId,
+                  role: roleSel ? roleSel.value : undefined,
+                  branch: brInp ? brInp.value.trim() : undefined,
+                },
+              },
+            }),
+          });
+          if (res.ok) {
+            alert('役職・所属情報を更新しました');
+            await loadAccounts();
+          } else {
+            alert(res.error || '更新に失敗しました');
+          }
+        });
+      });
+
+      tbody.querySelectorAll('[data-del-acc]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const accId = btn.dataset.delAcc;
+          if (!confirm(`アカウント「${accId}」を削除しますか？`)) return;
+          const res = await apiFetch('/api/accounts', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'DELETE_ACCOUNT', payload: { accountId: accId } }),
+          });
+          if (res.ok) {
+            alert('アカウントを削除しました');
+            await loadAccounts();
+          } else {
+            alert(res.error || '削除に失敗しました');
+          }
+        });
+      });
+    }
+
+    document.getElementById('createAccountBtn')?.addEventListener('click', async () => {
+      const role = document.getElementById('newAccRole').value;
+      const loginId = document.getElementById('newAccLoginId').value.trim();
+      const name = document.getElementById('newAccName').value.trim();
+      const branch = document.getElementById('newAccBranch').value.trim();
+      const password = document.getElementById('newAccPassword').value;
+      const lineUserId = document.getElementById('newAccLineId').value.trim();
+
+      const res = await apiFetch('/api/accounts', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'CREATE_ACCOUNT',
+          payload: {
+            account: { role, loginId, name, branch, password, lineUserId },
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        alert(res.error || '新規役職アカウントの登録に失敗しました');
+        return;
+      }
+
+      document.getElementById('newAccLoginId').value = '';
+      document.getElementById('newAccName').value = '';
+      document.getElementById('newAccPassword').value = '';
+      document.getElementById('newAccLineId').value = '';
+      alert(`${ROLE_LABELS[role] || role} アカウント「${loginId}」を登録しました`);
+      await loadAccounts();
+    });
+
+    document.getElementById('accFilterRole')?.addEventListener('change', renderAccountsTable);
+    document.getElementById('reloadAccountsBtn')?.addEventListener('click', loadAccounts);
+
+    </script>
 </body>
 </html>
