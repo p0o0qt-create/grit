@@ -2134,7 +2134,6 @@
       await loadAccounts();
       return true;
     }
-    }
 
     document.getElementById('createAccountBtn')?.addEventListener('click', async () => {
       const role = document.getElementById('newAccRole').value;
@@ -2383,35 +2382,6 @@
     });
 
   
-    document.getElementById('selfRegisterBtn')?.addEventListener('click', async () => {
-      const msgEl = document.getElementById('selfRegMsg');
-      const role = document.getElementById('selfRegRole').value;
-      const loginId = document.getElementById('selfRegLoginId').value.trim();
-      const name = document.getElementById('selfRegName').value.trim();
-      const branch = document.getElementById('selfRegBranch').value.trim();
-      const linkedStudentName = document.getElementById('selfRegLinkedStudent').value.trim();
-      const lineUserId = document.getElementById('selfRegLineId').value.trim();
-      const password = document.getElementById('selfRegPassword').value;
-      const agreed = document.getElementById('selfRegAgreeCheck').checked;
-
-      const res = await apiFetch('/api/accounts', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'SELF_REGISTER',
-          payload: {
-            account: {
-              role,
-              loginId,
-              name,
-              branch,
-              linkedStudentName,
-              lineUserId,
-              password,
-              agreed,
-            },
-          },
-        }),
-      });
 
       if (!res.ok) {
         if (msgEl) {
