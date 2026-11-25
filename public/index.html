@@ -487,6 +487,7 @@
                 <th>対象月</th>
                 <th>支部</th>
                 <th>生徒氏名</th>
+                <th>対象保護者</th>
                 <th>請求額</th>
                 <th>入金額</th>
                 <th>未入金額</th>
@@ -584,6 +585,26 @@
             </thead>
             <tbody id="accountsTableBody"></tbody>
           </table>
+        </div>
+
+        <div class="card" style="background:#f8fafc; margin-top:16px; margin-bottom:0;">
+          <h3 style="margin-top:0; font-size:0.98rem;">生徒・保護者 登録状況一覧（紐づけ確認）</h3>
+          <div class="table-wrap" style="max-height:260px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>区分</th>
+                  <th>ログインID</th>
+                  <th>氏名・表示名</th>
+                  <th>所属支部</th>
+                  <th>紐づけ対象（生徒／保護者）</th>
+                  <th>LINE連携</th>
+                  <th>承認状態</th>
+                </tr>
+              </thead>
+              <tbody id="studentParentRosterBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -1050,14 +1071,26 @@
         const n = String(r?.studentName || '').trim();
         if (n && n !== '空き' && !seenNames.has(n)) extraNames.add(n);
       });
+      (state.accounts || []).forEach((acc) => {
+        if (acc?.role === 'student' && (acc?.status === '有効' || !acc?.status)) {
+          const n = String(acc?.linkedStudentName || acc?.name || '').trim();
+          if (n && n !== '空き' && !seenNames.has(n)) {
+            seenNames.add(n);
+            extraNames.add(n);
+          }
+        }
+      });
       let seq = base.length + 1;
       extraNames.forEach((n) => {
+        const matchedAcc = (state.accounts || []).find(
+          (acc) => acc?.role === 'student' && String(acc?.linkedStudentName || acc?.name || '').trim() === n
+        );
         base.push({
           studentId: `stu_auto_${seq++}`,
           status: '在籍中',
           name: n,
           grade: '',
-          branch: '',
+          branch: matchedAcc?.branch || '',
           defaultMonthlyQuota: 4,
           overridesByMonth: {},
         });
@@ -1440,22 +1473,75 @@
       });
     }
 
+    function findLinkedParentsForStudent(studentName) {
+      const target = String(studentName || '').trim();
+      if (!target) return [];
+      return (state.accounts || []).filter((acc) => {
+        if (acc?.role !== 'parent') return false;
+        const linked = String(acc?.linkedStudentName || '').trim();
+        return linked && (linked === target || linked.includes(target) || target.includes(linked));
+      });
+    }
+
+    function renderStudentParentRoster() {
+      const tbody = document.getElementById('studentParentRosterBody');
+      if (!tbody) return;
+      const rows = (state.accounts || []).filter((a) => a.role === 'student' || a.role === 'parent');
+      tbody.innerHTML = rows.length
+        ? rows.map((acc) => {
+            const isStudent = acc.role === 'student';
+            let linkedText = '-';
+            if (isStudent) {
+              const sName = String(acc.linkedStudentName || acc.name || '').trim();
+              const parents = (state.accounts || []).filter((p) => {
+                if (p.role !== 'parent') return false;
+                const pl = String(p.linkedStudentName || '').trim();
+                return pl && sName && (pl === sName || pl.includes(sName) || sName.includes(pl));
+              });
+              linkedText = parents.length
+                ? `保護者: ${parents.map((p) => `${p.name} (${p.loginId || p.id})`).join(', ')}`
+                : '保護者未紐づけ';
+            } else {
+              linkedText = acc.linkedStudentName ? `生徒: ${acc.linkedStudentName}` : '生徒未紐づけ';
+            }
+            return `
+              <tr>
+                <td>${ROLE_LABELS[acc.role] || acc.role}</td>
+                <td><strong>${acc.loginId || acc.id}</strong></td>
+                <td>${acc.name || ''}</td>
+                <td>${acc.branch || ''}</td>
+                <td>${linkedText}</td>
+                <td>${acc.lineUserId ? '連携済' : '未連携'}</td>
+                <td>${acc.status || '有効'}</td>
+              </tr>
+            `;
+          }).join('')
+        : '<tr><td colspan="7">生徒・保護者アカウントはまだ登録されていません</td></tr>';
+    }
+
     function renderUnpaidTable(list = []) {
       const total = list.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
       document.getElementById('unpaidSummary').textContent =
         `未入金件数: ${list.length}件 / 未入金合計: ¥${total.toLocaleString()}`;
-      document.getElementById('unpaidTableBody').innerHTML = list.map((u) => `
-        <tr>
-          <td>${u.yearMonth}</td>
-          <td>${u.branch}</td>
-          <td>${u.studentName}</td>
-          <td>¥${Number(u.billedAmount).toLocaleString()}</td>
-          <td>¥${Number(u.paidAmount).toLocaleString()}</td>
-          <td style="color:#c53030;font-weight:700;">¥${Number(u.unpaidAmount).toLocaleString()}</td>
-          <td>${u.paymentStatus}</td>
-          <td>${u.csvStatus || ''}</td>
-        </tr>
-      `).join('');
+      document.getElementById('unpaidTableBody').innerHTML = list.map((u) => {
+        const linkedParents = findLinkedParentsForStudent(u.studentName);
+        const parentLabel = linkedParents.length
+          ? linkedParents.map((p) => `${p.name} (${p.loginId || p.id})`).join(' / ')
+          : '未紐づけ';
+        return `
+          <tr>
+            <td>${u.yearMonth}</td>
+            <td>${u.branch}</td>
+            <td>${u.studentName}</td>
+            <td>${parentLabel}</td>
+            <td>¥${Number(u.billedAmount).toLocaleString()}</td>
+            <td>¥${Number(u.paidAmount).toLocaleString()}</td>
+            <td style="color:#c53030;font-weight:700;">¥${Number(u.unpaidAmount).toLocaleString()}</td>
+            <td>${u.paymentStatus}</td>
+            <td>${u.csvStatus || ''}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     // Event bindings
@@ -1858,6 +1944,9 @@
           }
         });
       });
+
+      renderStudentParentRoster();
+      renderUnpaidTable(state.unpaidList || []);
 
       tbody.querySelectorAll('[data-del-acc]').forEach((btn) => {
         btn.addEventListener('click', async () => {

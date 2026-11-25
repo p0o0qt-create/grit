@@ -190,6 +190,27 @@ export default async function handler(req, res) {
         }
 
         const saved = await saveDoc('accounts', targetId, patch);
+        if (saved.role === 'student' && (saved.status === '有効' || !saved.status)) {
+          const stuDisplayName = String(saved.linkedStudentName || saved.name || '').trim();
+          if (stuDisplayName) {
+            const existingQuotas = await listDocs('student_quotas');
+            const alreadyExists = existingQuotas.some(
+              (s) => String(s?.name || '').trim() === stuDisplayName
+            );
+            if (!alreadyExists) {
+              const studentId = `stu_acc_${String(saved.loginId || saved.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+              await saveDoc('student_quotas', studentId, {
+                studentId,
+                status: '在籍中',
+                name: stuDisplayName,
+                grade: '',
+                branch: saved.branch || '',
+                defaultMonthlyQuota: 4,
+                overridesByMonth: {},
+              });
+            }
+          }
+        }
         const { password: _p, passwordHash: _ph, ...safeAccount } = saved;
         return sendJson(res, 200, { ok: true, account: safeAccount });
       }
