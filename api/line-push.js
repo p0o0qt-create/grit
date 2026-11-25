@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return sendJson(res, 405, { ok: false, error: 'Method Not Allowed' });
   }
 
-  const auth = requireAuth(req, ['hq', 'reception', 'teacher']);
+  const auth = requireAuth(req, ['hq', 'reception', 'teacher', 'student', 'parent']);
   if (!auth.ok) {
     return sendJson(res, auth.status, { ok: false, error: auth.error });
   }

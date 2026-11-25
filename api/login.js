@@ -71,6 +71,8 @@ export default async function handler(req, res) {
       name: updated.name,
       role: updated.role || 'hq',
       branch: updated.branch || '',
+      linkedStudentName: updated.linkedStudentName || '',
+      linkedTeacherName: updated.linkedTeacherName || '',
     });
 
     const { password: _p, passwordHash: _ph, ...safeAccount } = updated;

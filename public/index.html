@@ -474,9 +474,17 @@
             <label>初期パスワード
               <input type="password" id="newAccPassword" placeholder="未入力時は grit2026" style="width:155px;" />
             </label>
-            <label>LINE User ID（任意）
-              <input type="text" id="newAccLineId" placeholder="U..." style="width:150px;" />
+            <label>紐づけ生徒氏名（生徒・保護者）
+              <input type="text" id="newAccLinkedStudent" list="masterStudentNamesList" placeholder="例: アダチ　ユウト（足立　悠帆）" style="width:220px;" />
             </label>
+            <label>紐づけ講師氏名（講師）
+              <input type="text" id="newAccLinkedTeacher" list="masterTeacherNamesList" placeholder="例: イノウエ　カナコ" style="width:180px;" />
+            </label>
+            <label>LINE User ID（任意）
+              <input type="text" id="newAccLineId" placeholder="U..." style="width:140px;" />
+            </label>
+            <datalist id="masterStudentNamesList"></datalist>
+            <datalist id="masterTeacherNamesList"></datalist>
             <button class="primary" id="createAccountBtn">役職アカウントを登録</button>
           </div>
         </div>
@@ -513,10 +521,102 @@
         </div>
       </div>
     </section>
+
+    <!-- Dedicated Portal for Student / Parent / Teacher -->
+    <section id="rolePortalSection" class="hidden">
+      <div class="card">
+        <div class="toolbar" style="justify-content:space-between;">
+          <div>
+            <h2 id="portalTitle" style="margin:0 0 4px 0;">役職専用ポータル</h2>
+            <p id="portalSubtitle" style="margin:0; font-size:0.88rem; color:#4a5568;"></p>
+          </div>
+          <div class="toolbar" style="margin-bottom:0;">
+            <label>対象年月
+              <input type="month" id="portalYearMonth" value="2026-12" />
+            </label>
+            <button class="primary" id="portalReloadBtn">表示を更新</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="portalScheduleCard" class="card">
+        <h3 style="margin-top:0;">紐づいているスケジュール一覧</h3>
+        <div id="portalScheduleSummary" style="font-size:0.88rem; margin-bottom:8px;"></div>
+        <div class="table-wrap">
+          <table class="kamoku-table">
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>曜日</th>
+                <th>支部</th>
+                <th>コマ</th>
+                <th>担当講師</th>
+                <th>生徒氏名</th>
+                <th>科目</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody id="portalScheduleBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="portalAbsenceCard" class="card hidden">
+        <h3 style="margin-top:0;">欠席申請フォーム</h3>
+        <p style="font-size:0.86rem;">対象の授業を選択して欠席理由を入力すると、欠席申請が登録され振替対象として反映されます。</p>
+        <div class="toolbar">
+          <label style="min-width:340px;">欠席する授業コマ
+            <select id="portalAbsenceTargetSelect"></select>
+          </label>
+          <label style="min-width:240px;">欠席理由
+            <input type="text" id="portalAbsenceReasonInput" placeholder="例: 体調不良・学校行事など" />
+          </label>
+          <button class="danger" id="portalSubmitAbsenceBtn">欠席申請を送信</button>
+        </div>
+        <h4>提出済みの欠席申請履歴</h4>
+        <div class="table-wrap" style="max-height:220px;">
+          <table>
+            <thead>
+              <tr>
+                <th>申請日時</th>
+                <th>対象日・コマ</th>
+                <th>生徒氏名</th>
+                <th>欠席理由</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody id="portalAbsenceHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="portalBillingCard" class="card hidden">
+        <h3 style="margin-top:0;">入金状態の確認</h3>
+        <div id="portalBillingSummary" style="font-weight:600; margin-bottom:8px;"></div>
+        <div class="table-wrap" style="max-height:280px;">
+          <table>
+            <thead>
+              <tr>
+                <th>対象月</th>
+                <th>支部</th>
+                <th>生徒氏名</th>
+                <th>請求額</th>
+                <th>入金額</th>
+                <th>未入金額</th>
+                <th>入金状態</th>
+                <th>備考</th>
+              </tr>
+            </thead>
+            <tbody id="portalBillingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script type="module">
     let authToken = '';
+    let currentUser = null;
     let state = {
       yearMonth: '2026-12',
       templates: [],
@@ -577,11 +677,20 @@
         return;
       }
       authToken = data.token;
+      currentUser = data.account;
       document.getElementById('storageBadge').textContent = `DB: ${data.storage}`;
       document.getElementById('userBadge').textContent = `${data.account.name} (${data.account.role})`;
       document.getElementById('loginSection').classList.add('hidden');
-      document.getElementById('workspaceSection').classList.remove('hidden');
-      await loadAllData();
+      const role = data.account.role || 'hq';
+      if (['student', 'parent', 'teacher'].includes(role)) {
+        document.getElementById('workspaceSection').classList.add('hidden');
+        document.getElementById('rolePortalSection').classList.remove('hidden');
+        await loadRolePortalData();
+      } else {
+        document.getElementById('rolePortalSection').classList.add('hidden');
+        document.getElementById('workspaceSection').classList.remove('hidden');
+        await loadAllData();
+      }
     });
 
     async function loadAllData() {
@@ -601,6 +710,7 @@
       renderQuotaTable();
       renderDefaultTable();
       renderUnpaidTable(state.unpaidList);
+      populateMasterDataLists();
       await loadAccounts();
     }
 
@@ -1334,8 +1444,15 @@
           },
         }),
       });
-      alert('欠席申請を登録しました');
-      await loadAllData();
+      (() => {
+        const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
+        const sentCount = deliveries.filter((d) => d.status === 'sent' || d.status === 'simulated_no_token').length;
+        const skippedCount = deliveries.filter((d) => d.status === 'skipped_no_line_id').length;
+        alert(
+          `欠席申請を登録しました。振替対象リストに反映されています。\n` +
+          `紐づき役職へのLINE配信処理: 対象${deliveries.length}件（送信/ログ記録${sentCount}件・LINE未連携${skippedCount}件）`
+        );
+      })()      await loadAllData();
     });
 
     document.getElementById('confirmRescheduleBtn').addEventListener('click', async () => {
@@ -1646,6 +1763,8 @@
       const loginId = document.getElementById('newAccLoginId').value.trim();
       const name = document.getElementById('newAccName').value.trim();
       const branch = document.getElementById('newAccBranch').value.trim();
+      const linkedStudentName = document.getElementById('newAccLinkedStudent')?.value.trim() || '';
+      const linkedTeacherName = document.getElementById('newAccLinkedTeacher')?.value.trim() || '';
       const password = document.getElementById('newAccPassword').value;
       const lineUserId = document.getElementById('newAccLineId').value.trim();
 
@@ -1654,7 +1773,7 @@
         body: JSON.stringify({
           action: 'CREATE_ACCOUNT',
           payload: {
-            account: { role, loginId, name, branch, password, lineUserId },
+            account: { role, loginId, name, branch, linkedStudentName, linkedTeacherName, password, lineUserId },
           },
         }),
       });
@@ -1674,6 +1793,216 @@
 
     document.getElementById('accFilterRole')?.addEventListener('change', renderAccountsTable);
     document.getElementById('reloadAccountsBtn')?.addEventListener('click', loadAccounts);
+
+  
+    function populateMasterDataLists() {
+      const stuListEl = document.getElementById('masterStudentNamesList');
+      if (stuListEl) {
+        const names = getAllStudentNames();
+        stuListEl.innerHTML = names.map((n) => `<option value="${n.replace(/"/g, '&quot;')}"></option>`).join('');
+      }
+      const tchListEl = document.getElementById('masterTeacherNamesList');
+      if (tchListEl) {
+        const tNames = getAllTeacherNames();
+        tchListEl.innerHTML = tNames.map((n) => `<option value="${n.replace(/"/g, '&quot;')}"></option>`).join('');
+      }
+    }
+
+    function matchesLinkedStudent(rowStudentName, user) {
+      const sName = String(rowStudentName || '').trim();
+      if (!sName || sName === '空き') return false;
+      const targets = [user?.linkedStudentName, user?.name, user?.loginId]
+        .map((v) => String(v || '').trim())
+        .filter(Boolean);
+      return targets.some((t) => sName === t || sName.includes(t) || t.includes(sName));
+    }
+
+    function matchesLinkedTeacher(rowTeacherName, user) {
+      const tName = String(rowTeacherName || '').trim();
+      if (!tName) return false;
+      const targets = [user?.linkedTeacherName, user?.name, user?.loginId]
+        .map((v) => String(v || '').trim())
+        .filter(Boolean);
+      return targets.some((t) => tName === t || tName.includes(t) || t.includes(tName));
+    }
+
+    async function loadRolePortalData() {
+      if (!currentUser) return;
+      const ymInp = document.getElementById('portalYearMonth');
+      const ym = ymInp?.value || state.yearMonth || '2026-12';
+      state.yearMonth = ym;
+
+      const data = await apiFetch(`/api/schedules?yearMonth=${encodeURIComponent(ym)}`);
+      if (!data.ok) {
+        alert(data.error || 'ポータルデータの読込に失敗しました');
+        return;
+      }
+      state = { ...state, ...data };
+      renderRolePortal();
+    }
+
+    function renderRolePortal() {
+      if (!currentUser) return;
+      const role = currentUser.role;
+      const titleEl = document.getElementById('portalTitle');
+      const subEl = document.getElementById('portalSubtitle');
+      const absCard = document.getElementById('portalAbsenceCard');
+      const billCard = document.getElementById('portalBillingCard');
+
+      let mySchedules = [];
+      if (role === 'student') {
+        titleEl.textContent = '生徒専用ポータル（スケジュール確認・欠席申請）';
+        subEl.textContent = `${currentUser.name} 様 ／ 紐づけ生徒: ${currentUser.linkedStudentName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
+        absCard.classList.remove('hidden');
+        billCard.classList.add('hidden');
+        mySchedules = (state.schedules || []).filter((r) => matchesLinkedStudent(r.studentName, currentUser));
+      } else if (role === 'parent') {
+        titleEl.textContent = '保護者専用ポータル（スケジュール確認・欠席申請・入金状態）';
+        subEl.textContent = `${currentUser.name} 様 ／ 対象生徒: ${currentUser.linkedStudentName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
+        absCard.classList.remove('hidden');
+        billCard.classList.remove('hidden');
+        mySchedules = (state.schedules || []).filter((r) => matchesLinkedStudent(r.studentName, currentUser));
+      } else if (role === 'teacher') {
+        titleEl.textContent = '講師専用ポータル（担当スケジュール一覧）';
+        subEl.textContent = `${currentUser.name} 先生 ／ 紐づけ講師名: ${currentUser.linkedTeacherName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
+        absCard.classList.add('hidden');
+        billCard.classList.add('hidden');
+        mySchedules = (state.schedules || []).filter((r) => matchesLinkedTeacher(r.teacherName, currentUser));
+      }
+
+      const sumEl = document.getElementById('portalScheduleSummary');
+      if (sumEl) {
+        sumEl.textContent = `表示コマ数: ${mySchedules.length}コマ（${state.yearMonth}）`;
+      }
+
+      const tbody = document.getElementById('portalScheduleBody');
+      if (tbody) {
+        tbody.innerHTML = mySchedules.length
+          ? mySchedules.map((r) => {
+              const wdShort = WEEKDAY_SHORT[r.dayOfWeek] || r.dayOfWeek || '';
+              const wdCls = WEEKDAY_CLASS[r.dayOfWeek] || '';
+              const stClass = r.status === 'absent' ? 'st-absent' : r.status === 'rescheduled' ? 'st-rescheduled' : 'st-scheduled';
+              const stLabel = r.status === 'absent' ? '欠席申請済' : r.status === 'rescheduled' ? '振替済' : '予定';
+              return `
+                <tr>
+                  <td>${r.date}</td>
+                  <td><span class="wd-badge ${wdCls}">${wdShort}</span></td>
+                  <td>${r.branch || ''}</td>
+                  <td>${r.timeSlot || ''}</td>
+                  <td>${r.teacherName || '未割当'}</td>
+                  <td>${r.studentName || ''}</td>
+                  <td>${r.subject || ''}</td>
+                  <td><span class="status-pill ${stClass}">${stLabel}</span></td>
+                </tr>
+              `;
+            }).join('')
+          : '<tr><td colspan="8">紐づいているスケジュールがありません（ログインIDまたは紐づけ氏名をご確認ください）</td></tr>';
+      }
+
+      if (role === 'student' || role === 'parent') {
+        const sel = document.getElementById('portalAbsenceTargetSelect');
+        const schedOptions = mySchedules.filter((r) => r.status === 'scheduled');
+        if (sel) {
+          sel.innerHTML = schedOptions.length
+            ? schedOptions.map((r) => `<option value="${r.scheduleId}">${r.date} (${WEEKDAY_SHORT[r.dayOfWeek] || ''}) ${r.timeSlot} | ${r.branch} | ${r.studentName} | ${r.subject}</option>`).join('')
+            : '<option value="">欠席申請可能な予定コマがありません</option>';
+        }
+
+        const histBody = document.getElementById('portalAbsenceHistoryBody');
+        const myAbsences = (state.absences || []).filter((a) => matchesLinkedStudent(a.studentName, currentUser));
+        if (histBody) {
+          histBody.innerHTML = myAbsences.length
+            ? myAbsences.map((a) => `
+                <tr>
+                  <td>${(a.createdAt || '').slice(0, 16).replace('T', ' ')}</td>
+                  <td>${a.date || ''} ${a.timeSlot || ''}</td>
+                  <td>${a.studentName || ''}</td>
+                  <td>${a.reason || ''}</td>
+                  <td>${a.status === 'rescheduled' ? '振替済' : '申請中（振替待ち）'}</td>
+                </tr>
+              `).join('')
+            : '<tr><td colspan="5">欠席申請履歴はありません</td></tr>';
+        }
+      }
+
+      if (role === 'parent') {
+        const myBilling = (state.unpaidList || []).filter((u) => matchesLinkedStudent(u.studentName, currentUser));
+        const totalUnpaid = myBilling.reduce((acc, u) => acc + Number(u.unpaidAmount || 0), 0);
+        const bSum = document.getElementById('portalBillingSummary');
+        if (bSum) {
+          bSum.textContent = myBilling.length
+            ? `未入金件数: ${myBilling.length}件 ／ 未入金合計: ¥${totalUnpaid.toLocaleString()}`
+            : '現在、未入金データはありません（入金済・請求対象外）';
+        }
+        const bBody = document.getElementById('portalBillingBody');
+        if (bBody) {
+          bBody.innerHTML = myBilling.length
+            ? myBilling.map((u) => `
+                <tr>
+                  <td>${u.yearMonth || state.yearMonth}</td>
+                  <td>${u.branch || ''}</td>
+                  <td>${u.studentName || ''}</td>
+                  <td>¥${Number(u.billedAmount || 0).toLocaleString()}</td>
+                  <td>¥${Number(u.paidAmount || 0).toLocaleString()}</td>
+                  <td style="color:#c53030;font-weight:700;">¥${Number(u.unpaidAmount || 0).toLocaleString()}</td>
+                  <td><span class="status-pill st-absent">未入金</span></td>
+                  <td>${u.note || ''}</td>
+                </tr>
+              `).join('')
+            : '<tr><td colspan="8">対象となる未入金明細はありません</td></tr>';
+        }
+      }
+    }
+
+    document.getElementById('portalReloadBtn')?.addEventListener('click', loadRolePortalData);
+    document.getElementById('portalYearMonth')?.addEventListener('change', loadRolePortalData);
+
+    document.getElementById('portalSubmitAbsenceBtn')?.addEventListener('click', async () => {
+      const schedId = document.getElementById('portalAbsenceTargetSelect')?.value;
+      const reason = document.getElementById('portalAbsenceReasonInput')?.value.trim() || '欠席申請';
+      const target = (state.schedules || []).find((s) => s.scheduleId === schedId);
+      if (!target) {
+        alert('欠席する授業コマを選択してください');
+        return;
+      }
+
+      const absencePayload = {
+        absenceId: `abs_${Date.now()}`,
+        scheduleId: target.scheduleId,
+        yearMonth: state.yearMonth,
+        date: target.date,
+        dayOfWeek: target.dayOfWeek,
+        branch: target.branch,
+        timeSlot: target.timeSlot,
+        teacherName: target.teacherName,
+        studentName: target.studentName,
+        subject: target.subject,
+        reason,
+        requestedBy: currentUser?.loginId || currentUser?.name || '',
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+
+      const res = await apiFetch('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'CREATE_ABSENCE_REQUEST', payload: { request: absencePayload } }),
+      });
+
+      if (!res.ok) {
+        alert(res.error || '欠席申請の送信に失敗しました');
+        return;
+      }
+
+      document.getElementById('portalAbsenceReasonInput').value = '';
+      const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
+      const sentCount = deliveries.filter((d) => d.status === 'sent' || d.status === 'simulated_no_token').length;
+      const skippedCount = deliveries.filter((d) => d.status === 'skipped_no_line_id').length;
+      alert(
+        `${target.date} ${target.timeSlot}（${target.studentName}）の欠席申請を受け付けました\n` +
+        `紐づき役職へのLINE配信処理: 対象${deliveries.length}件（送信/ログ記録${sentCount}件・LINE未連携${skippedCount}件）`
+      );
+      await loadRolePortalData();
+    });
 
     </script>
 </body>

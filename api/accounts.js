@@ -54,6 +54,8 @@ export default async function handler(req, res) {
         const branch = String(acc.branch || '').trim();
         const password = String(acc.password || '').trim();
         const lineUserId = String(acc.lineUserId || '').trim();
+        const linkedStudentName = String(acc.linkedStudentName || '').trim();
+        const linkedTeacherName = String(acc.linkedTeacherName || '').trim();
 
         if (!loginId) {
           return sendJson(res, 400, { ok: false, error: 'ログインIDを入力してください' });
@@ -77,6 +79,8 @@ export default async function handler(req, res) {
           role,
           branch,
           lineUserId,
+          linkedStudentName,
+          linkedTeacherName,
           passwordHash: hashPassword(password || 'grit2026'),
           mustChangePassword: acc.mustChangePassword !== false,
           status: acc.status || '有効',
@@ -108,6 +112,8 @@ export default async function handler(req, res) {
           role: nextRole,
           branch: acc.branch !== undefined ? String(acc.branch).trim() : current.branch,
           lineUserId: acc.lineUserId !== undefined ? String(acc.lineUserId).trim() : (current.lineUserId || ''),
+          linkedStudentName: acc.linkedStudentName !== undefined ? String(acc.linkedStudentName).trim() : (current.linkedStudentName || ''),
+          linkedTeacherName: acc.linkedTeacherName !== undefined ? String(acc.linkedTeacherName).trim() : (current.linkedTeacherName || ''),
           status: acc.status !== undefined ? String(acc.status).trim() : (current.status || '有効'),
         };
         if (acc.password && String(acc.password).trim()) {

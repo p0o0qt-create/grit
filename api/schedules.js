@@ -175,7 +175,116 @@ export default async function handler(req, res) {
             isCustomized: true,
           });
         }
-        return sendJson(res, 200, { ok: true, absence: savedReq });
+
+        const accounts = await listDocs('accounts');
+        const stuName = String(request?.studentName || '').trim();
+        const tchName = String(request?.teacherName || '').trim();
+        const brName = String(request?.branch || '').trim();
+
+        const matchesName = (candidate, target) => {
+          const c = String(candidate || '').trim();
+          const t = String(target || '').trim();
+          if (!c || !t) return false;
+          return c === t || c.includes(t) || t.includes(c);
+        };
+
+        const linkedRecipients = accounts.filter((acc) => {
+          if (acc.status === '無効') return false;
+          if (acc.role === 'hq') return true;
+          if (acc.role === 'reception') {
+            return !acc.branch || acc.branch === '全支部' || acc.branch === '本部' || acc.branch === brName;
+          }
+          if (acc.role === 'teacher') {
+            return matchesName(acc.linkedTeacherName || acc.name, tchName);
+          }
+          if (acc.role === 'student' || acc.role === 'parent') {
+            return matchesName(acc.linkedStudentName || acc.name, stuName);
+          }
+          return false;
+        });
+
+        const msgText = [
+          '【GRIT指導学院】欠席申請のお知らせ',
+          `生徒様：${request?.studentName || '-'}`,
+          `日時：${request?.date || ''} (${request?.dayOfWeek || ''}) ${request?.timeSlot || ''}`,
+          `支部・科目：${request?.branch || '-'} / ${request?.subject || '-'}`,
+          `担当講師：${request?.teacherName || '未割当'}`,
+          `欠席理由：${request?.reason || '記載なし'}`,
+        ].join('\n');
+
+        const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+        const lineDeliveries = [];
+
+        for (const rec of linkedRecipients) {
+          const toId = String(rec.lineUserId || '').trim();
+          const logId = `line_abs_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          if (!toId) {
+            lineDeliveries.push({
+              accountId: rec.id || rec.loginId,
+              name: rec.name,
+              role: rec.role,
+              lineUserId: '',
+              status: 'skipped_no_line_id',
+            });
+            continue;
+          }
+
+          if (!accessToken) {
+            await saveDoc('notification_logs', logId, {
+              to: toId,
+              recipientName: rec.name,
+              recipientRole: rec.role,
+              messages: [{ type: 'text', text: msgText }],
+              meta: { type: 'absence_request', absenceId, studentName: stuName, teacherName: tchName },
+              sentBy: auth.user.id,
+              status: 'simulated_no_token',
+            });
+            lineDeliveries.push({
+              accountId: rec.id || rec.loginId,
+              name: rec.name,
+              role: rec.role,
+              lineUserId: toId,
+              status: 'simulated_no_token',
+            });
+          } else {
+            const lineRes = await fetch('https://api.line.me/v2/bot/message/push', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                to: toId,
+                messages: [{ type: 'text', text: msgText }],
+              }),
+            });
+            const bodyText = await lineRes.text();
+            await saveDoc('notification_logs', logId, {
+              to: toId,
+              recipientName: rec.name,
+              recipientRole: rec.role,
+              messages: [{ type: 'text', text: msgText }],
+              meta: { type: 'absence_request', absenceId, studentName: stuName, teacherName: tchName },
+              sentBy: auth.user.id,
+              status: lineRes.ok ? 'sent' : 'failed',
+              httpStatus: lineRes.status,
+              response: bodyText,
+            });
+            lineDeliveries.push({
+              accountId: rec.id || rec.loginId,
+              name: rec.name,
+              role: rec.role,
+              lineUserId: toId,
+              status: lineRes.ok ? 'sent' : 'failed',
+            });
+          }
+        }
+
+        return sendJson(res, 200, {
+          ok: true,
+          absence: savedReq,
+          lineDeliveries,
+        });
       }
 
       if (action === 'CONFIRM_RESCHEDULE') {
