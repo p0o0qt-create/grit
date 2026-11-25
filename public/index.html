@@ -753,15 +753,36 @@
     };
 
     const apiFetch = async (url, options = {}) => {
-      const res = await fetch(url, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          ...(options.headers || {}),
-        },
-      });
-      return res.json();
+      try {
+        const res = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+            ...(options.headers || {}),
+          },
+        });
+        const text = await res.text();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch {
+          return {
+            ok: false,
+            status: res.status,
+            error: `サーバー応答の解析に失敗しました（HTTP ${res.status}）`,
+          };
+        }
+        if (!res.ok && data.ok === undefined) {
+          return { ...data, ok: false, status: res.status, error: data.error || `HTTP ${res.status} エラー` };
+        }
+        return data;
+      } catch (err) {
+        return {
+          ok: false,
+          error: err?.message || 'ネットワーク通信エラーが発生しました',
+        };
+      }
     };
 
     // Tabs
