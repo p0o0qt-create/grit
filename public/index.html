@@ -691,6 +691,33 @@
 
         <div id="hqReportFormContainer" style="margin-bottom:16px;"></div>
 
+        <div class="card" style="background:#fffaf0; border:1px solid #f6ad55; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <h3 style="margin:0; font-size:1rem; color:#9c4221;">代行引継 履歴（本部保管・講師転送）</h3>
+            <span id="hqHandoverSummary" style="font-weight:700; color:#9c4221; font-size:0.86rem;"></span>
+          </div>
+          <p style="font-size:0.82rem; color:#4a5568; margin:0 0 8px 0;">
+            「代行引継」にチェックが入った指導報告書は本部履歴として保持されます。転送先講師を選択して「講師へ転送」を押すと対象講師へ通知・転送記録が反映されます。
+          </p>
+          <div class="table-wrap" style="max-height:240px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>授業日・コマ</th>
+                  <th>支部</th>
+                  <th>報告／担当講師</th>
+                  <th>生徒氏名</th>
+                  <th>引継内容（CL・宿題・メモ）</th>
+                  <th>転送先講師選択</th>
+                  <th>転送状態</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="hqHandoverHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="card" style="background:#f8fafc; margin-bottom:0;">
           <div class="toolbar" style="justify-content:space-between;">
             <h3 style="margin:0; font-size:1rem;">提出済み 指導報告書履歴（本部閲覧）</h3>
@@ -2631,6 +2658,8 @@
       'b.20:00-21:20',
     ];
 
+    const slotLookupCache = new Map();
+
     function buildReportFormHtml(prefix) {
       const slotOpts = REPORT_TIME_SLOTS.map((s) => `<option value="${s}">${s}</option>`).join('');
       const colBoxes = [1, 2, 3].map((colNum) => {
@@ -2650,7 +2679,8 @@
           <div class="report-col-box">
             <div class="report-col-cell" style="background:#edf2f7;">
               <label>生徒氏名（${colNum}人目）<span>さん</span></label>
-              <input type="text" id="${prefix}_stu_${colNum}" list="masterStudentNamesList" placeholder="生徒氏名を入力" style="width:100%;" />
+              <select id="${prefix}_stuSelect_${colNum}" style="width:100%; margin-bottom:4px; display:none;"></select>
+              <input type="text" id="${prefix}_stu_${colNum}" list="masterStudentNamesList" placeholder="月次スケジュールから読込・選択" style="width:100%;" />
               <input type="hidden" id="${prefix}_schedId_${colNum}" />
             </div>
             <div class="report-col-cell">
@@ -2692,7 +2722,7 @@
                 <input type="checkbox" id="${prefix}_chkReport_${colNum}" checked />指報
               </label>
               <label style="display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:0.82rem; margin:0; cursor:pointer;">
-                <input type="checkbox" id="${prefix}_chkSub_${colNum}" />代行引継
+                <input type="checkbox" id="${prefix}_chkSub_${colNum}" data-rep-sub-chk="${prefix}_${colNum}" />代行引継
               </label>
             </div>
           </div>
@@ -2716,14 +2746,24 @@
                 <input type="radio" name="${prefix}_classType" value="代行" />代行
               </label>
             </div>
-            <label style="font-weight:700;">コマ
+            <label style="font-weight:700;">コマ（時間帯）
               <select id="${prefix}_timeSlot">${slotOpts}</select>
             </label>
             <label style="font-weight:700;">支部
               <input type="text" id="${prefix}_branch" placeholder="例: 亀岡" style="width:110px;" />
             </label>
-            <label style="font-weight:700;">担当講師
-              <input type="text" id="${prefix}_teacher" list="masterTeacherNamesList" placeholder="講師氏名" style="width:165px;" />
+            <label style="font-weight:700;">担当講師（月次スケジュール読込・選択）
+              <select id="${prefix}_teacherSelect" style="width:185px; margin-bottom:3px; display:none;"></select>
+              <input type="text" id="${prefix}_teacher" list="masterTeacherNamesList" placeholder="講師氏名" style="width:185px;" />
+            </label>
+            <span id="${prefix}_slotMatchInfo" style="font-size:0.8rem; color:#2b6cb0; font-weight:600; padding-top:14px;"></span>
+          </div>
+
+          <div id="${prefix}_handoverTransferBar" style="display:none; background:#fffaf0; border:1px solid #f6ad55; border-radius:6px; padding:8px 12px; margin-bottom:10px; font-size:0.84rem;">
+            <strong>代行引継設定：</strong>本部へ履歴として保存され、提出後または履歴一覧から指定講師へ転送できます。
+            <label style="display:inline-flex; flex-direction:row; align-items:center; gap:6px; margin-left:10px; font-weight:600;">
+              転送先講師（任意・提出時同時転送）
+              <input type="text" id="${prefix}_transferTeacher" list="masterTeacherNamesList" placeholder="転送先講師名" style="width:170px;" />
             </label>
           </div>
 
@@ -2743,12 +2783,176 @@
       `;
     }
 
+    async function getSchedulesForDate(dateStr) {
+      if (!dateStr) return [];
+      const ym = dateStr.slice(0, 7);
+      let pool = [];
+      if (state.yearMonth === ym && Array.isArray(state.schedules) && state.schedules.length > 0) {
+        pool = state.schedules;
+      } else if (slotLookupCache.has(ym)) {
+        pool = slotLookupCache.get(ym);
+      } else {
+        const res = await apiFetch(`/api/schedules?yearMonth=${encodeURIComponent(ym)}`);
+        if (res.ok && Array.isArray(res.schedules)) {
+          slotLookupCache.set(ym, res.schedules);
+          pool = res.schedules;
+        }
+      }
+      return pool.filter((s) => !s.isVacant && s.date === dateStr && String(s.studentName || '').trim());
+    }
+
+    async function syncReportFromScheduleSlot(prefix, preferredTeacher = '') {
+      const dateStr = document.getElementById(`${prefix}_date`)?.value || '';
+      const timeSlot = document.getElementById(`${prefix}_timeSlot`)?.value || '';
+      const tchInput = document.getElementById(`${prefix}_teacher`);
+      const tchSelect = document.getElementById(`${prefix}_teacherSelect`);
+      const brInput = document.getElementById(`${prefix}_branch`);
+      const infoEl = document.getElementById(`${prefix}_slotMatchInfo`);
+
+      if (!dateStr || !timeSlot) return;
+
+      const dayRows = await getSchedulesForDate(dateStr);
+      const slotRows = dayRows.filter((s) => String(s.timeSlot || '').trim() === timeSlot.trim());
+
+      if (currentUser?.role === 'teacher') {
+        const myName = currentUser.linkedTeacherName || currentUser.name || '';
+        const myRows = slotRows.filter((s) => matchesLinkedTeacher(s.teacherName, currentUser));
+        if (myRows.length > 0 && tchInput) {
+          tchInput.value = myRows[0].teacherName || myName;
+        }
+      }
+
+      const teachersFound = Array.from(
+        new Set(slotRows.map((s) => String(s.teacherName || '').trim()).filter(Boolean))
+      );
+
+      if (tchSelect) {
+        if (teachersFound.length > 1) {
+          const currentVal = preferredTeacher || tchInput?.value.trim() || '';
+          tchSelect.style.display = 'block';
+          tchSelect.innerHTML =
+            '<option value="">-- 複数講師あり：選択してください --</option>' +
+            teachersFound.map((t) => `<option value="${t.replace(/"/g, '&quot;')}" ${t === currentVal ? 'selected' : ''}>${t}</option>`).join('');
+          if (!currentVal && tchInput) {
+            tchInput.value = teachersFound[0];
+            tchSelect.value = teachersFound[0];
+          }
+        } else {
+          tchSelect.style.display = 'none';
+          tchSelect.innerHTML = '';
+          if (teachersFound.length === 1 && tchInput && (!tchInput.value.trim() || preferredTeacher)) {
+            tchInput.value = teachersFound[0];
+          }
+        }
+      }
+
+      const activeTeacher = (tchSelect && tchSelect.style.display !== 'none' && tchSelect.value)
+        ? tchSelect.value.trim()
+        : (tchInput?.value.trim() || '');
+
+      const filteredStudentRows = activeTeacher
+        ? slotRows.filter((s) => String(s.teacherName || '').trim() === activeTeacher)
+        : slotRows;
+
+      const candidateRows = filteredStudentRows.length > 0 ? filteredStudentRows : slotRows;
+      const uniqueStudents = [];
+      const seenStu = new Set();
+      for (const r of candidateRows) {
+        const sn = String(r.studentName || '').trim();
+        if (!sn || seenStu.has(sn)) continue;
+        seenStu.add(sn);
+        uniqueStudents.push(r);
+      }
+
+      if (brInput && candidateRows[0]?.branch && !brInput.value.trim()) {
+        brInput.value = candidateRows[0].branch;
+      }
+
+      [1, 2, 3].forEach((colNum, idx) => {
+        const stuInp = document.getElementById(`${prefix}_stu_${colNum}`);
+        const stuSel = document.getElementById(`${prefix}_stuSelect_${colNum}`);
+        const sidInp = document.getElementById(`${prefix}_schedId_${colNum}`);
+
+        if (stuSel) {
+          if (uniqueStudents.length > 1) {
+            stuSel.style.display = 'block';
+            const optsHtml = ['<option value="">-- 生徒を選択 --</option>']
+              .concat(
+                uniqueStudents.map((u) => {
+                  const label = `${u.studentName}${u.subject ? '（' + u.subject + '）' : ''}`;
+                  return `<option value="${String(u.studentName).replace(/"/g, '&quot;')}" data-sid="${String(u.scheduleId || '').replace(/"/g, '&quot;')}">${label}</option>`;
+                })
+              )
+              .join('');
+            stuSel.innerHTML = optsHtml;
+            const defaultRow = uniqueStudents[idx];
+            if (defaultRow) {
+              stuSel.value = defaultRow.studentName;
+              if (stuInp) stuInp.value = defaultRow.studentName;
+              if (sidInp) sidInp.value = defaultRow.scheduleId || '';
+            } else {
+              stuSel.value = '';
+              if (stuInp) stuInp.value = '';
+              if (sidInp) sidInp.value = '';
+            }
+          } else {
+            stuSel.style.display = 'none';
+            stuSel.innerHTML = '';
+            const row = uniqueStudents[idx];
+            if (stuInp) stuInp.value = row ? row.studentName : '';
+            if (sidInp) sidInp.value = row ? (row.scheduleId || '') : '';
+          }
+        }
+      });
+
+      if (infoEl) {
+        if (slotRows.length === 0) {
+          infoEl.textContent = '※該当する月次スケジュールなし（手入力可）';
+        } else {
+          infoEl.textContent = `月次スケジュール読込：講師${teachersFound.length}名／生徒${uniqueStudents.length}名`;
+        }
+      }
+    }
+
+    function updateHandoverTransferBar(prefix) {
+      const container = document.getElementById(`${prefix}ReportFormContainer`);
+      const bar = document.getElementById(`${prefix}_handoverTransferBar`);
+      if (!container || !bar) return;
+      const anySub = [1, 2, 3].some((c) => document.getElementById(`${prefix}_chkSub_${c}`)?.checked);
+      bar.style.display = anySub ? 'block' : 'none';
+    }
+
     function bindReportFormEvents(prefix) {
       const container = document.getElementById(`${prefix}ReportFormContainer`);
       if (!container) return;
       if (!container.dataset.initialized) {
         container.innerHTML = buildReportFormHtml(prefix);
         container.dataset.initialized = '1';
+
+        document.getElementById(`${prefix}_date`)?.addEventListener('change', () => {
+          syncReportFromScheduleSlot(prefix);
+        });
+        document.getElementById(`${prefix}_timeSlot`)?.addEventListener('change', () => {
+          syncReportFromScheduleSlot(prefix);
+        });
+        document.getElementById(`${prefix}_teacherSelect`)?.addEventListener('change', (e) => {
+          const val = e.target.value;
+          const tchInp = document.getElementById(`${prefix}_teacher`);
+          if (tchInp && val) tchInp.value = val;
+          syncReportFromScheduleSlot(prefix, val);
+        });
+        [1, 2, 3].forEach((colNum) => {
+          document.getElementById(`${prefix}_stuSelect_${colNum}`)?.addEventListener('change', (e) => {
+            const opt = e.target.selectedOptions?.[0];
+            const stuInp = document.getElementById(`${prefix}_stu_${colNum}`);
+            const sidInp = document.getElementById(`${prefix}_schedId_${colNum}`);
+            if (stuInp) stuInp.value = e.target.value;
+            if (sidInp && opt?.dataset?.sid) sidInp.value = opt.dataset.sid;
+          });
+          document.getElementById(`${prefix}_chkSub_${colNum}`)?.addEventListener('change', () => {
+            updateHandoverTransferBar(prefix);
+          });
+        });
       }
 
       if (currentUser?.role === 'teacher') {
@@ -2798,10 +3002,12 @@
           const timeSlot = document.getElementById(`${prefix}_timeSlot`)?.value || '';
           const branch = document.getElementById(`${prefix}_branch`)?.value.trim() || '';
           const teacherName = document.getElementById(`${prefix}_teacher`)?.value.trim() || '';
+          const targetTransferTeacher = document.getElementById(`${prefix}_transferTeacher`)?.value.trim() || '';
 
           const columns = [1, 2, 3].map((colNum) => {
             const stuName = document.getElementById(`${prefix}_stu_${colNum}`)?.value.trim() || '';
             const hwDone = document.getElementById(`${prefix}_hwDone_${colNum}`)?.checked;
+            const subChk = Boolean(document.getElementById(`${prefix}_chkSub_${colNum}`)?.checked);
             return {
               scheduleId: document.getElementById(`${prefix}_schedId_${colNum}`)?.value || '',
               studentName: stuName,
@@ -2815,7 +3021,8 @@
               homeworkUnfinishedDetail: document.getElementById(`${prefix}_hwUnfinished_${colNum}`)?.value.trim() || '',
               memoComment: document.getElementById(`${prefix}_memo_${colNum}`)?.value.trim() || '',
               reportCheck: Boolean(document.getElementById(`${prefix}_chkReport_${colNum}`)?.checked),
-              substituteHandoverCheck: Boolean(document.getElementById(`${prefix}_chkSub_${colNum}`)?.checked),
+              substituteHandoverCheck: subChk,
+              targetTransferTeacher: subChk ? targetTransferTeacher : '',
             };
           }).filter((c) => c.studentName);
 
@@ -2832,7 +3039,7 @@
             body: JSON.stringify({
               action: 'SUBMIT_LESSON_REPORT',
               payload: {
-                report: { date, classType, timeSlot, branch, teacherName, columns },
+                report: { date, classType, timeSlot, branch, teacherName, targetTransferTeacher, columns },
               },
             }),
           });
@@ -2843,6 +3050,25 @@
               msgEl.textContent = res.error || '指導報告書の提出に失敗しました';
             }
             return;
+          }
+
+          // If targetTransferTeacher was specified on handover reports, transfer them immediately too
+          const savedList = Array.isArray(res.reports) ? res.reports : [];
+          if (targetTransferTeacher) {
+            for (const rep of savedList) {
+              if (rep.substituteHandoverCheck) {
+                await apiFetch('/api/schedules', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    action: 'TRANSFER_HANDOVER_TO_TEACHER',
+                    payload: {
+                      reportId: rep.reportId,
+                      targetTeacherName: targetTransferTeacher,
+                    },
+                  }),
+                });
+              }
+            }
           }
 
           const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
@@ -2861,7 +3087,9 @@
             document.getElementById(`${prefix}_hwUnfinished_${colNum}`).value = '';
             document.getElementById(`${prefix}_hwDone_${colNum}`).checked = false;
             document.getElementById(`${prefix}_memo_${colNum}`).value = '';
+            document.getElementById(`${prefix}_chkSub_${colNum}`).checked = false;
           });
+          updateHandoverTransferBar(prefix);
 
           if (currentUser?.role === 'teacher') {
             await loadRolePortalData();
@@ -2872,7 +3100,7 @@
       }
     }
 
-    function fillReportFormFromUnsubmitted(prefix, item) {
+    async function fillReportFormFromUnsubmitted(prefix, item) {
       bindReportFormEvents(prefix);
       const dateEl = document.getElementById(`${prefix}_date`);
       const slotEl = document.getElementById(`${prefix}_timeSlot`);
@@ -2883,24 +3111,13 @@
       if (brEl && item.branch) brEl.value = item.branch;
       if (tchEl && item.teacherName) tchEl.value = item.teacherName;
 
-      // Find up to 3 students in the same slot/teacher/date
-      const sameSlotRows = (state.schedules || []).filter(
-        (s) => !s.isVacant && s.studentName && s.date === item.date && s.timeSlot === item.timeSlot &&
-               (!item.teacherName || s.teacherName === item.teacherName)
-      );
-      const targets = sameSlotRows.length > 0 ? sameSlotRows.slice(0, 3) : [item];
-      [1, 2, 3].forEach((colNum, idx) => {
-        const row = targets[idx];
-        const stuInp = document.getElementById(`${prefix}_stu_${colNum}`);
-        const sidInp = document.getElementById(`${prefix}_schedId_${colNum}`);
-        if (stuInp) stuInp.value = row?.studentName || '';
-        if (sidInp) sidInp.value = row?.scheduleId || '';
-      });
+      await syncReportFromScheduleSlot(prefix, item.teacherName || '');
       document.getElementById(`${prefix}ReportFormContainer`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function renderReportsWorkspace() {
       bindReportFormEvents('hq');
+      syncReportFromScheduleSlot('hq');
 
       const unsub = state.unsubmittedReports || [];
       const sumEl = document.getElementById('hqUnsubmittedSummary');
@@ -2930,9 +3147,90 @@
           : '<tr><td colspan="10">24時間超過の未提出データはありません</td></tr>';
 
         unsubBody.querySelectorAll('[data-hq-fill-unsub]').forEach((btn) => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const item = unsub[Number(btn.dataset.hqFillUnsub)];
-            if (item) fillReportFormFromUnsubmitted('hq', item);
+            if (item) await fillReportFormFromUnsubmitted('hq', item);
+          });
+        });
+      }
+
+      // Render HQ Handover History & Transfer Table
+      const handoverList = (state.reports || [])
+        .filter((r) => Boolean(r.substituteHandoverCheck))
+        .sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+
+      const hoSum = document.getElementById('hqHandoverSummary');
+      if (hoSum) {
+        hoSum.textContent = `代行引継 履歴件数: ${handoverList.length}件`;
+      }
+
+      const teacherNames = getAllTeacherNames();
+      const hoBody = document.getElementById('hqHandoverHistoryBody');
+      if (hoBody) {
+        hoBody.innerHTML = handoverList.length
+          ? handoverList.map((r, idx) => {
+              const repId = r.reportId || r.id || '';
+              const defaultTarget = r.transferredToTeacher || r.targetTransferTeacher || '';
+              const opts = ['<option value="">転送先講師を選択</option>']
+                .concat(teacherNames.map((tn) => `<option value="${tn.replace(/"/g, '&quot;')}" ${tn === defaultTarget ? 'selected' : ''}>${tn}</option>`))
+                .join('');
+              const statusBadge = r.transferredToTeacher
+                ? `<span class="status-pill st-rescheduled">転送済 → ${r.transferredToTeacher}</span><br><small>${(r.transferredAt || '').slice(0, 16).replace('T', ' ')}</small>`
+                : `<span class="status-pill st-absent">本部履歴保管中</span>`;
+              return `
+                <tr>
+                  <td>${r.date}<br><small>${r.timeSlot}</small></td>
+                  <td>${r.branch || ''}</td>
+                  <td>${r.teacherName || ''}</td>
+                  <td><strong>${r.studentName || ''}</strong></td>
+                  <td>
+                    <div>CL①: ${r.cl1Content || '-'} / CL②: ${r.cl2Content || '-'}</div>
+                    <div>宿題: ${r.homework || '-'} (${r.homeworkStatus || '未'})</div>
+                    <div>メモ: ${r.memoComment || '-'}</div>
+                  </td>
+                  <td>
+                    <select data-ho-teacher-select="${idx}">${opts}</select>
+                    <input type="text" data-ho-teacher-input="${idx}" list="masterTeacherNamesList" value="${defaultTarget.replace(/"/g, '&quot;')}" placeholder="講師名手入力可" style="width:140px; margin-top:4px;" />
+                  </td>
+                  <td>${statusBadge}</td>
+                  <td><button class="primary" data-ho-transfer-btn="${repId}" data-ho-idx="${idx}">講師へ転送</button></td>
+                </tr>
+              `;
+            }).join('')
+          : '<tr><td colspan="8">「代行引継」チェック付きの指導報告書履歴はありません</td></tr>';
+
+        hoBody.querySelectorAll('[data-ho-teacher-select]').forEach((sel) => {
+          sel.addEventListener('change', () => {
+            const idx = sel.dataset.hoTeacherSelect;
+            const inp = hoBody.querySelector(`[data-ho-teacher-input="${idx}"]`);
+            if (inp && sel.value) inp.value = sel.value;
+          });
+        });
+
+        hoBody.querySelectorAll('[data-ho-transfer-btn]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const repId = btn.dataset.hoTransferBtn;
+            const idx = btn.dataset.hoIdx;
+            const inp = hoBody.querySelector(`[data-ho-teacher-input="${idx}"]`);
+            const sel = hoBody.querySelector(`[data-ho-teacher-select="${idx}"]`);
+            const targetTeacherName = (inp?.value.trim() || sel?.value.trim() || '');
+            if (!targetTeacherName) {
+              alert('転送先の講師名を選択または入力してください');
+              return;
+            }
+            const res = await apiFetch('/api/schedules', {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'TRANSFER_HANDOVER_TO_TEACHER',
+                payload: { reportId: repId, targetTeacherName },
+              }),
+            });
+            if (!res.ok) {
+              alert(res.error || '講師への転送に失敗しました');
+              return;
+            }
+            alert(`代行引継レポートを「${targetTeacherName}」先生へ転送し、本部履歴に記録しました`);
+            await loadAllData();
           });
         });
       }
@@ -2961,6 +3259,7 @@
                 <td>${r.memoComment || '-'}</td>
                 <td>
                   ${r.reportCheck ? '☑指報 ' : ''}${r.substituteHandoverCheck ? '☑代行引継' : ''}
+                  ${r.transferredToTeacher ? `<br><small>転送先: ${r.transferredToTeacher}</small>` : ''}
                   <br><small>${(r.submittedAt || '').slice(0, 16).replace('T', ' ')}</small>
                   ${r.isLate ? '<br><span style="color:#c53030;font-weight:700;">24h超過提出</span>' : ''}
                 </td>
@@ -2974,6 +3273,7 @@
 
     function renderTeacherPortalReportSection() {
       bindReportFormEvents('portal');
+      syncReportFromScheduleSlot('portal');
       const myUnsub = (state.unsubmittedReports || []).filter((u) => matchesLinkedTeacher(u.teacherName, currentUser));
       const sumEl = document.getElementById('portalUnsubmittedSummary');
       if (sumEl) {
@@ -2998,9 +3298,9 @@
           : '<tr><td colspan="7">未提出の授業はありません</td></tr>';
 
         tbody.querySelectorAll('[data-portal-fill-unsub]').forEach((btn) => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const item = myUnsub[Number(btn.dataset.portalFillUnsub)];
-            if (item) fillReportFormFromUnsubmitted('portal', item);
+            if (item) await fillReportFormFromUnsubmitted('portal', item);
           });
         });
       }
@@ -3009,7 +3309,11 @@
     function renderPortalReportHistory(role) {
       const list = (state.reports || [])
         .filter((r) => {
-          if (role === 'teacher') return matchesLinkedTeacher(r.teacherName, currentUser);
+          if (role === 'teacher') {
+            return matchesLinkedTeacher(r.teacherName, currentUser) ||
+                   matchesLinkedTeacher(r.transferredToTeacher, currentUser) ||
+                   matchesLinkedTeacher(r.targetTransferTeacher, currentUser);
+          }
           return matchesLinkedStudent(r.studentName, currentUser);
         })
         .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
@@ -3021,22 +3325,25 @@
       const tbody = document.getElementById('portalReportHistoryBody');
       if (tbody) {
         tbody.innerHTML = list.length
-          ? list.map((r) => `
-              <tr>
-                <td>${r.date}<br><small>${r.timeSlot}</small></td>
-                <td>${r.classType || '通常CL'}<br><small>${r.branch || ''}</small></td>
-                <td>${r.teacherName || ''}</td>
-                <td><strong>${r.studentName || ''}</strong></td>
-                <td>${r.cl1Content || '-'}<br><small>評価: ${r.cl1Eval || '-'}</small></td>
-                <td>${r.cl2Content || '-'}<br><small>評価: ${r.cl2Eval || '-'}</small></td>
-                <td>${r.homework || '-'}<br><small>確認: ${r.homeworkStatus || '未'} ${r.homeworkUnfinishedDetail || ''}</small></td>
-                <td>${r.memoComment || '-'}</td>
-              </tr>
-            `).join('')
+          ? list.map((r) => {
+              const isTransferredToMe = role === 'teacher' && !matchesLinkedTeacher(r.teacherName, currentUser);
+              return `
+                <tr>
+                  <td>${r.date}<br><small>${r.timeSlot}</small></td>
+                  <td>${r.classType || '通常CL'}${isTransferredToMe ? '<br><span class="status-pill st-rescheduled">代行引継転送</span>' : ''}<br><small>${r.branch || ''}</small></td>
+                  <td>${r.teacherName || ''}</td>
+                  <td><strong>${r.studentName || ''}</strong></td>
+                  <td>${r.cl1Content || '-'}<br><small>評価: ${r.cl1Eval || '-'}</small></td>
+                  <td>${r.cl2Content || '-'}<br><small>評価: ${r.cl2Eval || '-'}</small></td>
+                  <td>${r.homework || '-'}<br><small>確認: ${r.homeworkStatus || '未'} ${r.homeworkUnfinishedDetail || ''}</small></td>
+                  <td>${r.memoComment || '-'}</td>
+                </tr>
+              `;
+            }).join('')
           : '<tr><td colspan="8">表示できる指導報告書履歴はまだありません</td></tr>';
       }
     }
 
-    </script>
+  </script>
 </body>
 </html>

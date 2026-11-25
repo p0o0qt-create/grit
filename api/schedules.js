@@ -399,6 +399,11 @@ export default async function handler(req, res) {
             memoComment: col.memoComment || '',
             reportCheck: Boolean(col.reportCheck),
             substituteHandoverCheck: Boolean(col.substituteHandoverCheck),
+            handoverStatus: col.substituteHandoverCheck ? 'hq_history' : 'normal',
+            targetTransferTeacher: col.targetTransferTeacher || report.targetTransferTeacher || '',
+            transferredToTeacher: '',
+            transferredAt: '',
+            transferredBy: '',
           };
 
           const saved = await saveDoc('lesson_reports', reportId, record);
@@ -463,6 +468,93 @@ export default async function handler(req, res) {
           ok: true,
           reports: savedReports,
           lineDeliveries,
+        });
+      }
+
+      if (action === 'TRANSFER_HANDOVER_TO_TEACHER') {
+        if (!['hq', 'reception', 'teacher'].includes(auth.user.role)) {
+          return sendJson(res, 403, { ok: false, error: '代行引継の転送権限がありません' });
+        }
+        const { reportId, targetTeacherName, note = '' } = payload || {};
+        const cleanTeacher = String(targetTeacherName || '').trim();
+        if (!reportId || !cleanTeacher) {
+          return sendJson(res, 400, { ok: false, error: '対象の指導報告書IDと転送先講師名を指定してください' });
+        }
+
+        const reports = await listDocs('lesson_reports');
+        const targetReport = reports.find((r) => String(r.reportId || r.id) === String(reportId));
+        if (!targetReport) {
+          return sendJson(res, 404, { ok: false, error: '対象の指導報告書が見つかりません' });
+        }
+
+        const transferredAt = new Date().toISOString();
+        const updatedReport = await saveDoc('lesson_reports', targetReport.reportId || targetReport.id, {
+          ...targetReport,
+          substituteHandoverCheck: true,
+          handoverStatus: 'transferred',
+          targetTransferTeacher: cleanTeacher,
+          transferredToTeacher: cleanTeacher,
+          transferredAt,
+          transferredBy: auth.user.id,
+          transferNote: String(note || '').trim(),
+        });
+
+        const accounts = await listDocs('accounts');
+        const matchesName = (candidate, target) => {
+          const c = String(candidate || '').trim();
+          const t = String(target || '').trim();
+          if (!c || !t) return false;
+          return c === t || c.includes(t) || t.includes(c);
+        };
+        const teacherRecipients = accounts.filter(
+          (acc) => acc.status !== '無効' && acc.role === 'teacher' && matchesName(acc.linkedTeacherName || acc.kanjiName || acc.name, cleanTeacher)
+        );
+
+        const msgText = [
+          '【GRIT指導学院】代行引継（指導報告書）が転送されました',
+          `転送先講師：${cleanTeacher} 先生`,
+          `生徒様：${updatedReport.studentName || '-'} さん`,
+          `授業日・コマ：${updatedReport.date || ''} ${updatedReport.timeSlot || ''}（${updatedReport.branch || ''}支部）`,
+          `担当・報告者：${updatedReport.teacherName || '-'}`,
+          `CL内容①：${updatedReport.cl1Content || '-'}（評価：${updatedReport.cl1Eval || '-'}）`,
+          `CL内容②：${updatedReport.cl2Content || '-'}（評価：${updatedReport.cl2Eval || '-'}）`,
+          `宿題：${updatedReport.homework || '-'}（${updatedReport.homeworkStatus || '未'}）`,
+          `メモ・コメント：${updatedReport.memoComment || '-'}`,
+          note ? `転送補足：${note}` : '',
+        ].filter(Boolean).join('\n');
+
+        const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+        const deliveries = [];
+        for (const rec of teacherRecipients) {
+          const toId = String(rec.lineUserId || '').trim();
+          const logId = `line_ho_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          const status = !toId ? 'recorded_in_portal' : accessToken ? 'sent' : 'simulated_no_token';
+          if (toId && accessToken) {
+            await fetch('https://api.line.me/v2/bot/message/push', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({ to: toId, messages: [{ type: 'text', text: msgText }] }),
+            });
+          }
+          await saveDoc('notification_logs', logId, {
+            to: toId || rec.loginId,
+            recipientName: rec.name,
+            recipientRole: rec.role,
+            messages: [{ type: 'text', text: msgText }],
+            meta: { type: 'handover_transfer', reportId: updatedReport.reportId, targetTeacherName: cleanTeacher },
+            sentBy: auth.user.id,
+            status,
+          });
+          deliveries.push({ accountId: rec.id || rec.loginId, name: rec.name, status });
+        }
+
+        return sendJson(res, 200, {
+          ok: true,
+          report: updatedReport,
+          deliveries,
         });
       }
 
