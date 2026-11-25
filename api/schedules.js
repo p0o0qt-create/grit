@@ -81,6 +81,25 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { action, payload } = req.body || {};
 
+      if (action === 'IMPORT_DEFAULT_ASSIGNMENTS') {
+        const { assignments = [] } = payload || {};
+        if (!Array.isArray(assignments) || assignments.length === 0) {
+          return sendJson(res, 400, { ok: false, error: '取り込む配列データがありません' });
+        }
+
+        const normalized = assignments.map((item, idx) => ({
+          ...item,
+          assignmentId: String(
+            item.assignmentId || `def_${String(idx + 1).padStart(3, '0')}`
+          ),
+          sortOrder: Number(item.sortOrder ?? idx + 1),
+          isActive: item.isActive !== false,
+        }));
+
+        await batchSaveDocs('monthly_templates', normalized, 'assignmentId');
+        return sendJson(res, 200, { ok: true, count: normalized.length });
+      }
+
       if (action === 'SAVE_MONTH_SCHEDULES') {
         const { yearMonth, schedules = [] } = payload || {};
         const sorted = sortMonthSchedule(schedules);
