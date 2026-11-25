@@ -39,6 +39,30 @@
       border-radius: 999px;
       font-size: 0.82rem;
     }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+    .table-wrap { overflow-x: auto; }
+    table.kamoku-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    table.kamoku-table th, table.kamoku-table td { border: 1px solid #cbd5e0; padding: 6px 8px; vertical-align: middle; }
+    table.kamoku-table thead th { background: #d9d9d9; color: #1a202c; font-weight: 700; position: sticky; top: 0; z-index: 1; }
+    .wd-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-weight: 700; min-width: 26px; text-align: center; }
+    .wd-mon { background: #d9ead3; color: #1b4332; }
+    .wd-tue { background: #c9daf8; color: #1e3a8a; }
+    .wd-wed { background: #d9ead3; color: #1b4332; }
+    .wd-thu { background: #c9daf8; color: #1e3a8a; }
+    .wd-fri { background: #d9ead3; color: #1b4332; }
+    .wd-sat { background: #c9daf8; color: #1e3a8a; }
+    .wd-sun { background: #f8bbd0; color: #880e4f; }
+    .row-vacant td { background: #fff9db !important; color: #665c00; }
+    .vacant-pill { display: inline-block; background: #ffe066; color: #5c4700; font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 0.78rem; }
+    .hq-note-input { width: 165px; min-width: 130px; font-size: 0.82rem; padding: 5px 7px; }
+    .teacher-select { min-width: 145px; font-size: 0.82rem; padding: 5px 6px; }
+    .status-pill { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; background: #edf2f7; color: #2d3748; }
+    .st-scheduled { background: #e6fffa; color: #234e52; }
+    .st-absent { background: #fff5f5; color: #9b2c2c; }
+    .st-rescheduled { background: #ebf8ff; color: #2a4365; }
+    .st-vacant { background: #fefcbf; color: #744210; }
+    .hidden { display: none !important; }
+
     main { max-width: 1280px; margin: 20px auto; padding: 0 16px 48px; }
     .card {
       background: var(--card);
@@ -125,26 +149,46 @@
           <label>曜日フィルタ
             <select id="filterWeekday">
               <option value="">全曜日</option>
-              <option>月曜日</option><option>火曜日</option><option>水曜日</option>
-              <option>木曜日</option><option>金曜日</option><option>土曜日</option><option>日曜日</option>
+              <option value="月曜日">月</option>
+              <option value="火曜日">火</option>
+              <option value="水曜日">水</option>
+              <option value="木曜日">木</option>
+              <option value="金曜日">金</option>
+              <option value="土曜日">土</option>
+              <option value="日曜日">日</option>
             </select>
           </label>
+          <label>担当講師フィルタ
+            <select id="filterTeacher"><option value="">全講師</option></select>
+          </label>
+          <label>枠種別フィルタ
+            <select id="filterSlotType">
+              <option value="">すべて（授業・空き）</option>
+              <option value="occupied">授業枠のみ</option>
+              <option value="vacant">空き枠のみ</option>
+            </select>
+          </label>
+          <label>キーワード検索（生徒・学校・科目・指示）
+            <input type="text" id="filterKeyword" placeholder="例: 亀岡 / 中3 / 数学 / 指示" />
+          </label>
+          <button class="secondary" id="resetFiltersBtn">フィルタ解除</button>
           <button class="primary" id="reloadMonthBtn">月初から再展開・読込</button>
           <button class="success" id="saveAllSchedulesBtn">月次データをDB保存</button>
         </div>
         <div id="monthSummaryText" style="font-size:0.88rem; margin-bottom:8px;"></div>
         <div class="table-wrap">
-          <table>
+          <table class="kamoku-table">
             <thead>
               <tr>
-                <th>日付</th>
+                <th>日</th>
                 <th>曜日</th>
                 <th>支部</th>
                 <th>コマ</th>
-                <th>担当講師（変更可）</th>
+                <th>担当講師</th>
                 <th>生徒氏名</th>
                 <th>学年・学校</th>
                 <th>科目</th>
+                <th>本部指示</th>
                 <th>状態</th>
                 <th>操作</th>
               </tr>
@@ -364,65 +408,200 @@
       renderUnpaidTable(state.unpaidList);
     }
 
+    const WEEKDAY_SHORT = {
+      '月曜日': '月',
+      '火曜日': '火',
+      '水曜日': '水',
+      '木曜日': '木',
+      '金曜日': '金',
+      '土曜日': '土',
+      '日曜日': '日',
+    };
+
+    const WEEKDAY_CLASS = {
+      '月曜日': 'wd-mon',
+      '火曜日': 'wd-tue',
+      '水曜日': 'wd-wed',
+      '木曜日': 'wd-thu',
+      '金曜日': 'wd-fri',
+      '土曜日': 'wd-sat',
+      '日曜日': 'wd-sun',
+    };
+
+    const BRANCH_BG = {
+      '亀岡': '#d9ead3',
+      '長岡京': '#d9ead3',
+      '桂': '#d9ead3',
+      '太秦': '#d9ead3',
+      '向日': '#d9ead3',
+      '伏見': '#d9ead3',
+      '家庭教師': '#c9daf8',
+      '高槻': '#c9daf8',
+    };
+
+    function formatDayOnly(dateStr) {
+      if (!dateStr) return '';
+      const parts = String(dateStr).split('-');
+      return parts.length === 3 ? String(Number(parts[2])) : String(dateStr);
+    }
+
+    function formatShortWeekday(wd) {
+      const clean = String(wd || '').trim();
+      if (WEEKDAY_SHORT[clean]) return WEEKDAY_SHORT[clean];
+      if (['月', '火', '水', '木', '金', '土', '日'].includes(clean)) return clean;
+      return clean.replace('曜日', '');
+    }
+
+    function getAllTeacherNames() {
+      const set = new Set();
+      (state.teachers || []).forEach((t) => {
+        if (t?.name && String(t.name).trim()) set.add(String(t.name).trim());
+      });
+      (state.templates || []).forEach((t) => {
+        if (t?.teacherName && String(t.teacherName).trim()) set.add(String(t.teacherName).trim());
+      });
+      (state.schedules || []).forEach((s) => {
+        if (s?.teacherName && String(s.teacherName).trim()) set.add(String(s.teacherName).trim());
+        if (s?.defaultTeacherName && String(s.defaultTeacherName).trim()) set.add(String(s.defaultTeacherName).trim());
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, 'ja'));
+    }
+
+    function isRowVacant(row) {
+      if (row?.isVacant === true || row?.status === 'vacant') return true;
+      const stu = String(row?.studentName || '').trim();
+      const sub = String(row?.subject || '').trim();
+      return stu === '' || stu === '空き' || sub === '空き' || sub === '空き枠';
+    }
+
     function populateFilters() {
-      const branches = [...new Set(state.templates.map((t) => t.branch).filter(Boolean))].sort();
+      const branches = [...new Set([
+        ...(state.templates || []).map((t) => t.branch).filter(Boolean),
+        ...(state.schedules || []).map((s) => s.branch).filter(Boolean),
+      ])].sort((a, b) => a.localeCompare(b, 'ja'));
+
       const branchSel = document.getElementById('filterBranch');
       const resBranchSel = document.getElementById('rescheduleBranchSelect');
+      const prevBranch = branchSel.value;
       branchSel.innerHTML = '<option value="">全支部</option>' + branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+      if (prevBranch && branches.includes(prevBranch)) branchSel.value = prevBranch;
       resBranchSel.innerHTML = branches.map((b) => `<option value="${b}">${b}</option>`).join('');
+
+      const teacherSel = document.getElementById('filterTeacher');
+      const prevTeacher = teacherSel.value;
+      const allTeachers = getAllTeacherNames();
+      teacherSel.innerHTML =
+        '<option value="">全講師</option>' +
+        '<option value="__UNASSIGNED__">（未割当）</option>' +
+        allTeachers.map((n) => `<option value="${n}">${n}</option>`).join('');
+      if (prevTeacher) teacherSel.value = prevTeacher;
     }
 
     function renderMonthlyTable() {
       const branch = document.getElementById('filterBranch').value;
       const weekday = document.getElementById('filterWeekday').value;
-      const filtered = state.schedules.filter((s) => (!branch || s.branch === branch) && (!weekday || s.dayOfWeek === weekday));
+      const teacherFilter = document.getElementById('filterTeacher').value;
+      const slotType = document.getElementById('filterSlotType').value;
+      const keyword = String(document.getElementById('filterKeyword').value || '').trim().toLowerCase();
 
+      const filtered = (state.schedules || []).filter((s) => {
+        const vacant = isRowVacant(s);
+        const tName = String(s.teacherName || '').trim();
+        if (branch && s.branch !== branch) return false;
+        if (weekday && s.dayOfWeek !== weekday) return false;
+        if (teacherFilter === '__UNASSIGNED__' && tName !== '') return false;
+        if (teacherFilter && teacherFilter !== '__UNASSIGNED__' && tName !== teacherFilter) return false;
+        if (slotType === 'vacant' && !vacant) return false;
+        if (slotType === 'occupied' && vacant) return false;
+        if (keyword) {
+          const hay = [
+            s.date, formatDayOnly(s.date), s.dayOfWeek, formatShortWeekday(s.dayOfWeek),
+            s.branch, s.timeSlot, tName, s.studentName, s.grade, s.school, s.subject,
+            s.hqInstruction, s.note, vacant ? '空き' : ''
+          ].join(' ').toLowerCase();
+          if (!hay.includes(keyword)) return false;
+        }
+        return true;
+      });
+
+      const vacantCount = filtered.filter(isRowVacant).length;
       document.getElementById('monthSummaryText').textContent =
-        `${state.yearMonth} 表示件数: ${filtered.length}コマ / 全${state.schedules.length}コマ（1日から曜日順に整列）`;
+        `${state.yearMonth} 表示件数: ${filtered.length}件（うち空き枠 ${vacantCount}件）/ 全${state.schedules.length}件`;
 
+      const allTeachers = getAllTeacherNames();
       const teacherOptionsHtml = (selected) => {
         const selTrim = String(selected || '').trim();
-        const names = state.teachers.map((t) => t.name);
-        if (selTrim && !names.includes(selTrim)) {
-          names.unshift(selTrim);
+        const list = [...allTeachers];
+        if (selTrim && !list.includes(selTrim)) {
+          list.unshift(selTrim);
         }
-        return ['<option value="">（未割当）</option>', ...names.map((n) => `<option value="${n}" ${n === selTrim ? 'selected' : ''}>${n}</option>`)].join('');
+        return [
+          '<option value="">（未割当）</option>',
+          ...list.map((n) => `<option value="${n}" ${n === selTrim ? 'selected' : ''}>${n}</option>`),
+        ].join('');
       };
 
       const tbody = document.getElementById('monthlyTableBody');
-      tbody.innerHTML = filtered.slice(0, 300).map((row) => `
-        <tr>
-          <td>${row.date}</td>
-          <td>${row.dayOfWeek}</td>
-          <td>${row.branch}</td>
-          <td>${row.timeSlot}</td>
-          <td>
-            <select data-sched-teacher="${row.scheduleId}">
-              ${teacherOptionsHtml(row.teacherName)}
-            </select>
-          </td>
-          <td>${row.studentName}</td>
-          <td>${row.grade} ${row.school}</td>
-          <td>${row.subject}</td>
-          <td><span class="status-pill st-${row.status}">${row.status}</span></td>
-          <td>
-            <button class="secondary" data-save-row="${row.scheduleId}">変更保存</button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = filtered.slice(0, 500).map((row) => {
+        const vacant = isRowVacant(row);
+        const wdShort = formatShortWeekday(row.dayOfWeek);
+        const wdCls = WEEKDAY_CLASS[row.dayOfWeek] || '';
+        const brBg = BRANCH_BG[row.branch] || '#ffffff';
+        const hqVal = String(row.hqInstruction ?? row.note ?? '').replace(/"/g, '&quot;');
+        const stuDisplay = vacant
+          ? `<span class="vacant-pill">空き</span>`
+          : `${row.studentName}`;
+        const statusCode = vacant ? 'vacant' : (row.status || 'scheduled');
+        const statusLabel = vacant ? '空き' : (row.status || 'scheduled');
+
+        return `
+          <tr class="${vacant ? 'row-vacant' : ''}">
+            <td style="text-align:center;font-weight:700;">${formatDayOnly(row.date)}</td>
+            <td style="text-align:center;"><span class="wd-badge ${wdCls}">${wdShort}</span></td>
+            <td style="background:${brBg};font-weight:600;">${row.branch || ''}</td>
+            <td>${row.timeSlot || ''}</td>
+            <td>
+              <select class="teacher-select" data-sched-teacher="${row.scheduleId}">
+                ${teacherOptionsHtml(row.teacherName)}
+              </select>
+            </td>
+            <td>${stuDisplay}</td>
+            <td>${[row.grade, row.school].filter(Boolean).join(' ')}</td>
+            <td>${row.subject || ''}</td>
+            <td>
+              <input type="text" class="hq-note-input" data-sched-hq="${row.scheduleId}" value="${hqVal}" placeholder="本部指示を入力" />
+            </td>
+            <td><span class="status-pill st-${statusCode}">${statusLabel}</span></td>
+            <td>
+              <button class="secondary" data-save-row="${row.scheduleId}">保存</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       tbody.querySelectorAll('[data-save-row]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const id = btn.dataset.saveRow;
           const sel = tbody.querySelector(`[data-sched-teacher="${id}"]`);
+          const hqInp = tbody.querySelector(`[data-sched-hq="${id}"]`);
           const target = state.schedules.find((s) => s.scheduleId === id);
-          if (!target || !sel) return;
-          target.teacherName = sel.value;
-          await apiFetch('/api/schedules', {
+          if (!target) return;
+          if (sel) target.teacherName = sel.value;
+          if (hqInp) {
+            target.hqInstruction = hqInp.value;
+            target.note = hqInp.value;
+          }
+          target.isCustomized = true;
+          const res = await apiFetch('/api/schedules', {
             method: 'POST',
             body: JSON.stringify({ action: 'UPDATE_SCHEDULE_ENTRY', payload: { entry: target } }),
           });
-          alert('個別変更を保存しました');
+          if (res.ok) {
+            alert('個別変更・本部指示を保存しました');
+            renderMonthlyTable();
+          } else {
+            alert(res.error || '保存に失敗しました');
+          }
         });
       });
     }
@@ -568,6 +747,17 @@
     document.getElementById('reloadMonthBtn').addEventListener('click', loadAllData);
     document.getElementById('filterBranch').addEventListener('change', renderMonthlyTable);
     document.getElementById('filterWeekday').addEventListener('change', renderMonthlyTable);
+    document.getElementById('filterTeacher').addEventListener('change', renderMonthlyTable);
+    document.getElementById('filterSlotType').addEventListener('change', renderMonthlyTable);
+    document.getElementById('filterKeyword').addEventListener('input', renderMonthlyTable);
+    document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+      document.getElementById('filterBranch').value = '';
+      document.getElementById('filterWeekday').value = '';
+      document.getElementById('filterTeacher').value = '';
+      document.getElementById('filterSlotType').value = '';
+      document.getElementById('filterKeyword').value = '';
+      renderMonthlyTable();
+    });
     document.getElementById('rescheduleDateInput').addEventListener('change', refreshAvailableTeachers);
     document.getElementById('rescheduleBranchSelect').addEventListener('change', refreshAvailableTeachers);
     document.getElementById('rescheduleSlotSelect').addEventListener('change', refreshAvailableTeachers);
