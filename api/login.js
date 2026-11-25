@@ -51,6 +51,19 @@ export default async function handler(req, res) {
       });
     }
 
+    if (account.status === '承認待ち') {
+      return sendJson(res, 403, {
+        ok: false,
+        error: '現在、本部の承認待ちです。承認完了後にログイン可能となります。',
+      });
+    }
+    if (account.status === '無効') {
+      return sendJson(res, 403, {
+        ok: false,
+        error: 'このアカウントは無効化されています。本部へお問い合わせください。',
+      });
+    }
+
     if (!lineUserId) {
       const valid = verifyPassword(password, account.passwordHash || account.password);
       if (!valid) {

@@ -11,7 +11,73 @@ import {
 
 const VALID_ROLES = ['hq', 'reception', 'teacher', 'student', 'parent'];
 
+const SELF_REGISTER_ROLES = ['teacher', 'student', 'parent'];
+
 export default async function handler(req, res) {
+  if (req.method === 'POST' && req.body?.action === 'SELF_REGISTER') {
+    try {
+      const reg = req.body?.payload?.account || req.body || {};
+      const role = String(reg.role || '').trim();
+      const loginId = String(reg.loginId || '').trim();
+      const name = String(reg.name || '').trim();
+      const branch = String(reg.branch || '').trim();
+      const lineUserId = String(reg.lineUserId || '').trim();
+      const linkedStudentName = String(reg.linkedStudentName || '').trim();
+      const linkedTeacherName = String(reg.linkedTeacherName || '').trim();
+      const password = String(reg.password || '').trim();
+      const agreed = Boolean(reg.agreed);
+
+      if (!agreed) {
+        return sendJson(res, 400, { ok: false, error: '必要事項および注意喚起への同意にチェックを入れてください' });
+      }
+      if (!SELF_REGISTER_ROLES.includes(role)) {
+        return sendJson(res, 400, { ok: false, error: '新規申請可能な役職は 講師・生徒・保護者 です' });
+      }
+      if (!loginId) {
+        return sendJson(res, 400, { ok: false, error: '希望するログインIDを入力してください' });
+      }
+      if (!name) {
+        return sendJson(res, 400, { ok: false, error: '氏名を入力してください' });
+      }
+      if (!lineUserId) {
+        return sendJson(res, 400, { ok: false, error: '通知受信用のLINE ID（LINE User ID）を入力してください' });
+      }
+
+      const existing = await getDocById('accounts', loginId);
+      if (existing) {
+        return sendJson(res, 409, { ok: false, error: `ログインID「${loginId}」は既に登録または申請中です` });
+      }
+
+      const pendingDoc = {
+        id: loginId,
+        loginId,
+        name,
+        role,
+        branch,
+        lineUserId,
+        linkedStudentName,
+        linkedTeacherName,
+        passwordHash: hashPassword(password || 'grit2026'),
+        mustChangePassword: true,
+        status: '承認待ち',
+        selfRegisteredAt: new Date().toISOString(),
+        approvedBy: null,
+        approvedAt: null,
+      };
+
+      const saved = await saveDoc('accounts', loginId, pendingDoc);
+      const { password: _p, passwordHash: _ph, ...safeAccount } = saved;
+      return sendJson(res, 200, {
+        ok: true,
+        account: safeAccount,
+        message: '新規登録申請を受け付けました。本部の許可（承認）完了後にログイン可能となります。',
+      });
+    } catch (err) {
+      console.error('Self-register error:', err);
+      return sendJson(res, 500, { ok: false, error: err.message || '新規登録申請でエラーが発生しました' });
+    }
+  }
+
   const auth = requireAuth(req);
   if (!auth.ok) {
     return sendJson(res, auth.status, { ok: false, error: auth.error });
@@ -115,6 +181,9 @@ export default async function handler(req, res) {
           linkedStudentName: acc.linkedStudentName !== undefined ? String(acc.linkedStudentName).trim() : (current.linkedStudentName || ''),
           linkedTeacherName: acc.linkedTeacherName !== undefined ? String(acc.linkedTeacherName).trim() : (current.linkedTeacherName || ''),
           status: acc.status !== undefined ? String(acc.status).trim() : (current.status || '有効'),
+          ...(acc.status === '有効' && current.status === '承認待ち'
+            ? { approvedBy: auth.user.id, approvedAt: new Date().toISOString() }
+            : {}),
         };
         if (acc.password && String(acc.password).trim()) {
           patch.passwordHash = hashPassword(String(acc.password).trim());
