@@ -432,14 +432,14 @@
             <tbody id="unpaidTableBody"></tbody>
           </table>
         </div>
-            <!-- Tab 6: Role & Account Registration -->
-      <div id="tab-roles" class="tab-panel card">
-        <h2>新規役職・アカウント登録（本部・受付・講師・生徒・保護者）</h2>
+            <!-- Direct Role & Account Registration Card (Always visible in workspace) -->
+      <div id="roleRegistrationCard" class="card" style="display:block !important; visibility:visible !important; opacity:1 !important; margin-top:14px;">
+        <h2 style="margin-top:0;">新規役職・アカウント登録（本部・受付・講師・生徒・保護者）</h2>
         <p style="font-size:0.86rem;">各役職のログインアカウントを発行・管理できます。パスワード未入力時は初期パスワード <code>grit2026</code> が設定されます。</p>
 
-        <div class="card" style="background:#f8fafc; margin-bottom:14px;">
+        <div class="card" style="background:#f8fafc; margin-bottom:14px; display:block !important;">
           <h3 style="margin-top:0; font-size:0.98rem;">新規アカウント登録</h3>
-          <div class="toolbar" style="margin-bottom:0;">
+          <div class="toolbar" style="margin-bottom:0; display:flex !important;">
             <label>役職
               <select id="newAccRole">
                 <option value="hq">本部（hq）</option>
@@ -479,7 +479,7 @@
           </div>
         </div>
 
-        <div class="toolbar">
+        <div class="toolbar" style="display:flex !important;">
           <label>役職絞り込み
             <select id="accFilterRole">
               <option value="">全役職</option>
@@ -493,7 +493,7 @@
           <button class="secondary" id="reloadAccountsBtn">アカウント一覧を更新</button>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap" style="display:block !important;">
           <table class="kamoku-table">
             <thead>
               <tr>
