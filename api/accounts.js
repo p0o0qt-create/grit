@@ -331,17 +331,38 @@ export default async function handler(req, res) {
 
       if (action === 'DELETE_ACCOUNT') {
         const targetId = String(payload?.accountId || payload?.loginId || '').trim();
+        const reason = String(payload?.reason || '').trim();
         if (!targetId) {
           return sendJson(res, 400, { ok: false, error: '削除するアカウントIDが必要です' });
         }
         if (targetId === 'admin' || targetId === auth.user.id) {
           return sendJson(res, 400, { ok: false, error: '初期管理者（admin）または現在ログイン中のアカウントは削除できません' });
         }
-        const targetAcc = await getDocById('accounts', targetId);
+
+        const allAccounts = await listDocs('accounts');
+        const matchedDocs = allAccounts.filter(
+          (a) => String(a?.id || '').trim() === targetId || String(a?.loginId || '').trim() === targetId
+        );
+        const targetAcc = matchedDocs[0] || (await getDocById('accounts', targetId));
+
         if (targetAcc?.role === 'hq' && auth.user.role !== 'hq') {
           return sendJson(res, 403, { ok: false, error: '本部アカウントの削除は本部権限のみ可能です' });
         }
-        await deleteDocById('accounts', targetId);
+
+        const docIdsToDelete = new Set([targetId]);
+        for (const m of matchedDocs) {
+          if (m?.id) docIdsToDelete.add(String(m.id));
+          if (m?.loginId) docIdsToDelete.add(String(m.loginId));
+        }
+
+        const deletedIds = [];
+        for (const did of docIdsToDelete) {
+          if (did && did !== 'admin' && did !== auth.user.id) {
+            await deleteDocById('accounts', did);
+            deletedIds.push(did);
+          }
+        }
+
         if (targetAcc && targetAcc.role === 'student') {
           const candidateNames = new Set(
             [targetAcc.linkedStudentName, targetAcc.kanjiName, targetAcc.name, targetAcc.loginId, targetId]
@@ -358,7 +379,14 @@ export default async function handler(req, res) {
             }
           }
         }
-        return sendJson(res, 200, { ok: true, deletedId: targetId, deletedAccount: targetAcc || null });
+
+        return sendJson(res, 200, {
+          ok: true,
+          deletedId: targetId,
+          deletedIds,
+          reason,
+          deletedAccount: targetAcc || null,
+        });
       }
 
       return sendJson(res, 400, { ok: false, error: '未対応のactionです' });

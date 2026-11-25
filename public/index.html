@@ -580,6 +580,32 @@
           <button class="secondary" id="reloadAccountsBtn">アカウント一覧を更新</button>
         </div>
 
+        <div id="deleteAccountFormCard" class="card" style="background:#fff5f5; border:1px solid #feb2b2; margin-bottom:14px; display:block !important;">
+          <h3 style="margin-top:0; font-size:0.98rem; color:#c53030;">アカウント削除フォーム（退会・削除・データ反映）</h3>
+          <p style="font-size:0.84rem; margin:0 0 10px 0; color:#4a5568;">
+            削除対象アカウントを選択すると、未入金リストの有無を自動確認し、削除と同時にアカウント一覧・生徒/保護者一覧・コマ数設定リストへ確実に反映します。
+          </p>
+          <div class="toolbar" style="margin-bottom:8px; display:flex !important;">
+            <label>削除対象アカウント
+              <select id="deleteTargetAccountSelect" style="min-width:260px;">
+                <option value="">対象アカウントを選択してください</option>
+              </select>
+            </label>
+            <label>削除・退会理由（任意）
+              <input type="text" id="deleteAccountReason" placeholder="例: 退会手続き完了 / 重複登録整理" style="width:240px;" />
+            </label>
+          </div>
+          <div id="deleteAccountUnpaidNotice" style="font-size:0.84rem; color:#c53030; font-weight:600; margin-bottom:8px;"></div>
+          <div style="margin-bottom:10px;">
+            <label style="flex-direction:row; align-items:center; gap:8px; font-weight:600; cursor:pointer; margin:0;">
+              <input type="checkbox" id="deleteAccountConfirmCheck" />
+              対象アカウントを削除し、関連リスト・コマ数設定へ反映することに同意します。
+            </label>
+          </div>
+          <button class="danger" id="submitDeleteAccountBtn">選択したアカウントを削除してデータへ反映</button>
+          <p id="deleteAccountFormMsg" style="margin:8px 0 0 0; font-size:0.86rem; font-weight:600;"></p>
+        </div>
+
         <div class="table-wrap" style="display:block !important;">
           <table class="kamoku-table">
             <thead>
@@ -1977,59 +2003,116 @@
       renderStudentParentRoster();
       renderUnpaidTable(state.unpaidList || []);
 
+      syncDeleteAccountFormOptions();
+
       tbody.querySelectorAll('[data-del-acc]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           const accId = btn.dataset.delAcc;
-          const accObj = (state.accounts || []).find((a) => String(a.id || a.loginId) === String(accId));
-          const needles = [accObj?.linkedStudentName, accObj?.kanjiName, accObj?.name, accObj?.loginId, accObj?.id]
-            .map((v) => String(v || '').trim())
-            .filter(Boolean);
-          const matchedUnpaid = (state.unpaidList || []).filter((u) => {
-            const uName = String(u?.studentName || '').trim();
-            if (!uName) return false;
-            return needles.some((n) => uName === n || uName.includes(n) || n.includes(uName));
-          });
-
-          let msg = `アカウント「${accId}」を削除しますか？`;
-          if (matchedUnpaid.length > 0) {
-            const sumUnpaid = matchedUnpaid.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
-            const lines = matchedUnpaid
-              .map((x) => `・${x.yearMonth || ''} ${x.studentName || ''}：未入金 ¥${Number(x.unpaidAmount || 0).toLocaleString()}`)
-              .join('\n');
-            msg =
-              `【警告】退会・削除対象に未入金リストのデータが含まれています！\n` +
-              `該当件数: ${matchedUnpaid.length}件 ／ 未入金合計: ¥${sumUnpaid.toLocaleString()}\n` +
-              `${lines}\n\n` +
-              `未入金が残っていますが、アカウント「${accId}」を削除（退会処理）しますか？`;
-          }
-
-          if (!confirm(msg)) return;
-          const res = await apiFetch('/api/accounts', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'DELETE_ACCOUNT', payload: { accountId: accId } }),
-          });
-          if (res.ok) {
-            state.accounts = (state.accounts || []).filter((a) => String(a.id || a.loginId) !== String(accId));
-            if (accObj?.role === 'student') {
-              const stuNames = new Set(needles);
-              const expectedStuId = `stu_acc_${String(accObj.loginId || accId).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
-              state.students = (state.students || []).filter((s) => {
-                const sId = String(s?.studentId || s?.id || '').trim();
-                const sName = String(s?.name || '').trim();
-                return sId !== expectedStuId && !stuNames.has(sName);
-              });
-            }
-            renderAccountsTable();
-            renderStudentParentRoster();
-            renderQuotaTable();
-            populateMasterDataLists();
-            alert('アカウントを削除し、各リスト・コマ数設定を更新しました');
-            await loadAccounts();
-          } else {
-            alert(res.error || '削除に失敗しました');
-          }
+          await executeAccountDeletion(accId, '');
         });
       });
+    }
+
+    function getMatchedUnpaidForAccount(accObj) {
+      const needles = [accObj?.linkedStudentName, accObj?.kanjiName, accObj?.name, accObj?.loginId, accObj?.id]
+        .map((v) => String(v || '').trim())
+        .filter(Boolean);
+      if (!needles.length) return [];
+      return (state.unpaidList || []).filter((u) => {
+        const uName = String(u?.studentName || '').trim();
+        if (!uName) return false;
+        return needles.some((n) => uName === n || uName.includes(n) || n.includes(uName));
+      });
+    }
+
+    function syncDeleteAccountFormOptions() {
+      const sel = document.getElementById('deleteTargetAccountSelect');
+      const noticeEl = document.getElementById('deleteAccountUnpaidNotice');
+      if (!sel) return;
+      const prev = sel.value;
+      const deletable = (state.accounts || []).filter((a) => {
+        const aid = String(a?.id || a?.loginId || '').trim();
+        if (!aid || aid === 'admin' || aid === currentUser?.id) return false;
+        if (a?.role === 'hq' && currentUser?.role !== 'hq') return false;
+        return true;
+      });
+      sel.innerHTML = '<option value="">対象アカウントを選択してください</option>' + deletable.map((a) => {
+        const aid = String(a.id || a.loginId);
+        const rLabel = ROLE_LABELS[a.role] || a.role;
+        return `<option value="${aid}">${aid}｜${a.name || ''}（${rLabel}・${a.branch || ''}）</option>`;
+      }).join('');
+      if (prev && deletable.some((a) => String(a.id || a.loginId) === prev)) {
+        sel.value = prev;
+      }
+      if (noticeEl) {
+        const selectedAcc = deletable.find((a) => String(a.id || a.loginId) === sel.value);
+        const unpaidMatches = getMatchedUnpaidForAccount(selectedAcc);
+        if (unpaidMatches.length > 0) {
+          const sum = unpaidMatches.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
+          noticeEl.textContent = `【警告】選択対象に未入金リスト ${unpaidMatches.length}件（合計 ¥${sum.toLocaleString()}）が含まれています。`;
+        } else {
+          noticeEl.textContent = '';
+        }
+      }
+    }
+
+    async function executeAccountDeletion(accId, reason = '') {
+      if (!accId) {
+        alert('削除対象アカウントを選択してください');
+        return false;
+      }
+      const accObj = (state.accounts || []).find((a) => String(a.id || a.loginId) === String(accId));
+      const needles = [accObj?.linkedStudentName, accObj?.kanjiName, accObj?.name, accObj?.loginId, accObj?.id]
+        .map((v) => String(v || '').trim())
+        .filter(Boolean);
+      const matchedUnpaid = getMatchedUnpaidForAccount(accObj);
+
+      let msg = `アカウント「${accId}」を削除してデータへ反映しますか？`;
+      if (matchedUnpaid.length > 0) {
+        const sumUnpaid = matchedUnpaid.reduce((s, x) => s + (Number(x.unpaidAmount) || 0), 0);
+        const lines = matchedUnpaid
+          .map((x) => `・${x.yearMonth || ''} ${x.studentName || ''}：未入金 ¥${Number(x.unpaidAmount || 0).toLocaleString()}`)
+          .join('\n');
+        msg =
+          `【警告】退会・削除対象に未入金リストのデータが含まれています！\n` +
+          `該当件数: ${matchedUnpaid.length}件 ／ 未入金合計: ¥${sumUnpaid.toLocaleString()}\n` +
+          `${lines}\n\n` +
+          `未入金が残っていますが、アカウント「${accId}」を削除（退会処理）しますか？`;
+      }
+
+      if (!confirm(msg)) return false;
+
+      const res = await apiFetch('/api/accounts', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'DELETE_ACCOUNT', payload: { accountId: accId, reason } }),
+      });
+      if (!res.ok) {
+        alert(res.error || '削除に失敗しました');
+        return false;
+      }
+
+      const deletedSet = new Set([String(accId), ...(res.deletedIds || []).map(String)]);
+      state.accounts = (state.accounts || []).filter(
+        (a) => !deletedSet.has(String(a.id || '').trim()) && !deletedSet.has(String(a.loginId || '').trim())
+      );
+      if (accObj?.role === 'student') {
+        const stuNames = new Set(needles);
+        const expectedStuId = `stu_acc_${String(accObj.loginId || accId).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        state.students = (state.students || []).filter((s) => {
+          const sId = String(s?.studentId || s?.id || '').trim();
+          const sName = String(s?.name || '').trim();
+          return sId !== expectedStuId && !stuNames.has(sName);
+        });
+      }
+
+      renderAccountsTable();
+      renderStudentParentRoster();
+      renderQuotaTable();
+      populateMasterDataLists();
+      syncDeleteAccountFormOptions();
+      await loadAccounts();
+      return true;
+    }
     }
 
     document.getElementById('createAccountBtn')?.addEventListener('click', async () => {
@@ -2380,6 +2463,45 @@
       document.getElementById('selfRegLinkedStudent').value = '';
       document.getElementById('selfRegPassword').value = '';
       document.getElementById('selfRegAgreeCheck').checked = false;
+    });
+
+  
+    document.getElementById('deleteTargetAccountSelect')?.addEventListener('change', () => {
+      syncDeleteAccountFormOptions();
+    });
+
+    document.getElementById('submitDeleteAccountBtn')?.addEventListener('click', async () => {
+      const sel = document.getElementById('deleteTargetAccountSelect');
+      const reasonInp = document.getElementById('deleteAccountReason');
+      const agreeCb = document.getElementById('deleteAccountConfirmCheck');
+      const msgEl = document.getElementById('deleteAccountFormMsg');
+      const accId = sel?.value?.trim() || '';
+      const reason = reasonInp?.value?.trim() || '';
+
+      if (!accId) {
+        if (msgEl) {
+          msgEl.style.color = '#c53030';
+          msgEl.textContent = '削除対象アカウントを選択してください。';
+        }
+        return;
+      }
+      if (!agreeCb?.checked) {
+        if (msgEl) {
+          msgEl.style.color = '#c53030';
+          msgEl.textContent = '削除・反映への同意チェックボックスにチェックを入れてください。';
+        }
+        return;
+      }
+
+      const ok = await executeAccountDeletion(accId, reason);
+      if (ok) {
+        if (reasonInp) reasonInp.value = '';
+        if (agreeCb) agreeCb.checked = false;
+        if (msgEl) {
+          msgEl.style.color = '#2f855a';
+          msgEl.textContent = `アカウント「${accId}」を削除し、アカウント一覧・生徒/保護者一覧・コマ数設定へ反映しました。`;
+        }
+      }
     });
 
     </script>
