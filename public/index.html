@@ -2382,28 +2382,6 @@
     });
 
   
-
-      if (!res.ok) {
-        if (msgEl) {
-          msgEl.style.color = '#c53030';
-          msgEl.textContent = res.error || '新規登録申請に失敗しました';
-        }
-        return;
-      }
-
-      if (msgEl) {
-        msgEl.style.color = '#2f855a';
-        msgEl.textContent = `申請完了：ログインID「${loginId}」（LINE ID: ${lineUserId}）を「承認待ち」で登録しました。本部との相互確認・承認完了後にログインしてください。`;
-      }
-      document.getElementById('selfRegLoginId').value = '';
-      document.getElementById('selfRegName').value = '';
-      document.getElementById('selfRegLinkedStudent').value = '';
-      document.getElementById('selfRegLineId').value = '';
-      document.getElementById('selfRegPassword').value = '';
-      document.getElementById('selfRegAgreeCheck').checked = false;
-    });
-
-  
     document.getElementById('selfRegisterBtn')?.addEventListener('click', async () => {
       const msgEl = document.getElementById('selfRegMsg');
       const role = document.getElementById('selfRegRole').value;
