@@ -55,6 +55,16 @@
     .row-vacant td { background: #fff9db !important; color: #665c00; }
     .vacant-pill { display: inline-block; background: #ffe066; color: #5c4700; font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 0.78rem; }
     .hq-note-input { width: 165px; min-width: 130px; font-size: 0.82rem; padding: 5px 7px; }
+    .report-sheet { border: 2px solid #2d3748; border-radius: 6px; background: #fff; padding: 14px; }
+    .report-sheet-header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border-bottom: 2px solid #2d3748; padding-bottom: 10px; margin-bottom: 12px; }
+    .report-cols-grid { display: grid; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 10px; }
+    @media (max-width: 960px) { .report-cols-grid { grid-template-columns: 1fr; } }
+    .report-col-box { border: 1.5px solid #4a5568; border-radius: 4px; background: #fcfcfd; display: flex; flex-direction: column; }
+    .report-col-cell { border-bottom: 1px solid #cbd5e0; padding: 8px; }
+    .report-col-cell:last-child { border-bottom: none; }
+    .report-col-cell label { font-size: 0.78rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .report-col-cell textarea { width: 100%; min-height: 46px; font-size: 0.84rem; padding: 5px 7px; border: 1px solid var(--border); border-radius: 4px; resize: vertical; }
+    .report-slot-legend { font-size: 0.76rem; color: #4a5568; margin-top: 8px; border-top: 1px solid #cbd5e0; padding-top: 6px; }
     .teacher-select { min-width: 145px; font-size: 0.82rem; padding: 5px 6px; }
     .status-pill { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; background: #edf2f7; color: #2d3748; }
     .st-scheduled { background: #e6fffa; color: #234e52; }
@@ -214,6 +224,7 @@
         <button class="tab-btn" data-tab="tab-defaults">4. 月次デフォルト原本（講師×生徒紐づけ）</button>
         <button class="tab-btn" data-tab="tab-csv">5. 口座情報CSVインポート＆未入金リスト</button>
         <button class="tab-btn" data-tab="tab-roles">6. 新規役職・アカウント登録</button>
+        <button class="tab-btn" data-tab="tab-reports">7. 指導報告書・24h未提出リスト・履歴</button>
       </div>
 
       <!-- Tab 1: Monthly Schedule -->
@@ -644,6 +655,69 @@
           </div>
         </div>
       </div>
+
+      <!-- Tab 7: Lesson Report Submission, 24h Unsubmitted List & History -->
+      <div id="tab-reports" class="tab-panel card">
+        <h2 style="margin-top:0;">指導報告書提出（授業終了後24時間以内）・未提出リスト・履歴</h2>
+        <p style="font-size:0.86rem; color:#4a5568; margin-top:0;">
+          講師・本部アカウントは授業終了後24時間以内に指導報告書を提出してください。24時間超過で未提出の場合は「未提出リスト」へ自動反映され、提出時には該当生徒・保護者・本部へ通知されます。
+        </p>
+
+        <div class="card" style="background:#fff5f5; border:1px solid #feb2b2; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <h3 style="margin:0; font-size:1rem; color:#c53030;">24時間超過・指導報告書 未提出リスト（自動更新）</h3>
+            <span id="hqUnsubmittedSummary" style="font-weight:700; color:#c53030; font-size:0.88rem;"></span>
+          </div>
+          <div class="table-wrap" style="max-height:240px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>授業日</th>
+                  <th>曜日</th>
+                  <th>コマ</th>
+                  <th>支部</th>
+                  <th>担当講師</th>
+                  <th>生徒氏名</th>
+                  <th>科目</th>
+                  <th>提出期限（終了+24h）</th>
+                  <th>超過時間</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="hqUnsubmittedReportsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="hqReportFormContainer" style="margin-bottom:16px;"></div>
+
+        <div class="card" style="background:#f8fafc; margin-bottom:0;">
+          <div class="toolbar" style="justify-content:space-between;">
+            <h3 style="margin:0; font-size:1rem;">提出済み 指導報告書履歴（本部閲覧）</h3>
+            <label>生徒・講師・支部検索
+              <input type="text" id="hqReportHistoryFilter" placeholder="氏名・支部で絞り込み" style="width:200px;" />
+            </label>
+          </div>
+          <div class="table-wrap" style="max-height:320px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>授業日・コマ</th>
+                  <th>区分／支部</th>
+                  <th>担当講師</th>
+                  <th>生徒氏名</th>
+                  <th>CL内容①／評価</th>
+                  <th>CL内容②／評価</th>
+                  <th>宿題／確認</th>
+                  <th>メモ・コメント</th>
+                  <th>チェック／提出日時</th>
+                </tr>
+              </thead>
+              <tbody id="hqReportHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Dedicated Portal for Student / Parent / Teacher -->
@@ -714,6 +788,53 @@
         </div>
       </div>
 
+      <div id="portalTeacherReportCard" class="card hidden">
+        <h3 style="margin-top:0;">指導報告書提出（授業終了後24時間以内）＆未提出リスト</h3>
+        <div style="background:#fff5f5; border:1px solid #feb2b2; border-radius:6px; padding:10px; margin-bottom:12px;">
+          <strong style="color:#c53030; font-size:0.9rem;">あなたの24時間超過・未提出授業リスト</strong>
+          <div id="portalUnsubmittedSummary" style="font-size:0.84rem; font-weight:600; color:#c53030; margin:4px 0 8px 0;"></div>
+          <div class="table-wrap" style="max-height:190px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>授業日</th>
+                  <th>コマ</th>
+                  <th>支部</th>
+                  <th>生徒氏名</th>
+                  <th>科目</th>
+                  <th>提出期限</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="portalUnsubmittedBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="portalReportFormContainer"></div>
+      </div>
+
+      <div id="portalReportHistoryCard" class="card hidden">
+        <h3 style="margin-top:0;">指導報告書履歴（通知済みレポート一覧）</h3>
+        <div id="portalReportHistorySummary" style="font-weight:600; margin-bottom:8px; font-size:0.88rem;"></div>
+        <div class="table-wrap" style="max-height:320px;">
+          <table>
+            <thead>
+              <tr>
+                <th>授業日・コマ</th>
+                <th>区分／支部</th>
+                <th>担当講師</th>
+                <th>生徒氏名</th>
+                <th>CL内容①／評価</th>
+                <th>CL内容②／評価</th>
+                <th>宿題／確認</th>
+                <th>メモ・コメント</th>
+              </tr>
+            </thead>
+            <tbody id="portalReportHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div id="portalBillingCard" class="card hidden">
         <h3 style="margin-top:0;">入金状態の確認</h3>
         <div id="portalBillingSummary" style="font-weight:600; margin-bottom:8px;"></div>
@@ -749,6 +870,8 @@
       schedules: [],
       absences: [],
       unpaidList: [],
+      reports: [],
+      unsubmittedReports: [],
       accounts: [],
     };
 
@@ -800,11 +923,11 @@
           targetPanel.style.display = 'block';
         }
         if (btn.dataset.tab === 'tab-roles') {
-          if (!state.accounts?.length) {
-            await loadAccounts();
-          } else {
-            renderAccountsTable();
-          }
+          await loadAccounts();
+          syncDeleteAccountFormOptions();
+        }
+        if (btn.dataset.tab === 'tab-reports') {
+          renderReportsWorkspace();
         }
       });
     });
@@ -857,6 +980,7 @@
       renderQuotaTable();
       renderDefaultTable();
       renderUnpaidTable(state.unpaidList);
+      renderReportsWorkspace();
       populateMasterDataLists();
       await loadAccounts();
     }
@@ -1898,6 +2022,7 @@
         state.accounts = res.accounts;
         renderAccountsTable();
       }
+      syncDeleteAccountFormOptions();
     }
 
     function syncRoleSelectHqRestriction() {
@@ -2057,7 +2182,10 @@
         if (a?.role === 'hq' && currentUser?.role !== 'hq') return false;
         return true;
       });
-      sel.innerHTML = '<option value="">対象アカウントを選択してください</option>' + deletable.map((a) => {
+      const defaultOpt = deletable.length
+        ? '<option value="">対象アカウントを選択してください</option>'
+        : '<option value="">削除可能なアカウントがありません（「アカウント一覧を更新」で確認）</option>';
+      sel.innerHTML = defaultOpt + deletable.map((a) => {
         const aid = String(a.id || a.loginId);
         const rLabel = ROLE_LABELS[a.role] || a.role;
         return `<option value="${aid}">${aid}｜${a.name || ''}（${rLabel}・${a.branch || ''}）</option>`;
@@ -2225,25 +2353,33 @@
       const subEl = document.getElementById('portalSubtitle');
       const absCard = document.getElementById('portalAbsenceCard');
       const billCard = document.getElementById('portalBillingCard');
+      const tchRepCard = document.getElementById('portalTeacherReportCard');
+      const repHistCard = document.getElementById('portalReportHistoryCard');
 
       let mySchedules = [];
       if (role === 'student') {
-        titleEl.textContent = '生徒専用ポータル（スケジュール確認・欠席申請）';
+        titleEl.textContent = '生徒専用ポータル（スケジュール確認・欠席申請・指導報告書履歴）';
         subEl.textContent = `${currentUser.name} 様 ／ 紐づけ生徒: ${currentUser.linkedStudentName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
         absCard.classList.remove('hidden');
         billCard.classList.add('hidden');
+        tchRepCard?.classList.add('hidden');
+        repHistCard?.classList.remove('hidden');
         mySchedules = (state.schedules || []).filter((r) => matchesLinkedStudent(r.studentName, currentUser));
       } else if (role === 'parent') {
-        titleEl.textContent = '保護者専用ポータル（スケジュール確認・欠席申請・入金状態）';
+        titleEl.textContent = '保護者専用ポータル（スケジュール・欠席申請・指導報告書履歴・入金状態）';
         subEl.textContent = `${currentUser.name} 様 ／ 対象生徒: ${currentUser.linkedStudentName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
         absCard.classList.remove('hidden');
         billCard.classList.remove('hidden');
+        tchRepCard?.classList.add('hidden');
+        repHistCard?.classList.remove('hidden');
         mySchedules = (state.schedules || []).filter((r) => matchesLinkedStudent(r.studentName, currentUser));
       } else if (role === 'teacher') {
-        titleEl.textContent = '講師専用ポータル（担当スケジュール一覧）';
+        titleEl.textContent = '講師専用ポータル（担当スケジュール・指導報告書提出）';
         subEl.textContent = `${currentUser.name} 先生 ／ 紐づけ講師名: ${currentUser.linkedTeacherName || currentUser.name} ／ 対象月: ${state.yearMonth}`;
         absCard.classList.add('hidden');
         billCard.classList.add('hidden');
+        tchRepCard?.classList.remove('hidden');
+        repHistCard?.classList.remove('hidden');
         mySchedules = (state.schedules || []).filter((r) => matchesLinkedTeacher(r.teacherName, currentUser));
       }
 
@@ -2300,6 +2436,14 @@
               `).join('')
             : '<tr><td colspan="5">欠席申請履歴はありません</td></tr>';
         }
+      }
+
+      if (role === 'teacher') {
+        renderTeacherPortalReportSection(mySchedules);
+      }
+
+      if (role === 'student' || role === 'parent' || role === 'teacher') {
+        renderPortalReportHistory(role);
       }
 
       if (role === 'parent') {
@@ -2472,6 +2616,426 @@
         }
       }
     });
+
+  
+    const REPORT_TIME_SLOTS = [
+      '①9:00-10:20',
+      '②10:30-11:50',
+      '③13:00-14:20',
+      '④14:30-15:50',
+      '⑤16:00-17:20',
+      '⑥17:30-18:50',
+      '⑦19:00-20:20',
+      '⑧20:30-21:50',
+      'a.18:30-19:50',
+      'b.20:00-21:20',
+    ];
+
+    function buildReportFormHtml(prefix) {
+      const slotOpts = REPORT_TIME_SLOTS.map((s) => `<option value="${s}">${s}</option>`).join('');
+      const colBoxes = [1, 2, 3].map((colNum) => {
+        const copyAbove = colNum > 1
+          ? `<label style="display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:0.75rem; margin:0; cursor:pointer;"><input type="checkbox" data-rep-copy-cl1="${prefix}_${colNum}" />左記と同様</label>`
+          : '';
+        const copyCl2 = colNum > 1
+          ? `<label style="display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:0.75rem; margin:0; cursor:pointer;"><input type="checkbox" data-rep-copy-cl2="${prefix}_${colNum}" />左記と同様</label>`
+          : '';
+        const copyHw = colNum > 1
+          ? `<label style="display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:0.75rem; margin:0; cursor:pointer;"><input type="checkbox" data-rep-copy-hw="${prefix}_${colNum}" />左記と同様</label>`
+          : '';
+        const copyMemo = colNum > 1
+          ? `<label style="display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:0.75rem; margin:0; cursor:pointer;"><input type="checkbox" data-rep-copy-memo="${prefix}_${colNum}" />左記と同様</label>`
+          : '';
+        return `
+          <div class="report-col-box">
+            <div class="report-col-cell" style="background:#edf2f7;">
+              <label>生徒氏名（${colNum}人目）<span>さん</span></label>
+              <input type="text" id="${prefix}_stu_${colNum}" list="masterStudentNamesList" placeholder="生徒氏名を入力" style="width:100%;" />
+              <input type="hidden" id="${prefix}_schedId_${colNum}" />
+            </div>
+            <div class="report-col-cell">
+              <label><span>CL内容①</span>${copyAbove}</label>
+              <textarea id="${prefix}_cl1_${colNum}" placeholder="指導単元・内容①"></textarea>
+              <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.78rem; font-weight:700;">評価：</span>
+                <input type="text" id="${prefix}_eval1_${colNum}" placeholder="例: ◎ / ○ / 理解良好" style="flex:1;" />
+              </div>
+            </div>
+            <div class="report-col-cell">
+              <label><span>CL内容②</span>${copyCl2}</label>
+              <textarea id="${prefix}_cl2_${colNum}" placeholder="指導単元・内容②"></textarea>
+              <div style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.78rem; font-weight:700;">評価：</span>
+                <input type="text" id="${prefix}_eval2_${colNum}" placeholder="例: ◎ / ○ / 演習完了" style="flex:1;" />
+              </div>
+            </div>
+            <div class="report-col-cell">
+              <label><span>宿題</span>${copyHw}</label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-weight:500; font-size:0.76rem; margin:0 0 4px 0; cursor:pointer;">
+                <input type="checkbox" id="${prefix}_hwNext_${colNum}" />次コマ分に記載
+              </label>
+              <textarea id="${prefix}_hw_${colNum}" placeholder="宿題内容・ページ"></textarea>
+              <div style="margin-top:6px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:0.8rem;">
+                <span>未：</span>
+                <input type="text" id="${prefix}_hwUnfinished_${colNum}" placeholder="未完了箇所" style="width:110px; padding:4px 6px;" />
+                <label style="display:inline-flex; align-items:center; gap:4px; font-weight:700; margin:0; cursor:pointer;">
+                  <input type="checkbox" id="${prefix}_hwDone_${colNum}" />済
+                </label>
+              </div>
+            </div>
+            <div class="report-col-cell">
+              <label><span>メモ・コメント</span>${copyMemo}</label>
+              <textarea id="${prefix}_memo_${colNum}" placeholder="学習の様子・保護者様への連絡事項"></textarea>
+            </div>
+            <div class="report-col-cell" style="background:#f8fafc; display:flex; gap:14px; align-items:center;">
+              <label style="display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:0.82rem; margin:0; cursor:pointer;">
+                <input type="checkbox" id="${prefix}_chkReport_${colNum}" checked />指報
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:0.82rem; margin:0; cursor:pointer;">
+                <input type="checkbox" id="${prefix}_chkSub_${colNum}" />代行引継
+              </label>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="report-sheet">
+          <div class="report-sheet-header">
+            <label style="font-weight:700;">授業日
+              <input type="date" id="${prefix}_date" value="2026-12-01" />
+            </label>
+            <div style="display:flex; gap:10px; align-items:center; padding-top:16px;">
+              <label style="flex-direction:row; align-items:center; gap:4px; cursor:pointer; font-weight:700;">
+                <input type="radio" name="${prefix}_classType" value="通常CL" checked />通常CL
+              </label>
+              <label style="flex-direction:row; align-items:center; gap:4px; cursor:pointer; font-weight:700;">
+                <input type="radio" name="${prefix}_classType" value="季節CL" />季節CL
+              </label>
+              <label style="flex-direction:row; align-items:center; gap:4px; cursor:pointer; font-weight:700;">
+                <input type="radio" name="${prefix}_classType" value="代行" />代行
+              </label>
+            </div>
+            <label style="font-weight:700;">コマ
+              <select id="${prefix}_timeSlot">${slotOpts}</select>
+            </label>
+            <label style="font-weight:700;">支部
+              <input type="text" id="${prefix}_branch" placeholder="例: 亀岡" style="width:110px;" />
+            </label>
+            <label style="font-weight:700;">担当講師
+              <input type="text" id="${prefix}_teacher" list="masterTeacherNamesList" placeholder="講師氏名" style="width:165px;" />
+            </label>
+          </div>
+
+          <div class="report-cols-grid">
+            ${colBoxes}
+          </div>
+
+          <div class="report-slot-legend">
+            ①9:00-10:20　②10:30-11:50　③13:00-14:20　④14:30-15:50　⑤16:00-17:20　⑥17:30-18:50　⑦19:00-20:20　⑧20:30-21:50　a.18:30-19:50　b.20:00-21:20
+          </div>
+
+          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+            <button class="primary" id="${prefix}_submitBtn">指導報告書を提出（生徒・保護者・本部へ通知）</button>
+            <span id="${prefix}_msg" style="font-size:0.86rem; font-weight:600;"></span>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindReportFormEvents(prefix) {
+      const container = document.getElementById(`${prefix}ReportFormContainer`);
+      if (!container) return;
+      if (!container.dataset.initialized) {
+        container.innerHTML = buildReportFormHtml(prefix);
+        container.dataset.initialized = '1';
+      }
+
+      if (currentUser?.role === 'teacher') {
+        const tchInp = document.getElementById(`${prefix}_teacher`);
+        if (tchInp && !tchInp.value) {
+          tchInp.value = currentUser.linkedTeacherName || currentUser.name || '';
+        }
+        const brInp = document.getElementById(`${prefix}_branch`);
+        if (brInp && !brInp.value && currentUser.branch) {
+          brInp.value = currentUser.branch;
+        }
+      }
+
+      [2, 3].forEach((colNum) => {
+        container.querySelector(`[data-rep-copy-cl1="${prefix}_${colNum}"]`)?.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            document.getElementById(`${prefix}_cl1_${colNum}`).value = document.getElementById(`${prefix}_cl1_1`).value;
+            document.getElementById(`${prefix}_eval1_${colNum}`).value = document.getElementById(`${prefix}_eval1_1`).value;
+          }
+        });
+        container.querySelector(`[data-rep-copy-cl2="${prefix}_${colNum}"]`)?.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            document.getElementById(`${prefix}_cl2_${colNum}`).value = document.getElementById(`${prefix}_cl2_1`).value;
+            document.getElementById(`${prefix}_eval2_${colNum}`).value = document.getElementById(`${prefix}_eval2_1`).value;
+          }
+        });
+        container.querySelector(`[data-rep-copy-hw="${prefix}_${colNum}"]`)?.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            document.getElementById(`${prefix}_hw_${colNum}`).value = document.getElementById(`${prefix}_hw_1`).value;
+            document.getElementById(`${prefix}_hwNext_${colNum}`).checked = document.getElementById(`${prefix}_hwNext_1`).checked;
+          }
+        });
+        container.querySelector(`[data-rep-copy-memo="${prefix}_${colNum}"]`)?.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            document.getElementById(`${prefix}_memo_${colNum}`).value = document.getElementById(`${prefix}_memo_1`).value;
+          }
+        });
+      });
+
+      const subBtn = document.getElementById(`${prefix}_submitBtn`);
+      if (subBtn && !subBtn.dataset.bound) {
+        subBtn.dataset.bound = '1';
+        subBtn.addEventListener('click', async () => {
+          const msgEl = document.getElementById(`${prefix}_msg`);
+          const date = document.getElementById(`${prefix}_date`)?.value || '';
+          const classType = container.querySelector(`input[name="${prefix}_classType"]:checked`)?.value || '通常CL';
+          const timeSlot = document.getElementById(`${prefix}_timeSlot`)?.value || '';
+          const branch = document.getElementById(`${prefix}_branch`)?.value.trim() || '';
+          const teacherName = document.getElementById(`${prefix}_teacher`)?.value.trim() || '';
+
+          const columns = [1, 2, 3].map((colNum) => {
+            const stuName = document.getElementById(`${prefix}_stu_${colNum}`)?.value.trim() || '';
+            const hwDone = document.getElementById(`${prefix}_hwDone_${colNum}`)?.checked;
+            return {
+              scheduleId: document.getElementById(`${prefix}_schedId_${colNum}`)?.value || '',
+              studentName: stuName,
+              cl1Content: document.getElementById(`${prefix}_cl1_${colNum}`)?.value.trim() || '',
+              cl1Eval: document.getElementById(`${prefix}_eval1_${colNum}`)?.value.trim() || '',
+              cl2Content: document.getElementById(`${prefix}_cl2_${colNum}`)?.value.trim() || '',
+              cl2Eval: document.getElementById(`${prefix}_eval2_${colNum}`)?.value.trim() || '',
+              homework: document.getElementById(`${prefix}_hw_${colNum}`)?.value.trim() || '',
+              homeworkNextSlotNote: Boolean(document.getElementById(`${prefix}_hwNext_${colNum}`)?.checked),
+              homeworkStatus: hwDone ? '済' : '未',
+              homeworkUnfinishedDetail: document.getElementById(`${prefix}_hwUnfinished_${colNum}`)?.value.trim() || '',
+              memoComment: document.getElementById(`${prefix}_memo_${colNum}`)?.value.trim() || '',
+              reportCheck: Boolean(document.getElementById(`${prefix}_chkReport_${colNum}`)?.checked),
+              substituteHandoverCheck: Boolean(document.getElementById(`${prefix}_chkSub_${colNum}`)?.checked),
+            };
+          }).filter((c) => c.studentName);
+
+          if (!date || !timeSlot || columns.length === 0) {
+            if (msgEl) {
+              msgEl.style.color = '#c53030';
+              msgEl.textContent = '授業日・コマ・生徒氏名（1名以上）を入力してください。';
+            }
+            return;
+          }
+
+          const res = await apiFetch('/api/schedules', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'SUBMIT_LESSON_REPORT',
+              payload: {
+                report: { date, classType, timeSlot, branch, teacherName, columns },
+              },
+            }),
+          });
+
+          if (!res.ok) {
+            if (msgEl) {
+              msgEl.style.color = '#c53030';
+              msgEl.textContent = res.error || '指導報告書の提出に失敗しました';
+            }
+            return;
+          }
+
+          const deliveries = Array.isArray(res.lineDeliveries) ? res.lineDeliveries : [];
+          if (msgEl) {
+            msgEl.style.color = '#2f855a';
+            msgEl.textContent = `指導報告書（${columns.length}名分）を提出し、該当生徒・保護者・本部（通知対象${deliveries.length}件）へ配信・履歴保存しました。`;
+          }
+          [1, 2, 3].forEach((colNum) => {
+            document.getElementById(`${prefix}_stu_${colNum}`).value = '';
+            document.getElementById(`${prefix}_schedId_${colNum}`).value = '';
+            document.getElementById(`${prefix}_cl1_${colNum}`).value = '';
+            document.getElementById(`${prefix}_eval1_${colNum}`).value = '';
+            document.getElementById(`${prefix}_cl2_${colNum}`).value = '';
+            document.getElementById(`${prefix}_eval2_${colNum}`).value = '';
+            document.getElementById(`${prefix}_hw_${colNum}`).value = '';
+            document.getElementById(`${prefix}_hwUnfinished_${colNum}`).value = '';
+            document.getElementById(`${prefix}_hwDone_${colNum}`).checked = false;
+            document.getElementById(`${prefix}_memo_${colNum}`).value = '';
+          });
+
+          if (currentUser?.role === 'teacher') {
+            await loadRolePortalData();
+          } else {
+            await loadAllData();
+          }
+        });
+      }
+    }
+
+    function fillReportFormFromUnsubmitted(prefix, item) {
+      bindReportFormEvents(prefix);
+      const dateEl = document.getElementById(`${prefix}_date`);
+      const slotEl = document.getElementById(`${prefix}_timeSlot`);
+      const brEl = document.getElementById(`${prefix}_branch`);
+      const tchEl = document.getElementById(`${prefix}_teacher`);
+      if (dateEl && item.date) dateEl.value = item.date;
+      if (slotEl && item.timeSlot) slotEl.value = item.timeSlot;
+      if (brEl && item.branch) brEl.value = item.branch;
+      if (tchEl && item.teacherName) tchEl.value = item.teacherName;
+
+      // Find up to 3 students in the same slot/teacher/date
+      const sameSlotRows = (state.schedules || []).filter(
+        (s) => !s.isVacant && s.studentName && s.date === item.date && s.timeSlot === item.timeSlot &&
+               (!item.teacherName || s.teacherName === item.teacherName)
+      );
+      const targets = sameSlotRows.length > 0 ? sameSlotRows.slice(0, 3) : [item];
+      [1, 2, 3].forEach((colNum, idx) => {
+        const row = targets[idx];
+        const stuInp = document.getElementById(`${prefix}_stu_${colNum}`);
+        const sidInp = document.getElementById(`${prefix}_schedId_${colNum}`);
+        if (stuInp) stuInp.value = row?.studentName || '';
+        if (sidInp) sidInp.value = row?.scheduleId || '';
+      });
+      document.getElementById(`${prefix}ReportFormContainer`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderReportsWorkspace() {
+      bindReportFormEvents('hq');
+
+      const unsub = state.unsubmittedReports || [];
+      const sumEl = document.getElementById('hqUnsubmittedSummary');
+      if (sumEl) {
+        sumEl.textContent = unsub.length
+          ? `未提出件数: ${unsub.length}件（授業終了後24時間超過）`
+          : '現在、24時間超過の未提出指導報告書はありません';
+      }
+
+      const unsubBody = document.getElementById('hqUnsubmittedReportsBody');
+      if (unsubBody) {
+        unsubBody.innerHTML = unsub.length
+          ? unsub.map((u, idx) => `
+              <tr>
+                <td>${u.date}</td>
+                <td>${u.dayOfWeek || ''}</td>
+                <td>${u.timeSlot}</td>
+                <td>${u.branch || ''}</td>
+                <td><strong>${u.teacherName}</strong></td>
+                <td><strong>${u.studentName}</strong></td>
+                <td>${u.subject || ''}</td>
+                <td>${(u.deadlineAt || '').slice(0, 16).replace('T', ' ')}</td>
+                <td style="color:#c53030; font-weight:700;">+${u.overdueHours}時間</td>
+                <td><button class="primary" data-hq-fill-unsub="${idx}">報告書を作成</button></td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="10">24時間超過の未提出データはありません</td></tr>';
+
+        unsubBody.querySelectorAll('[data-hq-fill-unsub]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const item = unsub[Number(btn.dataset.hqFillUnsub)];
+            if (item) fillReportFormFromUnsubmitted('hq', item);
+          });
+        });
+      }
+
+      const kw = (document.getElementById('hqReportHistoryFilter')?.value || '').trim().toLowerCase();
+      const histList = (state.reports || [])
+        .filter((r) => {
+          if (!kw) return true;
+          const hay = `${r.date} ${r.branch} ${r.teacherName} ${r.studentName} ${r.cl1Content} ${r.memoComment}`.toLowerCase();
+          return hay.includes(kw);
+        })
+        .sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+
+      const histBody = document.getElementById('hqReportHistoryBody');
+      if (histBody) {
+        histBody.innerHTML = histList.length
+          ? histList.map((r) => `
+              <tr>
+                <td>${r.date}<br><small>${r.timeSlot}</small></td>
+                <td>${r.classType || '通常CL'}<br><small>${r.branch || ''}</small></td>
+                <td>${r.teacherName || ''}</td>
+                <td><strong>${r.studentName || ''}</strong></td>
+                <td>${r.cl1Content || '-'}<br><small>評価: ${r.cl1Eval || '-'}</small></td>
+                <td>${r.cl2Content || '-'}<br><small>評価: ${r.cl2Eval || '-'}</small></td>
+                <td>${r.homework || '-'}<br><small>状態: ${r.homeworkStatus || '未'} ${r.homeworkUnfinishedDetail || ''}</small></td>
+                <td>${r.memoComment || '-'}</td>
+                <td>
+                  ${r.reportCheck ? '☑指報 ' : ''}${r.substituteHandoverCheck ? '☑代行引継' : ''}
+                  <br><small>${(r.submittedAt || '').slice(0, 16).replace('T', ' ')}</small>
+                  ${r.isLate ? '<br><span style="color:#c53030;font-weight:700;">24h超過提出</span>' : ''}
+                </td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="9">提出済みの指導報告書履歴はありません</td></tr>';
+      }
+    }
+
+    document.getElementById('hqReportHistoryFilter')?.addEventListener('input', renderReportsWorkspace);
+
+    function renderTeacherPortalReportSection() {
+      bindReportFormEvents('portal');
+      const myUnsub = (state.unsubmittedReports || []).filter((u) => matchesLinkedTeacher(u.teacherName, currentUser));
+      const sumEl = document.getElementById('portalUnsubmittedSummary');
+      if (sumEl) {
+        sumEl.textContent = myUnsub.length
+          ? `未提出が ${myUnsub.length}件 あります（授業終了後24時間超過）`
+          : '現在、24時間超過の未提出授業はありません';
+      }
+      const tbody = document.getElementById('portalUnsubmittedBody');
+      if (tbody) {
+        tbody.innerHTML = myUnsub.length
+          ? myUnsub.map((u, idx) => `
+              <tr>
+                <td>${u.date}</td>
+                <td>${u.timeSlot}</td>
+                <td>${u.branch || ''}</td>
+                <td><strong>${u.studentName}</strong></td>
+                <td>${u.subject || ''}</td>
+                <td>${(u.deadlineAt || '').slice(0, 16).replace('T', ' ')}</td>
+                <td><button class="primary" data-portal-fill-unsub="${idx}">この授業を記入</button></td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="7">未提出の授業はありません</td></tr>';
+
+        tbody.querySelectorAll('[data-portal-fill-unsub]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const item = myUnsub[Number(btn.dataset.portalFillUnsub)];
+            if (item) fillReportFormFromUnsubmitted('portal', item);
+          });
+        });
+      }
+    }
+
+    function renderPortalReportHistory(role) {
+      const list = (state.reports || [])
+        .filter((r) => {
+          if (role === 'teacher') return matchesLinkedTeacher(r.teacherName, currentUser);
+          return matchesLinkedStudent(r.studentName, currentUser);
+        })
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+
+      const sumEl = document.getElementById('portalReportHistorySummary');
+      if (sumEl) {
+        sumEl.textContent = `閲覧可能な指導報告書履歴: ${list.length}件`;
+      }
+      const tbody = document.getElementById('portalReportHistoryBody');
+      if (tbody) {
+        tbody.innerHTML = list.length
+          ? list.map((r) => `
+              <tr>
+                <td>${r.date}<br><small>${r.timeSlot}</small></td>
+                <td>${r.classType || '通常CL'}<br><small>${r.branch || ''}</small></td>
+                <td>${r.teacherName || ''}</td>
+                <td><strong>${r.studentName || ''}</strong></td>
+                <td>${r.cl1Content || '-'}<br><small>評価: ${r.cl1Eval || '-'}</small></td>
+                <td>${r.cl2Content || '-'}<br><small>評価: ${r.cl2Eval || '-'}</small></td>
+                <td>${r.homework || '-'}<br><small>確認: ${r.homeworkStatus || '未'} ${r.homeworkUnfinishedDetail || ''}</small></td>
+                <td>${r.memoComment || '-'}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="8">表示できる指導報告書履歴はまだありません</td></tr>';
+      }
+    }
 
     </script>
 </body>

@@ -23,6 +23,53 @@ function loadJsonSeed(relPath) {
   }
 }
 
+function getLessonEndDateTime(dateStr, timeSlotStr) {
+  const m = String(timeSlotStr || '').match(/(\d{1,2}):(\d{2})\s*[-〜～]\s*(\d{1,2}):(\d{2})/);
+  const endHour = m ? String(m[3]).padStart(2, '0') : '21';
+  const endMin = m ? String(m[4]).padStart(2, '0') : '20';
+  return new Date(`${dateStr}T${endHour}:${endMin}:00+09:00`);
+}
+
+function buildUnsubmittedReports(schedules, reports, now = new Date()) {
+  const submittedKeySet = new Set(
+    (reports || []).map((r) => `${r.scheduleId || ''}::${String(r.studentName || '').trim()}`)
+  );
+  const submittedDateSlotStuSet = new Set(
+    (reports || []).map((r) => `${r.date || ''}::${r.timeSlot || ''}::${String(r.studentName || '').trim()}`)
+  );
+  const unsubmitted = [];
+
+  for (const s of schedules || []) {
+    if (s.isVacant || !s.studentName || s.status === 'absent') continue;
+    const stuTrim = String(s.studentName).trim();
+    const key1 = `${s.scheduleId}::${stuTrim}`;
+    const key2 = `${s.date || ''}::${s.timeSlot || ''}::${stuTrim}`;
+    if (submittedKeySet.has(key1) || submittedDateSlotStuSet.has(key2)) continue;
+
+    const endDt = getLessonEndDateTime(s.date, s.timeSlot);
+    if (Number.isNaN(endDt.getTime())) continue;
+    const deadlineDt = new Date(endDt.getTime() + 24 * 60 * 60 * 1000);
+
+    if (now.getTime() > deadlineDt.getTime()) {
+      const overdueHours = Math.floor((now.getTime() - deadlineDt.getTime()) / (60 * 60 * 1000));
+      unsubmitted.push({
+        scheduleId: s.scheduleId,
+        date: s.date,
+        dayOfWeek: s.dayOfWeek || '',
+        timeSlot: s.timeSlot || '',
+        branch: s.branch || '',
+        teacherName: s.teacherName || '未割当',
+        studentName: stuTrim,
+        subject: s.subject || '',
+        lessonEndAt: endDt.toISOString(),
+        deadlineAt: deadlineDt.toISOString(),
+        overdueHours,
+      });
+    }
+  }
+  return unsubmitted.sort((a, b) => a.date.localeCompare(b.date) || a.timeSlot.localeCompare(b.timeSlot));
+}
+
 export default async function handler(req, res) {
   const auth = requireAuth(req);
   if (!auth.ok) {
@@ -65,6 +112,8 @@ export default async function handler(req, res) {
       const monthSchedules = generateMonthFromFirstDay(yearMonth, templates, savedSchedules);
       const absences = await listDocs('absence_requests');
       const unpaidList = await listDocs('unpaid_list');
+      const reports = await listDocs('lesson_reports');
+      const unsubmittedReports = buildUnsubmittedReports(monthSchedules, reports, new Date());
 
       return sendJson(res, 200, {
         ok: true,
@@ -76,6 +125,8 @@ export default async function handler(req, res) {
         schedules: monthSchedules,
         absences,
         unpaidList,
+        reports,
+        unsubmittedReports,
       });
     }
 
@@ -283,6 +334,134 @@ export default async function handler(req, res) {
         return sendJson(res, 200, {
           ok: true,
           absence: savedReq,
+          lineDeliveries,
+        });
+      }
+
+      if (action === 'SUBMIT_LESSON_REPORT') {
+        if (!['teacher', 'hq'].includes(auth.user.role)) {
+          return sendJson(res, 403, { ok: false, error: '指導報告書の提出は講師または本部アカウントのみ可能です' });
+        }
+
+        const { report } = payload || {};
+        const columns = Array.isArray(report?.columns)
+          ? report.columns.filter((c) => String(c?.studentName || '').trim())
+          : [];
+        if (!report?.date || !report?.timeSlot || columns.length === 0) {
+          return sendJson(res, 400, { ok: false, error: '日付・コマ・生徒氏名（1名以上）を入力してください' });
+        }
+
+        const endDt = getLessonEndDateTime(report.date, report.timeSlot);
+        const deadlineDt = new Date(endDt.getTime() + 24 * 60 * 60 * 1000);
+        const submittedAt = new Date().toISOString();
+        const isLate = new Date(submittedAt).getTime() > deadlineDt.getTime();
+
+        const accounts = await listDocs('accounts');
+        const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+        const savedReports = [];
+        const lineDeliveries = [];
+
+        const matchesName = (candidate, target) => {
+          const c = String(candidate || '').trim();
+          const t = String(target || '').trim();
+          if (!c || !t) return false;
+          return c === t || c.includes(t) || t.includes(c);
+        };
+
+        for (let idx = 0; idx < columns.length; idx++) {
+          const col = columns[idx];
+          const stuName = String(col.studentName || '').trim();
+          const reportId = `rep_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`;
+
+          const record = {
+            reportId,
+            scheduleId: col.scheduleId || report.scheduleId || '',
+            date: report.date,
+            classType: report.classType || '通常CL',
+            timeSlot: report.timeSlot,
+            branch: report.branch || '',
+            teacherName: report.teacherName || auth.user.linkedTeacherName || auth.user.name || '',
+            submittedBy: auth.user.id,
+            submittedByRole: auth.user.role,
+            submittedAt,
+            deadlineAt: deadlineDt.toISOString(),
+            isLate,
+            columnIndex: idx + 1,
+            studentName: stuName,
+            cl1Content: col.cl1Content || '',
+            cl1Eval: col.cl1Eval || '',
+            cl2Content: col.cl2Content || '',
+            cl2Eval: col.cl2Eval || '',
+            homework: col.homework || '',
+            homeworkNextSlotNote: Boolean(col.homeworkNextSlotNote),
+            homeworkStatus: col.homeworkStatus || '未',
+            homeworkUnfinishedDetail: col.homeworkUnfinishedDetail || '',
+            memoComment: col.memoComment || '',
+            reportCheck: Boolean(col.reportCheck),
+            substituteHandoverCheck: Boolean(col.substituteHandoverCheck),
+          };
+
+          const saved = await saveDoc('lesson_reports', reportId, record);
+          savedReports.push(saved);
+
+          const recipients = accounts.filter((acc) => {
+            if (acc.status === '無効') return false;
+            if (acc.role === 'hq') return true;
+            if (acc.role === 'student' || acc.role === 'parent') {
+              return matchesName(acc.linkedStudentName || acc.kanjiName || acc.name, stuName);
+            }
+            return false;
+          });
+
+          const msgText = [
+            '【GRIT指導学院】指導報告書が提出されました',
+            `生徒様：${stuName} さん`,
+            `授業日・コマ：${record.date} ${record.timeSlot}（${record.classType}／${record.branch}支部）`,
+            `担当講師：${record.teacherName}`,
+            `CL内容①：${record.cl1Content || '-'}（評価：${record.cl1Eval || '-'}）`,
+            `CL内容②：${record.cl2Content || '-'}（評価：${record.cl2Eval || '-'}）`,
+            `宿題：${record.homework || '-'}（確認：${record.homeworkStatus}${record.homeworkUnfinishedDetail ? ' ' + record.homeworkUnfinishedDetail : ''}）`,
+            `メモ・コメント：${record.memoComment || '-'}`,
+          ].join('\n');
+
+          for (const rec of recipients) {
+            const toId = String(rec.lineUserId || '').trim();
+            const logId = `line_rep_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+            const status = !toId ? 'recorded_in_portal' : accessToken ? 'sent' : 'simulated_no_token';
+
+            if (toId && accessToken) {
+              await fetch('https://api.line.me/v2/bot/message/push', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ to: toId, messages: [{ type: 'text', text: msgText }] }),
+              });
+            }
+
+            await saveDoc('notification_logs', logId, {
+              to: toId || rec.loginId,
+              recipientName: rec.name,
+              recipientRole: rec.role,
+              messages: [{ type: 'text', text: msgText }],
+              meta: { type: 'lesson_report', reportId, studentName: stuName },
+              sentBy: auth.user.id,
+              status,
+            });
+
+            lineDeliveries.push({
+              accountId: rec.id || rec.loginId,
+              name: rec.name,
+              role: rec.role,
+              status,
+            });
+          }
+        }
+
+        return sendJson(res, 200, {
+          ok: true,
+          reports: savedReports,
           lineDeliveries,
         });
       }
