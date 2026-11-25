@@ -105,7 +105,7 @@ export default async function handler(req, res) {
       loginId: updated.loginId || updated.id,
       name: updated.name,
       kanjiName: updated.kanjiName || '',
-      role: updated.role || 'hq',
+      role: updated.role || 'student',
       branch: updated.branch || '',
       lineFriendRegistered: Boolean(updated.lineFriendRegistered ?? true),
       linkedStudentName: updated.linkedStudentName || '',

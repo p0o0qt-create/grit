@@ -1853,7 +1853,24 @@
       }
     }
 
+    function syncRoleSelectHqRestriction() {
+      const isHq = currentUser?.role === 'hq';
+      const newRoleSel = document.getElementById('newAccRole');
+      if (newRoleSel) {
+        Array.from(newRoleSel.options).forEach((opt) => {
+          if (opt.value === 'hq') {
+            opt.disabled = !isHq;
+            opt.hidden = !isHq;
+          }
+        });
+        if (!isHq && newRoleSel.value === 'hq') {
+          newRoleSel.value = 'student';
+        }
+      }
+    }
+
     function renderAccountsTable() {
+      syncRoleSelectHqRestriction();
       const tbody = document.getElementById('accountsTableBody');
       if (!tbody) return;
       const roleFilter = document.getElementById('accFilterRole')?.value || '';
@@ -2003,6 +2020,7 @@
               });
             }
             renderAccountsTable();
+            renderStudentParentRoster();
             renderQuotaTable();
             populateMasterDataLists();
             alert('アカウントを削除し、各リスト・コマ数設定を更新しました');

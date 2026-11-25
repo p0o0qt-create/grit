@@ -203,11 +203,14 @@ export default async function handler(req, res) {
         if (!loginId) {
           return sendJson(res, 400, { ok: false, error: 'ログインIDを入力してください' });
         }
-        if (!name) {
-          return sendJson(res, 400, { ok: false, error: '氏名・表示名を入力してください' });
+        if (!name && !kanjiName) {
+          return sendJson(res, 400, { ok: false, error: '氏名・表示名（または漢字氏名）を入力してください' });
         }
         if (!VALID_ROLES.includes(role)) {
           return sendJson(res, 400, { ok: false, error: '有効な役職を選択してください（hq / reception / teacher / student / parent）' });
+        }
+        if (role === 'hq' && auth.user.role !== 'hq') {
+          return sendJson(res, 403, { ok: false, error: '最上役職「本部（hq）」のアカウント作成は本部権限のみ可能です' });
         }
 
         const existing = await getDocById('accounts', loginId);
@@ -218,6 +221,7 @@ export default async function handler(req, res) {
         const combinedCreateName = kanjiName && name && !name.includes(kanjiName)
           ? `${name}（${kanjiName}）`
           : (kanjiName || name);
+
         const docData = {
           id: loginId,
           loginId,
@@ -255,7 +259,10 @@ export default async function handler(req, res) {
           return sendJson(res, 404, { ok: false, error: '対象アカウントが見つかりません' });
         }
 
-        const nextRole = acc.role && VALID_ROLES.includes(acc.role) ? acc.role : (current.role || 'hq');
+        const nextRole = acc.role && VALID_ROLES.includes(acc.role) ? acc.role : (current.role || 'student');
+        if ((nextRole === 'hq' || current.role === 'hq') && auth.user.role !== 'hq') {
+          return sendJson(res, 403, { ok: false, error: '最上役職「本部（hq）」の付与・変更は本部権限のみ可能です' });
+        }
         const patch = {
           name: acc.name !== undefined ? String(acc.name).trim() : current.name,
           kanjiName: acc.kanjiName !== undefined ? String(acc.kanjiName).trim() : (current.kanjiName || ''),
@@ -266,9 +273,6 @@ export default async function handler(req, res) {
           linkedStudentName: acc.linkedStudentName !== undefined ? String(acc.linkedStudentName).trim() : (current.linkedStudentName || ''),
           linkedTeacherName: acc.linkedTeacherName !== undefined ? String(acc.linkedTeacherName).trim() : (current.linkedTeacherName || ''),
           status: acc.status !== undefined ? String(acc.status).trim() : (current.status || '有効'),
-          ...(acc.status === '有効' && current.status === '承認待ち'
-            ? { approvedBy: auth.user.id, approvedAt: new Date().toISOString() }
-            : {}),
           ...(acc.status === '有効' && current.status === '承認待ち'
             ? { approvedBy: auth.user.id, approvedAt: new Date().toISOString() }
             : {}),
@@ -334,6 +338,9 @@ export default async function handler(req, res) {
           return sendJson(res, 400, { ok: false, error: '初期管理者（admin）または現在ログイン中のアカウントは削除できません' });
         }
         const targetAcc = await getDocById('accounts', targetId);
+        if (targetAcc?.role === 'hq' && auth.user.role !== 'hq') {
+          return sendJson(res, 403, { ok: false, error: '本部アカウントの削除は本部権限のみ可能です' });
+        }
         await deleteDocById('accounts', targetId);
         if (targetAcc && targetAcc.role === 'student') {
           const candidateNames = new Set(
