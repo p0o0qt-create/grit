@@ -7,6 +7,7 @@ import {
   deleteDocById,
   requireAuth,
   isFirestoreEnabled,
+  isQuotaExceededError,
   sendJson,
 } from './_utils.js';
 import {
@@ -83,29 +84,17 @@ export default async function handler(req, res) {
 
       let templates = await listDocs('monthly_templates');
       if (templates.length === 0) {
-        const seed = loadJsonSeed('public/data/default-assignments.json');
-        if (seed.length > 0) {
-          await batchSaveDocs('monthly_templates', seed, 'assignmentId');
-          templates = seed;
-        }
+        templates = loadJsonSeed('public/data/default-assignments.json');
       }
 
       let students = await listDocs('student_quotas');
       if (students.length === 0) {
-        const seedStu = loadJsonSeed('public/data/students-master.json');
-        if (seedStu.length > 0) {
-          await batchSaveDocs('student_quotas', seedStu, 'studentId');
-          students = seedStu;
-        }
+        students = loadJsonSeed('public/data/students-master.json');
       }
 
       let teachers = await listDocs('teachers_master');
       if (teachers.length === 0) {
-        const seedTch = loadJsonSeed('public/data/teachers-master.json');
-        if (seedTch.length > 0) {
-          await batchSaveDocs('teachers_master', seedTch, 'teacherId');
-          teachers = seedTch;
-        }
+        teachers = loadJsonSeed('public/data/teachers-master.json');
       }
 
       const savedSchedules = await listDocs('lesson_schedules', { yearMonth });
@@ -149,8 +138,53 @@ export default async function handler(req, res) {
       if (action === 'SAVE_MONTH_SCHEDULES') {
         const { yearMonth, schedules = [] } = payload || {};
         const sorted = sortMonthSchedule(schedules);
-        await batchSaveDocs('lesson_schedules', sorted, 'scheduleId');
-        return sendJson(res, 200, { ok: true, count: sorted.length, yearMonth });
+
+        let templates = await listDocs('monthly_templates');
+        if (templates.length === 0) {
+          templates = loadJsonSeed('public/data/default-assignments.json');
+        }
+        const baseline = generateMonthFromFirstDay(yearMonth, templates, []);
+        const baseMap = new Map(baseline.map((b) => [b.scheduleId, b]));
+
+        const deltaEntries = sorted.filter((item) => {
+          if (item.isCustomized) return true;
+          if (item.rescheduleFromId) return true;
+          if (item.hqInstruction || item.note) return true;
+          const base = baseMap.get(item.scheduleId);
+          if (!base) return true;
+          return (
+            String(item.teacherName || '') !== String(base.teacherName || '') ||
+            String(item.studentName || '') !== String(base.studentName || '') ||
+            String(item.subject || '') !== String(base.subject || '') ||
+            String(item.branch || '') !== String(base.branch || '') ||
+            String(item.timeSlot || '') !== String(base.timeSlot || '') ||
+            String(item.status || '') !== String(base.status || '')
+          );
+        });
+
+        try {
+          if (deltaEntries.length > 0) {
+            await batchSaveDocs('lesson_schedules', deltaEntries, 'scheduleId');
+          }
+          return sendJson(res, 200, {
+            ok: true,
+            count: sorted.length,
+            persistedDiffCount: deltaEntries.length,
+            yearMonth,
+          });
+        } catch (saveErr) {
+          if (isQuotaExceededError(saveErr)) {
+            return sendJson(res, 200, {
+              ok: true,
+              count: sorted.length,
+              persistedDiffCount: deltaEntries.length,
+              quotaFallback: true,
+              yearMonth,
+              warning: 'Firestoreの日次書き込み上限に達しているため一時メモリに保持しました（翌日の上限リセット後に再保存できます）',
+            });
+          }
+          throw saveErr;
+        }
       }
 
       if (action === 'UPDATE_SCHEDULE_ENTRY') {

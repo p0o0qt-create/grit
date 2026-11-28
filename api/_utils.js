@@ -47,28 +47,79 @@ function getMemoryStore(collectionName) {
   return globalThis.__GRIT_DB_STORE__.get(collectionName);
 }
 
+function getReadCache() {
+  if (!globalThis.__GRIT_READ_CACHE__) {
+    globalThis.__GRIT_READ_CACHE__ = new Map();
+  }
+  return globalThis.__GRIT_READ_CACHE__;
+}
+
+function invalidateCollectionCache(collectionName) {
+  const cache = getReadCache();
+  for (const key of cache.keys()) {
+    if (key === collectionName || key.startsWith(`${collectionName}::`)) {
+      cache.delete(key);
+    }
+  }
+}
+
+export function isQuotaExceededError(err) {
+  const msg = String(err?.message || err || '');
+  return err?.code === 8 || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('Quota exceeded');
+}
+
 export async function getDocById(collectionName, docId) {
   if (!docId) return null;
   const id = String(docId);
   const db = getFirestoreDb();
   if (db) {
-    const snap = await db.collection(collectionName).doc(id).get();
-    return snap.exists ? { id: snap.id, ...snap.data() } : null;
+    try {
+      const snap = await db.collection(collectionName).doc(id).get();
+      return snap.exists ? { id: snap.id, ...snap.data() } : null;
+    } catch (err) {
+      if (isQuotaExceededError(err)) {
+        return getMemoryStore(collectionName).get(id) || null;
+      }
+      throw err;
+    }
   }
   return getMemoryStore(collectionName).get(id) || null;
 }
 
-export async function listDocs(collectionName, filters = {}) {
+export async function listDocs(collectionName, filters = {}, { cacheTtlMs = 120000 } = {}) {
   const db = getFirestoreDb();
   if (db) {
-    let ref = db.collection(collectionName);
-    for (const [k, v] of Object.entries(filters)) {
-      if (v !== undefined && v !== null && v !== '') {
-        ref = ref.where(k, '==', v);
-      }
+    const cacheKey = `${collectionName}::${JSON.stringify(filters)}`;
+    const cache = getReadCache();
+    const cached = cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
     }
-    const snap = await ref.get();
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    try {
+      let ref = db.collection(collectionName);
+      for (const [k, v] of Object.entries(filters)) {
+        if (v !== undefined && v !== null && v !== '') {
+          ref = ref.where(k, '==', v);
+        }
+      }
+      const snap = await ref.get();
+      const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      cache.set(cacheKey, { data: rows, expiresAt: Date.now() + cacheTtlMs });
+      // Also mirror into memory store as backup
+      const mem = getMemoryStore(collectionName);
+      for (const r of rows) {
+        mem.set(String(r.id), r);
+      }
+      return rows;
+    } catch (err) {
+      if (isQuotaExceededError(err)) {
+        const allMem = Array.from(getMemoryStore(collectionName).values());
+        return allMem.filter((item) =>
+          Object.entries(filters).every(([k, v]) => v === undefined || v === null || v === '' || item[k] === v)
+        );
+      }
+      throw err;
+    }
   }
   const all = Array.from(getMemoryStore(collectionName).values());
   return all.filter((item) =>
@@ -79,32 +130,41 @@ export async function listDocs(collectionName, filters = {}) {
 export async function saveDoc(collectionName, docId, data) {
   const id = String(docId);
   const now = new Date().toISOString();
+  invalidateCollectionCache(collectionName);
+  const store = getMemoryStore(collectionName);
+  const prevMem = store.get(id) || { createdAt: now };
+  const nextMem = { ...prevMem, ...data, id, updatedAt: now };
+  store.set(id, nextMem);
+
   const db = getFirestoreDb();
   if (db) {
-    const ref = db.collection(collectionName).doc(id);
-    const existing = await ref.get();
-    const payload = {
-      ...data,
-      id,
-      updatedAt: now,
-      ...(existing.exists ? {} : { createdAt: now }),
-    };
-    await ref.set(payload, { merge: true });
-    const updated = await ref.get();
-    return { id: updated.id, ...updated.data() };
+    try {
+      const ref = db.collection(collectionName).doc(id);
+      await ref.set({ ...data, id, updatedAt: now }, { merge: true });
+      return nextMem;
+    } catch (err) {
+      if (isQuotaExceededError(err)) {
+        return { ...nextMem, _quotaFallback: true };
+      }
+      throw err;
+    }
   }
-  const store = getMemoryStore(collectionName);
-  const prev = store.get(id) || { createdAt: now };
-  const next = { ...prev, ...data, id, updatedAt: now };
-  store.set(id, next);
-  return next;
+  return nextMem;
 }
 
 export async function batchSaveDocs(collectionName, items, idField = 'id') {
-  const db = getFirestoreDb();
   const now = new Date().toISOString();
+  invalidateCollectionCache(collectionName);
+  const store = getMemoryStore(collectionName);
+  for (const item of items) {
+    const id = String(item[idField] || crypto.randomUUID());
+    const prev = store.get(id) || { createdAt: now };
+    store.set(id, { ...prev, ...item, [idField]: id, updatedAt: now });
+  }
+
+  const db = getFirestoreDb();
   if (db) {
-    const chunkSize = 400;
+    const chunkSize = 200;
     for (let i = 0; i < items.length; i += chunkSize) {
       const batch = db.batch();
       const slice = items.slice(i, i + chunkSize);
@@ -114,24 +174,25 @@ export async function batchSaveDocs(collectionName, items, idField = 'id') {
         batch.set(ref, { ...item, [idField]: id, updatedAt: now }, { merge: true });
       }
       await batch.commit();
+      if (i + chunkSize < items.length) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
     }
     return items.length;
-  }
-  const store = getMemoryStore(collectionName);
-  for (const item of items) {
-    const id = String(item[idField] || crypto.randomUUID());
-    const prev = store.get(id) || { createdAt: now };
-    store.set(id, { ...prev, ...item, [idField]: id, updatedAt: now });
   }
   return items.length;
 }
 
 export async function deleteDocById(collectionName, docId) {
   const id = String(docId);
+  invalidateCollectionCache(collectionName);
   const db = getFirestoreDb();
   if (db) {
-    await db.collection(collectionName).doc(id).delete();
-    return true;
+    try {
+      await db.collection(collectionName).doc(id).delete();
+    } catch (err) {
+      if (!isQuotaExceededError(err)) throw err;
+    }
   }
   return getMemoryStore(collectionName).delete(id);
 }

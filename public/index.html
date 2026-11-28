@@ -1773,6 +1773,10 @@
     document.getElementById('rescheduleBranchSelect').addEventListener('change', refreshAvailableTeachers);
     document.getElementById('rescheduleSlotSelect').addEventListener('change', refreshAvailableTeachers);
 
+    document.getElementById('targetYearMonth')?.addEventListener('change', () => {
+      loadAllData();
+    });
+
     document.getElementById('saveAllSchedulesBtn').addEventListener('click', async () => {
       const res = await apiFetch('/api/schedules', {
         method: 'POST',
@@ -1781,7 +1785,15 @@
           payload: { yearMonth: state.yearMonth, schedules: state.schedules },
         }),
       });
-      alert(res.ok ? `${res.count}件の月次スケジュールを保存しました` : res.error);
+      if (!res.ok) {
+        alert(res.error || '保存に失敗しました');
+        return;
+      }
+      if (res.quotaFallback) {
+        alert(`${res.count}件の月次スケジュールを展開しました。\n${res.warning}`);
+      } else {
+        alert(`${res.count}件の月次スケジュールを確認・保存しました（DB差分書き込み: ${res.persistedDiffCount ?? res.count}件）`);
+      }
     });
 
     document.getElementById('submitAbsenceBtn').addEventListener('click', async () => {
